@@ -1,0 +1,15 @@
+OBJDIRS     += util
+UTILSRC   := util.cc 
+UTILOBJ   := $(patsubst %.cc,$(OBJDIR)/util/%.o,$(UTILSRC))
+
+all:    $(OBJDIR)/libfheutil.so
+$(OBJDIR)/libfheutil.so: $(UTILOBJ) 
+	$(CXX) -shared -o $@ $(UTILOBJ) $(LDFLAGS) -lgmpxx -lgmp 
+
+install: install_util
+
+.PHONY: install_util
+install_util: $(OBJDIR)/libfheutil.so
+	install -m 644 $(OBJDIR)/libfheutil.so /usr/lib
+
+# vim: set noexpandtab:

@@ -1,0 +1,19 @@
+OBJDIRS     += math
+MATHSRC   :=  poly.cc matrix.cc
+MATHOBJ   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC))
+
+all:    $(OBJDIR)/libfhemath.so
+$(OBJDIR)/libfhemath.so: $(MATHOBJ) $(OBJDIR)/libfheutil.so
+	$(CXX) -shared -o $@ $(MATHOBJ) $(LDFLAGS) -lgmpxx -lgmp -lfheutil
+
+all:	$(OBJDIR)/math/r
+$(OBJDIR)/math/r: $(OBJDIR)/math/r.o $(OBJDIR)/libfhemath.so 
+	$(CXX) $< -o $@ $(LDFLAGS) -lfhemath -lfheutil
+	
+install: install_math
+
+.PHONY: install_math
+install_math: $(OBJDIR)/libfhemath.so
+	install -m 644 $(OBJDIR)/libfhemath.so /usr/lib
+
+# vim: set noexpandtab:
