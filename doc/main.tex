@@ -1,0 +1,173 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+
+\input{commands}
+
+\newcommand{\mysection}[1]{\vspace{3mm}\noindent\textbf{#1} \\}
+
+\title{Notes}
+
+\begin{document}
+
+\maketitle
+
+Below is a pseudocode for the FHE scheme extracted from ~\cite{BGV12}, where I figured out what some parameters should be and instantiated the scheme for the RLWE assumption. 
+For RLWE-based scheme, so the dimension $n=1$ and the degree of the polynomial $d>1$. I still need to figure out a bunch of things. 
+
+
+\section{Basic FHE - somewhat homomorphic}
+
+
+\textbf{Notation.} $\langle a, b \rangle$ indicates dot product between $a$ and $b$.  $[a]_q$ indicates modulo $q$ but my considering the remainder in the interval $(-q/2, q/2)$ ($q$ is odd). 
+
+
+$\esetup$ takes as input $1^\lambda$, a security parameter and $\mu$, another parameter \todo{what is it?}.
+
+\ALGORITHM{$\esetup$}{}{}{
+\item Compute parameters
+\begin{itemize}
+\item $d$ degree of polynomial \todo{what should it be?}
+\item $N = \lceil 3 \log q \rceil$
+\item $\chi = \chi(\lambda, \mu)$, \todo{what should it be?}, the distribution from which we sample errors.
+\end{itemize}
+\item Let $R$ be the field $\bbZ[x]/(x^d+1)$. 
+\item Output $\params = (q, d, N, \chi)$. 
+}
+
+\ALGORITHM{$\eskkeygen(\params)$}{}{}{
+\item Let $s' \gets \chi$.
+\item Output $\sk = s \gets (1, s')$.
+}
+
+\ALGORITHM{$\epkkeygen(\sk, \params)$}{}{}{
+\item Parse $\sk = s = (1, s')$. 
+\item Generate column vector $A' \gets R_q^N$ and a row vector $e \gets \chi^N$. 
+\item Let $b \gets A' s' + 2 e \in R_q^N$.
+\item Output $\pk = A = (b, -A') \in R_q^{N \times 2}$. 
+}
+
+\ALGORITHM{$\eenc(\params, \pk, m \in R_2)$}{}{}{
+\item ${\bf m} \gets (m, 0)$
+\item Sample ${\bf r} \gets R_2^N$
+\item Output $c = (m+\langle b, r \rangle, \langle -A', r \rangle)$. 
+}
+
+
+
+\ALGORITHM{$\edec(\params, \sk,c \in R^2_q)$}{}{}{
+\item Output $m \gets [[\langle c, s \rangle]_q]_2$.   
+}
+
+Let's see why this should be true.
+
+\begin{eqnarray*}
+[[\langle c, s \rangle]_q]_2 &=& [[m + \langle b, r \rangle + s'(\langle -A', r \rangle) ]_q]_2 \\
+&=& [[m + \langle A's'+2e, r \rangle + s'(\langle -A', r \rangle) ]_q]_2  \\
+&=& [[m + \langle 2e, r \rangle ]_q]_2,
+\end{eqnarray*}
+
+which for $e$ small does not cause loop over for $q$ and it is even, thus yielding $m$. 
+
+
+\section{Leveled FHE}
+
+
+\subsection{Procedures for managing noise}
+
+\paragraph{Key switching or dimension reduction.}
+$\bitdec(x \in R^n_q, q)$ decomposes x into its bit representation. Outputs $(u_0, \dots, u_{\lfloor \log q \rfloor}) \in R_2^{n\lceil \log q \rceil }$, such that $x = \sum_j 2^j u_j$. 
+
+For example, if $x = 2 \alpha^3 + 8 \alpha + 2$ for $q = 9$, then the bit decomposition of $x$ is $(0, 1+\alpha^3, 0, \alpha)$ is a set of polynomials with binary coefficients. 
+
+$\powtwo(x \in R^n_q, q)$ outputs the vector $(x, 2x, \dots, 2^{\lfloor \log q \rfloor} x) \in R_q^{n \lceil \log q \rceil }$.
+
+Note that for any $c, x \in R^n_q$, $\langle \bitdec(c, q), \powtwo(s, q)\rangle = \langle c, s \rangle \mod q. $
+
+We will usually call the following procedure for $n_2 =2$ when working with RLWE.
+
+\ALGORITHM{$\switchkeygen(n_1, n_2, s_1 \in R_q^{n_1}, s_2 \in R_q^{n_2})$:}{}{}{
+\item $A \gets \epkkeygen(s_2, N)$ for $N = n_1 \lceil \log q \rceil $. 
+\item $B \gets A + \powtwo(s_1) $
+\item Output $\tau_{s_1 \rightarrow s_2} = B$. 
+}
+
+\ALGORITHM{$\switch(\tau_{s_1 \rightarrow s_2}, c_1)$}{}{}{
+\item Output $c_2 = \bitdec(c_1)^T \cdot B \in R_q^{n_2}$. 
+}
+
+
+
+\paragraph{Modulus switching.}
+$\mathsf{Scale}$ takes as input a ciphertext $c$, being an encryption of $m$ under $s$ modulo $q$ and transforms $c$ into a new ciphertext $c'$ that is an encryption of $m$ under $s$, but modulo $q$, a smaller modulus. This turns out to be a simple scaling operation. \todo{details}
+
+
+
+ $\fhesetup$ takes as input:
+ \begin{itemize}
+ \item $\lambda$: security parameter
+ \item $L$: number of levels \todo{can optimize to make addition not count to levels!}
+ \end{itemize} 
+ 
+ \ALGORITHM{$\fhesetup$}{}{}{
+\item Compute $\mu$ \todo{how? what is it}
+\item For $j$ from $L$ to $0$, run $\params_j \gets \esetup(1^\lambda, 1^{(j+1) \mu})$. In particular, $\params_j$ contains $q_j$, which are a ladder of moduli. $q_L$ has $(L+1)\mu$ bits and $q_0$ has $\mu$ bits. 
+\item All $d_j$ must be equal to $d_L$ and all $\chi_j$ must be $\chi_L$, so make these replacements in $\{\params_j\}_j$.
+\item Output $\params = \{\params_j\}_j$.
+ }
+
+To multiply two ciphertexts $c_1 = (c_{1a}, c_{1b})$ and $c_2 = (c_{2a}, c_{2b})$, the evaluator computes
+$c_{mul} = (c_{1a} c_{2a}, c_{1b} c_{2a} + c_{1a} c_{2b}, c_{1b} c_{2b})$. If both $c_1$ and $c_2$ were decryptable with $s = (s_1, s_2)$, then
+$c_{mul}$ is decryptable with $s \oplus s = (s_1^2, s_1s_2, s_2^2)$. 
+
+ \ALGORITHM{$\fhekeygen(\{\params_j\}_j)$}{}{
+ For $j = L $ downto $0$ do }{
+\item $s_j \gets \eskkeygen(\params_j)$ and $A_j \gets \epkkeygen(\params_j, s_j)$. Recall $s_j = (1, s'_j) \in R_q^2$. 
+\item Let $s'_j = s_j \oplus s_j$.
+\item Let $s''_j = \bitdec(s_j', q_j)$.  
+ }
+
+
+\ALGORITHM{$\fheenc(\params, \pk, m)$}{}{}{
+\item Take a message $m$ in $R_2$. Run $\eenc(A_L, m)$ starting from level $L$.
+}
+
+\ALGORITHM{$\fhedec(\params, \sk, c)$}{}{}{
+\item If the ciphertext is under key $s_j$, run $\edec(s_j, c)$. 
+}
+
+\ALGORITHM{$\fheadd(\pk, c_1, c_2)$}{}{}{
+\item Assumes both ciphertexts are under $s_j$ else use $\fherefresh$. 
+\item $c_3 \gets c_1 + c_2 \mod q_j$. 
+\item $c_3$ is now a ciphertext under $s'_j = s_j \oplus s_j$ so $s'_j$ has dimension $3$. 
+\item Output $c_4 \gets \fherefresh(c_3, \tau_{s_j'' \rightarrow s_{j-1}}, q_j, q_{j-1})$. 
+}
+
+\todo{why do you need to change modulus for plus?? why increase dimension for plus?}
+
+\ALGORITHM{$\fhemult(\pk, c_1, c_2)$}{}{}{
+\item \todo{}
+}
+
+\ALGORITHM{$\fherefresh(c, \tau_{s_j'' \rightarrow s_{j-1}}, q_j, q_{j-1})$}{}{}{
+\item Let $c$ be encrypted under $s_j'$. $c_1 \gets \powtwo(c, q_j)$
+\item Switch moduli: $c_2 \gets \scale(c_1, q_j, q_{j-1}, 2)$ a ciphertext under $s_j''$ and $q_{j-1}$. 
+\item Switch keys: $c_3 \gets \switch(\tau, c_2, q_{j-1})$ a ciphertext under $s_{j-1}$ and $q_{j-1}$. 
+}
+
+\todo{what does circular security allow you to do, besides using the same secret keys? o} 
+
+\section{A Concrete example}
+
+Lets evaluate the function $f(x_1, x_2) = x_1 + x_2 x_1^2$.
+We are given $c_1$ for $x_1$ and $c_2$ for $x_2$. 
+
+
+\bibliography{main}
+\bibliographystyle{alpha}
+
+
+
+
+
+\end{document}

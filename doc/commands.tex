@@ -1,0 +1,734 @@
+% !TEX root = main.tex
+
+
+
+\usepackage{amsmath,amsfonts,amssymb, amsthm}
+\usepackage{times}
+\usepackage{enumitem, framed}
+\usepackage{color}
+\usepackage{tikz,tabularx}
+\usepackage{algorithmicx}
+\usepackage{algorithm2e}
+
+%% fix some algorithm2e vs. hyperref conflicts
+%% http://tex.stackexchange.com/questions/15430/titlesec-hyperref-algorithm2e-and-appendix
+\let\chapter\undefined
+
+\IfFileExists{microtype.sty}{
+  \usepackage{microtype}
+}{
+  \PackageWarning{microtype}{Package microtype not found.}{}
+}
+\usepackage[T1]{fontenc}
+
+% requires amsthm, enumitem
+\theoremstyle{algorithms}
+\newtheorem{construction}{Algorithm}
+\newcommand{\ALGORITHM}[4]{%  name, llabel, intro, \items
+  \begin{construction}[#1]\label{#2} \mbox{}
+  \normalfont\noindent
+  #3
+  \vspace{0.13\baselineskip}
+  \begin{enumerate}[noitemsep,nolistsep]\itemsep=0.1\baselineskip
+  #4
+  \end{enumerate}
+  \end{construction}
+}
+
+
+\def\pkfont{1}
+%\input{header-pke.tex}
+
+\hyphenpenalty=5000
+\tolerance=1000
+
+\frenchspacing
+
+\usepackage{latexsym}
+\usepackage{color}
+\usepackage{url,array,epsfig}
+\usepackage[colorlinks=true,citecolor=blue,linkcolor=red]{hyperref}
+
+\newcommand{\remove}[1]{}
+\newcommand{\ignore}[1]{}
+\newenvironment{ignoreme}{\ignore{}{}}
+
+%%%%%%%%%%%%  Defining theorem-like environments %%%%%%%%%%
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{informaltheorem}[theorem]{Theorem}
+\newtheorem{informalcorollary}[theorem]{Corollary}
+\newtheorem{informalclaim}[theorem]{Claim}
+%\newtheorem{definition}{Definition}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{claim}[theorem]{Claim}
+%\newtheorem{remark}{Remark}[section]
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{fact}[theorem]{Fact}
+
+%%%%%%%%%%%%%%%% VINOD's DEFS %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\circuit{\mathcal{C}}
+\def\gcircuit{\mathcal{GC}}
+\def\rcircuit{\mathcal{\tilde{C}}}
+\def\R{\mathcal{R}}
+\def\pset{\mathcal{P}}
+
+\def\circuitp{\mathcal{\tilde{C}}}
+\def\Zp{\Z_p}
+\newcommand{\ip}[1]{\langle #1 \rangle}
+
+
+%%%%%%%%%%%%%%%%% SOME BASIC DEFINITIONS %%%%%%%%%%%%%%%%%%
+
+%Security Parameter
+\newcommand{\secparam}{\kappa}
+\newcommand{\secp}{\secparam}
+
+% Vectors, Matrices and such
+
+\def\veca{\vc{a}}
+\def\vecb{\vc{b}}
+\def\vecc{\vc{c}}
+\def\vecd{\vc{d}}
+\def\vece{\vc{e}}
+\def\vecm{\vc{m}}
+\def\vecs{\vc{s}}
+\def\vect{\vc{t}}
+\def\vecv{\vc{v}}
+\def\vecx{\vc{x}}
+\def\vecy{\vc{y}}
+
+\def\Z{\mathbb{Z}}
+\def\N{\mathbb{N}}
+\def\R{\mathbb{R}}
+\def\Q{\mathbb{Q}}
+\def\F{\mathbb{F}}
+
+% Emphasis in theorems
+\newcommand{\emphth}[1]{{\rm\sf {#1}}}
+
+% Changing QED symbol in claim proofs
+%\newenvironment{claimproof}{\begin{proof}
+%\renewcommand{\qedsymbol}{{$\blacksquare$}}
+%}{\end{proof}}
+
+
+% Fixing bug in citations inside of brackets.
+\newcommand{\brafix}[1]{[{#1}]}
+\newcommand{\citefix}[2]{{\cite[#1]{#2}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Calligraphic and blackboard type letters.
+
+\def\cA{{\cal A}}
+\def\cB{{\cal B}}
+\def\cC{{\cal C}}
+\def\cD{{\cal D}}
+\def\cE{{\cal E}}
+\def\cF{{\cal F}}
+\def\cG{{\cal G}}
+\def\cH{{\cal H}}
+\def\cI{{\cal I}}
+\def\cJ{{\cal J}}
+\def\cK{{\cal K}}
+\def\cL{{\cal L}}
+\def\cM{{\cal M}}
+\def\cN{{\cal N}}
+\def\cO{{\cal O}}
+\def\cP{{\cal P}}
+\def\cQ{{\cal Q}}
+\def\cR{{\cal R}}
+\def\cS{{\cal S}}
+\def\cT{{\cal T}}
+\def\cU{{\cal U}}
+\def\cV{{\cal V}}
+\def\cW{{\cal W}}
+\def\cX{{\cal X}}
+\def\cY{{\cal Y}}
+\def\cZ{{\cal Z}}
+%%%%%%%%%%%%%%%%%
+\def\bbC{{\mathbb C}}
+\def\bbE{{\mathbb E}}
+\def\bbF{{\mathbb F}}
+\def\bbG{{\mathbb G}}
+\def\bbM{{\mathbb M}}
+\def\bbN{{\mathbb N}}
+\def\bbQ{{\mathbb Q}}
+\def\bbR{{\mathbb R}}
+\def\bbV{{\mathbb V}}
+\def\bbZ{{\mathbb Z}}
+
+\def\Zq{\bbZ_q}
+
+%%%%%%%%%%%%%%%%%
+
+% FHE work other than Gentry 09
+\newcommand{\otherFHEwork}{\cite{DGHV10, SS10FHE, BV11lwe,V11,BGV12,GHS12,GHS12a}}
+\newcommand{\allFHEwork}{\cite{G09,DGHV10, SS10FHE,BV11ideal,BV11lwe,V11,BGV12,GHS12,GHS12a,LTV12,Bra12}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Copied from Raluca's defs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\obalg}{\mathsf{Obfuscate}}
+\newcommand{\tok}{\mathsf{Token}}
+\newcommand{\cala}{\mathcal{A}}
+\newcommand{\cals}{\mathcal{S}}
+
+\newcommand{\tk}{\mathsf{tk}}
+
+\newcommand{\obfs}{\mathcal{O}}
+\renewcommand{\sim}{\mathcal{S}}
+
+%%%%%%%%%%%%%%%%%% END Copied from Raluca's defs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rounding commands
+
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\round}[1]{\left\lfloor #1 \right\rceil}
+
+
+\newcommand{\dlwe}{\mathsf{dLWE}}
+\newcommand{\SIVP}{\mathsf{SIVP}}
+\newcommand{\gapSVP}{\mathsf{gapSVP}}
+
+
+
+% Other short-hands
+
+
+\def\binset{\{0,1\}}
+\def\pmset{\{\pm 1\}}
+\def\ind{\mathbbm{1}}
+%\def\ind{\mathbf{1}}
+
+\newcommand{\abs}[1]{\left\vert {#1} \right\vert}
+\newcommand{\norm}[1]{\left\| {#1} \right\|}
+\newcommand{\norminf}[1]{\left\| {#1} \right\|_{\infty}}
+
+
+% Assignments
+\def\getsr{\stackrel{\scriptscriptstyle{\$}}{\gets}}
+\def\getsd{{:=}}
+%\def\bydef{\stackrel{.}{=}}
+\def\bydef{\triangleq}
+\def\getsf{{\gets}}
+
+
+
+% Asymptotics
+
+\def\poly{{\rm poly}}
+\def\polylog{{\rm polylog}}
+\def\polyloglog{{\rm polyloglog}}
+\def\negl{{\rm negl}}
+\newcommand{\ppt}{\mbox{{\sc ppt}}}
+\def\Otilde{\widetilde{O}}
+
+% Indistinguishability
+\newcommand{\cind}{{\ \stackrel{c}{\approx}\ }}
+\newcommand{\compind}{\cind}
+\newcommand{\sind}{{\ \stackrel{s}{\approx}\ }}
+
+%\newcommand{\sind}[1][\epsilon]{{\ \stackrel{{#1}}{\approx}_{s}\ }}
+%\newcommand{\epssind}{{\ \stackrel{{\epsilon}}{\approx}_{s}\ }}
+
+
+% Complexity classes
+
+\def\NP{\mathbf{NP}}
+\def\Ppoly{{\mathbf{P}/\poly}}
+
+
+% Cryptographic assumptions
+
+\newcommand{\ddh}{\mathrm{DDH}}
+\newcommand{\cdh}{\mathrm{CDH}}
+\newcommand{\dlin}{\text{\rm $d$LIN}}
+\newcommand{\lin}{\text{\rm Lin}}
+\newcommand{\sxdh}{\mathrm{SXDH}}
+\newcommand{\rsa}{\mathrm{RSA}}
+\newcommand{\sis}{\mathrm{SIS}}
+\newcommand{\isis}{\mathrm{ISIS}}
+\newcommand{\lwe}{\mathsf{LWE}}
+\newcommand{\qr}{\mathrm{QR}}
+
+
+% Types of attacks
+
+\newcommand{\adv}{\mathrm{Adv}}
+\newcommand{\dst}{\mathrm{Dist}}
+\newcommand{\leak}{\mathrm{Leak}}
+\newcommand{\forge}{\mathrm{Forge}}
+\newcommand{\col}{\mathrm{Col}}
+\newcommand{\invt}{\mathrm{Inv}}
+\newcommand{\cpa}{\text{\rm CPA}}
+\newcommand{\kdm}{\mathrm{KDM}}
+\newcommand{\kdi}{\mathrm{KDM}^{(1)}}
+\newcommand{\kdmn}{\mathrm{KDM}^{(\usr)}}
+\newcommand{\good}{\mathrm{GOOD}}
+\newcommand{\legal}{\mathrm{L}}
+
+
+% Linear algebra
+
+\newcommand{\mx}[1]{\mathbf{{#1}}}
+\newcommand{\vc}[1]{\mathbf{{#1}}}
+\newcommand{\gvc}[1]{\bm{{#1}}}
+%\newcommand{\vc}[1]{\gvc{{#1}}}
+
+\newcommand{\zo}{\{0,1\}}
+
+% Probability
+
+\newcommand{\Ex}{\mathop{\bbE}}
+\newcommand{\cov}{\mathop{\text{\rm Cov}}}
+
+%\newcommand{\sd}{\mathop{\text{\tt dist}}}
+\newcommand{\sd}{\mathop{\Delta}}
+
+
+
+% Cryptographic elements
+
+\newcommand{\evk}{\mathsf{evk}}
+\newcommand{\pp}{{pp}}
+\newcommand{\vk}{{vk}}
+\newcommand{\td}{{td}}
+
+\def\PK{\mathsf{PK}}
+\def\MPK{\mathsf{MPK}}
+\def\MSK{\mathsf{MSK}}
+\def\SK{\mathsf{SK}}
+\def\bydef{:=}
+
+
+
+\newcommand{\zeon}{\{0, 1\}}
+
+\def\CT{\mathsf{CT}}
+
+% IBE keys
+\newcommand{\ibempk}{{MPK_{ibe}}}
+\newcommand{\ibemsk}{{MSK_{ibe}}}
+\newcommand{\ID}{{ID}}
+\newcommand{\id}{{ID}}
+
+\newcommand{\crs}{\text{\sf crs}}
+
+\newcommand{\params}{\mathsf{params}}
+\newcommand{\state}{{setupstate}}
+
+\newcommand{\query}{{query}}
+\newcommand{\qstate}{{qstate}}
+\newcommand{\pptstate}{\mathsf{state}}
+\newcommand{\resp}{{resp}}
+
+% Protocols
+\newcommand{\ibe}{\mathrm{IBE}}
+\newcommand{\fhe}{\mathrm{FHE}}
+\newcommand{\gfe}{\mathrm{GFE}}
+\newcommand{\pke}{\mathrm{PKE}}
+\newcommand{\fe}{\mathrm{FE}}
+\newcommand{\mpc}{\mathrm{MPC}}
+
+% Algorithms
+
+
+\newcommand{\keygen}{\mathsf{KeyGen}}
+\newcommand{\gen}{\mathsf{Gen}}
+\newcommand{\eval}{\mathsf{Eval}}
+\newcommand{\setup}{\mathsf{Setup}}
+\newcommand{\extract}{\mathsf{Extract}}
+\newcommand{\enc}{\mathsf{Enc}}
+\newcommand{\dec}{\mathsf{Dec}}
+
+\newcommand{\symname}{\ssym}
+\newcommand{\symkeygen}{\mathsf{SYM.Setup}}
+\newcommand{\symgen}{\symkeygen}
+\newcommand{\symsetup}{\symkeygen}
+\newcommand{\symenc}{\mathsf{SYM.Enc}}
+\newcommand{\symdec}{\mathsf{SYM.Dec}}
+
+\newcommand{\pkesetup}{\mathsf{PKE.Setup}}
+\newcommand{\pkeenc}{\mathsf{PKE.Enc}}
+\newcommand{\pkedec}{\mathsf{PKE.Dec}}
+
+
+\newcommand{\gb}{\mathsf{Gb}}
+\newcommand{\gbgarble}{\gb\mathsf{.Garble}}
+\newcommand{\gbsim}{\mathsf{Sim}_{\mathsf{Garble}}}
+\newcommand{\gbenc}{\gb\mathsf{.Enc}}
+\newcommand{\gbeval}{\gb\mathsf{.Eval}}
+\newcommand{\rgb}{\mathsf{RGb}}
+\newcommand{\rgbsetup}{\rgb\mathsf{.Setup}}
+\newcommand{\rgbgarble}{\rgb\mathsf{.Garble}}
+\newcommand{\rgbenc}{\rgb\mathsf{.Enc}}
+\newcommand{\rgbeval}{\rgb\mathsf{.Eval}}
+\newcommand{\pgb}{\mathsf{PubGb}}
+\newcommand{\pgbsetup}{\pgb\mathsf{.Setup}}
+\newcommand{\pgbgarble}{\pgb\mathsf{.Garble}}
+\newcommand{\pgbenc}{\pgb\mathsf{.Enc}}
+\newcommand{\pgbeval}{\pgb\mathsf{.Eval}}
+
+% Homomorphic encryption, fully and leveled
+
+\newcommand{\fhename}{\mathsf{FHE}}
+\newcommand{\fhekeygen}{\mathsf{FHE.KeyGen}}
+\newcommand{\fhegen}{\fhekeygen}
+\newcommand{\fhesetup}{\fhe\mathsf{.}\setup}
+\newcommand{\fheenc}{\mathsf{FHE.Enc}}
+\newcommand{\fhedec}{\mathsf{FHE.Dec}}
+\newcommand{\fheeval}{\mathsf{FHE.Eval}}
+\newcommand{\fheadd}{\fhename\mathsf{.Add}}
+\newcommand{\fhemult}{\fhename\mathsf{.Mult}}
+\newcommand{\fherefresh}{\fhename\mathsf{.Refresh}}
+
+\newcommand{\hename}{\mathsf{HE}}
+\newcommand{\hectsize}{\mathsf{ctsize}_{\hename}}
+\newcommand{\hepksize}{\mathsf{pksize}_{\hename}}
+\newcommand{\hesksize}{\mathsf{sksize}_{\hename}}
+\newcommand{\hekeygen}{\hename\mathsf{.KeyGen}}
+\newcommand{\heenc}{\hename\mathsf{.Enc}}
+\newcommand{\hedec}{\hename\mathsf{.Dec}}
+\newcommand{\heeval}{\hename\mathsf{.Eval}}
+
+
+
+\newcommand{\Setup}{\mathsf{Setup}}
+\newcommand{\KeyGen}{\mathsf{KeyGen}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Sim}{\mathsf{Sim}}
+
+\newcommand{\ibesetup}{\mathsf{IBE.Setup}}
+\newcommand{\ibekeygen}{\mathsf{IBE.KeyGen}}
+\newcommand{\ibeenc}{\mathsf{IBE.Enc}}
+\newcommand{\ibedec}{\mathsf{IBE.Dec}}
+
+
+\newcommand{\fesetup}{\mathsf{FE.Setup}}
+\newcommand{\fekeygen}{\mathsf{FE.KeyGen}}
+\newcommand{\feenc}{\mathsf{FE.Enc}}
+\newcommand{\fedec}{\mathsf{FE.Dec}}
+
+% basic encryption scheme
+\newcommand{\esetup}{\mathsf{E.Setup}}
+\newcommand{\ekeygen}{\mathsf{E.KeyGen}}
+\newcommand{\eskkeygen}{\mathsf{E.SKKeyGen}}
+\newcommand{\epkkeygen}{\mathsf{E.PKKeyGen}}
+\newcommand{\eenc}{\mathsf{E.Enc}}
+\newcommand{\edec}{\mathsf{E.Dec}}
+
+\newcommand{\olsetup}{\tokob\mathsf{.Setup}}
+\newcommand{\olobfus}{\tokob\mathsf{.Obfuscate}}
+\newcommand{\oltok}{\tokob\mathsf{.Token}}
+\newcommand{\olsim}{\tokob\mathsf{.Sim}}
+
+% computation on encrypted data in input-specific time
+\newcommand{\istmfullname}{Turing machine homomorphic encryption}
+\newcommand{\istm}{\mathsf{TMHE}}
+\newcommand{\istmabbrev}{TMHE}
+\newcommand{\istmkeygen}{\istm\mathsf{.KeyGen}}
+\newcommand{\istmenc}{\istm\mathsf{.Enc}}
+\newcommand{\istmeval}{\istm\mathsf{.Eval}}
+\newcommand{\istmdec}{\istm\mathsf{.Dec}}
+
+% Primitives
+\newcommand{\prf}{\mathsf{PRF}}
+
+
+\newcommand{\ibename}{\mathsf{IBE}}
+\newcommand{\ssym}{\mathcal{SYM}}
+\newcommand{\pkesf}{\mathcal{PKE}}
+\newcommand{\ssname}{\mathcal{SS}}
+\newcommand{\fename}{\mathsf{FE}}
+\newcommand{\tokob}{\mathsf{tOB}}
+\newcommand{\yaogs}{\mathcal{GS}}
+\newcommand{\re}{\mathcal{RE}}
+\newcommand{\bdfename}{\mathcal{BDFE}}
+\newcommand{\oneqfename}{\mathcal{ONEQFE}} %??
+\newcommand{\bffename}{\mathcal{BFFE}}
+
+\newcommand{\nizk}{\text{\rm NIZK}}
+\newcommand{\ltdf}{\text{\rm LTDF}}
+
+
+% Tiny subscript
+
+\newcommand{\tsub}[2]{{{#1}_{\scriptscriptstyle #2}}}
+
+
+% "TH" symbol
+
+\newcommand{\thh}{{\mbox{\tiny th}}}
+
+
+% Bold paragraph (similar to \paragraph*{})
+
+\newcommand{\boldpar}[1]{\vspace{3pt}\par\noindent\textbf{#1}}
+
+% Nicer paragraph
+\renewcommand{\paragraph}[1]{
+\vspace{1mm}
+\noindent{\bf #1}
+}
+
+
+
+\def\exp{\mathsf{Exp}}
+\def\expreal{\exp^{\mathsf{real}}}
+\def\expideal{\exp^{\mathsf{ideal}}}
+\def\exprealsel{\exp^{\mathsf{real, sel}}}
+\def\expidealsel{\exp^{\mathsf{ideal, sel}}}
+
+
+\newcommand{\indcca}{\mathsf{IND}\mbox{-}\mathsf{CCA}}
+
+\newcommand{\nasim}{\mathsf{NA}\mbox{-}\mathsf{SIM}}
+\newcommand{\nausim}{\mathsf{NA}\mbox{-}\mathsf{USIM}}
+\newcommand{\naind}{\mathsf{NA}\mbox{-}\mathsf{IND}}
+\newcommand{\selsim}{\mathsf{SEL}\mbox{-}\mathsf{SIM}}
+
+
+\newcommand{\fullsim}{\mathsf{FULL}\mbox{-}\mathsf{SIM}}
+\newcommand{\adusim}{\mathsf{AD}\mbox{-}\mathsf{USIM}}
+\newcommand{\adind}{\mathsf{AD}\mbox{-}\mathsf{IND}}
+
+
+
+
+% Author notes
+
+\def\ShowAuthNotes{1}
+
+\ifnum\ShowAuthNotes=1
+\newcommand{\authnote}[2]{{\textbf{$\mathbf{\big[}$~#1's note:}} \textbf{\em\small #2}~{$\mathbf{\big]}$}}
+\else
+\newcommand{\authnote}[2]{}
+\fi
+
+%%%%%%%%%%%%%%%%%%% Vnote  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\vnote}[1]{\textcolor{red}{[{\footnotesize {\bf Vnote:} { {#1}}}]}}
+\newcommand{\ynote}[1]{\textcolor{red}{[{\footnotesize {\bf Ynote:} { {#1}}}]}}
+\newcommand{\snote}[1]{\textcolor{red}{[{\footnotesize {\bf Snote:} { {#1}}}]}}
+\newcommand{\rnote}[1]{\textcolor{red}{[{\footnotesize {\bf Rnote:} { {#1}}}]}}
+\newcommand{\nnote}[1]{\textcolor{red}{[{\footnotesize {\bf Nnote:} { {#1}}}]}}
+\newcommand{\todo}[1]{\textcolor{blue}{[{\footnotesize {\bf TODO:} { {#1}}}]}}
+
+
+\newcounter{auxthmctr}
+\newcounter{auxsecctr}
+
+
+
+% Document specific definitions
+
+\newcommand{\idl}[1]{\left\langle{#1}\right\rangle}
+\newcommand{\rlwe}{\mathsf{RLWE}}
+\newcommand{\plwe}{\mathsf{PLWE}}
+\newcommand{\drlwe}{\text{\rm G-RLWE}}
+\newcommand{\sdrlwe}{\text{\rm RLWE}}
+\newcommand{\vssm}{\text{\rm SVSS}}
+
+\newcommand{\ekdm}{{\cE_{\kdm}}}
+\newcommand{\usr}{{\nu}}
+
+\newcommand{\add}{\mathsf{add}}
+\newcommand{\mlt}{\mathsf{mult}}
+
+\newcommand{\hc}{\hat{c}}
+%\newcommand{\vsig}{\gvc{\sigma}}
+%\newcommand{\hvsig}{\hat{\gvc{\sigma}}}
+
+\newcommand{\mcyc}{{\Phi_{2^{\round{\log \secp}}}}}
+
+\newcommand{\otild}{{\widetilde{O}}}
+\newcommand{\omtild}{{\widetilde{\Omega}}}
+
+\newcommand{\linf}{{\ell_{\infty}}}
+\renewcommand{\max}{\mathsf{max}}
+
+\newcommand{\gf}{{\text{GF}}}
+
+\newcommand{\zset}[1]{\{0, \ldots, {#1}\}}
+
+\newcommand{\medskipo}{\medskip}
+\newcommand{\medskipoo}{\medskipo}
+
+
+\newcommand{\db}{{\mathtt{DB}}}
+\newcommand{\dbs}{{|\db|}}
+
+\newcommand{\esw}{\shname}
+\newcommand{\esym}{\symname}
+
+
+
+\newcommand{\hesk}{\mathsf{hsk}}
+\newcommand{\hepk}{\mathsf{hpk}}
+\newcommand{\symsk}{{symsk}}
+
+
+\newcommand{\hvcs}{\hat{\vc{s}}}
+\newcommand{\hmxA}{\hat{\mx{A}}}
+\newcommand{\hvce}{\hat{\vc{e}}}
+\newcommand{\hvcb}{\hat{\vc{b}}}
+\newcommand{\he}{{\hat{e}}}
+\newcommand{\heta}{{\hat{\eta}}}
+\newcommand{\hpsi}{{\hat{\psi}}}
+\newcommand{\hPsi}{{\hat{\Psi}}}
+\newcommand{\hchi}{{\hat{\chi}}}
+\newcommand{\hvcv}{{\hat{\vc{v}}}}
+\newcommand{\hw}{{\hat{w}}}
+\newcommand{\hvca}{{\hat{\vc{a}}}}
+\newcommand{\hb}{{\hat{b}}}
+\newcommand{\hB}{{\hat{B}}}
+\newcommand{\homega}{{\hat{\omega}}}
+
+\newcommand{\bitdec}{\mathsf{BitDecomp}}
+\newcommand{\powtwo}{\mathsf{PowersOf2}}
+\newcommand{\switchkeygen}{\mathsf{SwitchKeyGen}}
+\newcommand{\switch}{\mathsf{SwitchKey}}
+\newcommand{\scale}{\mathsf{Scale}}
+
+\newcommand{\pir}{\mathrm{PIR}}
+
+
+\def\Hrand{H_{\mathsf{rand}}}
+\def\polyclass{\mathsf{Poly}}
+\def\colarith{\mathsf{Arith}}
+
+\newcommand{\tab}{\ \ \ }
+\newcommand{\ttab}{\ \ \ \ \ \ }
+\newcommand{\tttab}{\ \ \ \ \ \ \ \ \ }
+
+
+\def\CT{\mathsf{CT}}
+\def\setI{\mathcal I}
+\def\funct{F}
+\def\tfunct{\mathcal{G}}
+\def\fn{F}
+\def\tfn{G}
+
+
+\def\redecode{\mathsf{RE.Decode}}
+\def\reencode{\mathsf{RE.Encode}}
+\def\resim{\mathsf{RE.Sim}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\date{\today}
+%\date{}
+
+\newcommand{\matA}{\mathbf{A}}
+\newcommand{\matT}{\mathbf{T}}
+
+\newcommand{\trapsamp}{\mathsf{TrapSamp}}
+
+
+
+
+\newcommand{\abename}{\mathsf{ABE}}
+\newcommand{\abesetup}{\mathsf{ABE.Setup}}
+\newcommand{\abekeygen}{\mathsf{ABE.KeyGen}}
+\newcommand{\abeenc}{\mathsf{ABE.Enc}}
+\newcommand{\abedec}{\mathsf{ABE.Dec}}
+
+
+% Public index FE
+\newcommand{\pubfe}{\mathsf{pFE}}
+\newcommand{\pubfectsize}{\mathsf{ctsize}_{\pubfe}}
+\newcommand{\pubfesetup}{\pubfe\mathsf{.Setup}}
+\newcommand{\pubfekeygen}{\pubfe\mathsf{.KeyGen}}
+\newcommand{\pubfeenc}{\pubfe\mathsf{.Enc}}
+\newcommand{\pubfedec}{\pubfe\mathsf{.Dec}}
+
+% Private FE, "s" is from secret
+\newcommand{\privfe}{\mathsf{sFE}}
+\newcommand{\privfectsize}{\mathsf{ctsize}_{\privfe}}
+\newcommand{\privfesetup}{\privfe\mathsf{.Setup}}
+\newcommand{\privfekeygen}{\privfe\mathsf{.KeyGen}}
+\newcommand{\privfeenc}{\privfe\mathsf{.Enc}}
+\newcommand{\privfedec}{\privfe\mathsf{.Dec}}
+\newcommand{\privfesim}{\mathsf{Sim}_{\privfe}}
+
+% Public index two-outcome FE
+
+\newcommand{\pubfet}{\mathsf{pFE_2}}
+\newcommand{\pubfetsetup}{\pubfet\mathsf{.Setup}}
+\newcommand{\pubfetkeygen}{\pubfet\mathsf{.KeyGen}}
+\newcommand{\pubfetenc}{\pubfet\mathsf{.Enc}}
+\newcommand{\pubfetdec}{\pubfet\mathsf{.Dec}}
+% Two-outcome FE
+\newcommand{\fet}{\mathsf{FE_2}}
+\newcommand{\fetname}{\fet}
+\newcommand{\fetsetup}{\fet\mathsf{.Setup}}
+\newcommand{\fetkeygen}{\fet\mathsf{.KeyGen}}
+\newcommand{\fetenc}{\fet\mathsf{.Enc}}
+\newcommand{\fetdec}{\fet\mathsf{.Dec}}
+
+
+
+\newcommand{\sfename}{s\fename}
+\newcommand{\sfect}{\sfename\mathsf{.ctsize}}
+\newcommand{\sfesetup}{s\fesetup}
+\newcommand{\sfekeygen}{s\fekeygen}
+\newcommand{\sfeenc}{s\feenc}
+\newcommand{\sfedec}{s\fedec}
+
+\newcommand{\mpk}{\mathsf{mpk}}
+\newcommand{\msk}{\mathsf{msk}}
+\newcommand{\sk}{\mathsf{sk}}
+\newcommand{\pk}{\mathsf{pk}}
+
+
+
+
+
+
+\newcommand{\sfmpk}{\mathsf{sf}\mpk}
+\newcommand{\fmpk}{\mathsf{f}\mpk}
+\newcommand{\fmsk}{\mathsf{f}\msk}
+\newcommand{\sfmsk}{\mathsf{sf}\msk}
+
+\newcommand{\const}{\mathsf{const}}
+
+
+\newcommand{\fhepk}{\mathsf{h}\pk}
+\newcommand{\fhesk}{\mathsf{h}\sk}
+\newcommand{\olsk}{\mathsf{o}\sk}
+\newcommand{\olpk}{\mathsf{to}\pk}
+\newcommand{\gsk}{\mathsf{g}\sk}
+\newcommand{\gpk}{\mathsf{g}\pk}
+\newcommand{\sfsk}{\mathsf{sf}\sk}
+\newcommand{\fsk}{\mathsf{f}\sk}
+
+% Compact itemize and enumerate.  Note that they use the same counters and
+% symbols as the usual itemize and enumerate environments.
+\makeatletter
+\def\compactify{\itemsep=3pt plus3pt \topsep=3pt plus3pt \partopsep=0pt
+\parsep=0pt \leftmargin=1.3em}
+\let\latexusecounter=\usecounter
+\def\CompactItemize{%
+  \ifnum \@itemdepth >\thr@@\@toodeep\else
+    \advance\@itemdepth\@ne
+    \edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+    \expandafter
+    \list
+      \csname\@itemitem\endcsname
+      {\compactify\def\makelabel##1{\hss\llap{##1}}}%
+  \fi}
+\let\endCompactItemize\endlist
+\newenvironment{CompactEnumerate}
+  {\def\usecounter{\compactify\latexusecounter}
+   \begin{enumerate}}
+  {\end{enumerate}\let\usecounter=\latexusecounter}
+\makeatother
+
