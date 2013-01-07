@@ -11,7 +11,7 @@
 struct poly {
 
     poly(std::vector<mpz_class> * c, bool makecopy = false);
-    poly() {coeffs = NULL;};
+    poly(){coeffs = NULL;}
     poly(const poly & p);
     
     // first coefficient is for power 0
@@ -22,13 +22,18 @@ struct poly {
     uint size() const {return coeffs->size();}
 
     poly copy() const;
-    
+
+    static poly zero();
+
+    void operator=(const poly & P);
     ~poly();
 };
 
 
 //P+Q
 poly operator+(const poly & P, const poly & Q);
+//TODO: these operators cause another copyuing of a poly in R = P + Q; if it
+//matters, define add(R, P, Q);
 
 //P*Q
 poly operator*(const poly & P, const poly & Q);

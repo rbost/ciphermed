@@ -46,10 +46,9 @@ main(int ac, char **av)
     assert_s(f == make_poly({7}), "incorrect modpoly");
     
     cerr << "after f, a is " << a << "\n";
-/*    
+    
     //test vecs
 
- 
     vec v = {a, b};
     vec w = {c, d};
 
@@ -65,6 +64,6 @@ main(int ac, char **av)
 
     cerr << "v dot w is " << dot(v, w) << "\n";
     cerr << "v dot w mod x^4+1" << modpoly(dot(v, w), 4) << " and mod q" << modpoly(dot(v, w), 4) % q << "\n"; 
-*/
+
     cerr << "OK\n";
 }

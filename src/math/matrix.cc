@@ -29,9 +29,6 @@ operator+(const vec & v1, const vec & v2) {
     vector<poly> res = vector<poly>(v1.size());
     for (uint i = 0; i < v1.size(); i++) {
 	res[i] = v1[i] + v2[i];
-	poly aux = v1[i] + v2[i];
-	cerr <<"v1+v2 of i" << aux << "\n";
-	cerr << "res[i] " << res[i] << "\n";
     }
 
     //TODO: could avoid copying on return
@@ -42,7 +39,7 @@ poly
 dot(const vec & v1, const vec & v2) {
     assert(v1.size() == v2.size());
 
-    poly res = 0;
+    poly res = poly::zero();
 
     for (uint i = 0; i < v1.size(); i++) {
 	res = res + (v1[i] * v2[i]);
@@ -74,8 +71,9 @@ modRq(const vec & v, uint n, mpz_class q) {
 std::ostream &
 operator<<(std::ostream & s, const vec & v) {
     s << "{";
-    for (auto p : v) {
-	s << p <<", ";
+
+    for (auto it = v.begin(); it != v.end(); it++) {
+	s << *it << ", ";
     }
     s << "} ";
     return s;

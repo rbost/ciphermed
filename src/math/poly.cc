@@ -26,6 +26,11 @@ copy(vector<mpz_class> * x) {
     return r;
 }
 
+poly
+poly::zero() {
+    return poly(new vector<mpz_class>({0}));
+}
+
 poly::poly(std::vector<mpz_class> * c, bool makecopy) {
     if (!makecopy) {
 	coeffs = c;
@@ -35,6 +40,11 @@ poly::poly(std::vector<mpz_class> * c, bool makecopy) {
 }
 
 poly::poly(const poly & P) {
+    coeffs = ::copy(P.coeffs);
+}
+
+void
+poly::operator=(const poly & P) {
     coeffs = ::copy(P.coeffs);
 }
 
@@ -59,7 +69,7 @@ poly operator+(const poly & P, const poly & Q){
 
 
     for (uint i = 0; i < min_sz; i++) {
-	res->at(i) = (P[i] + Q[i]);
+	res->at(i) = P[i] + Q[i];
     }
 
     if (P.size() > min_sz) {
