@@ -2,6 +2,8 @@
 
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <util/util.hh>
 
 using namespace std;
 
@@ -57,6 +59,7 @@ poly::~poly() {
 
 mpz_class &
 poly::operator[](uint i) const {
+    if(i > deg() ) return *(new mpz_class(0));
     return coeffs->at(i);
 }
 
@@ -85,6 +88,42 @@ poly operator+(const poly & P, const poly & Q){
     return poly(res);
 }
 
+//attempt at karatsuba poly multiplication
+poly karatsuba(const poly & P, const poly & Q){
+
+	assert_s(P.deg()==Q.deg(), "Trying to use karatsuba with polynomials of different degrees");
+	
+	uint deg = P.deg();
+	uint n = deg+1;
+
+	vector<mpz_class> * di = newvec(n);
+	for(uint i=0; i <= deg; i++){
+		(*di)[i] = P[i]*Q[i];
+	}
+
+	uint limit = 2*n - 1;
+	vector<mpz_class> * dst = newvec(limit);
+
+	(*dst)[0] = (*di)[0];
+	(*dst)[limit-1] = (*di)[deg];
+
+	if(limit<2)
+		return poly(dst);
+
+	for(uint i=1; i <= limit-2; i++){
+		for(uint s = 0; s <= i/2; s++){
+			uint t = i-s;
+			if(t>s && t < n)
+				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - (*di)[s] - (*di)[t];
+		}
+		if (i%2 == 0) {
+			(*dst)[i] += (*di)[i/2];
+		}
+		
+	}
+
+	return poly(dst);
+}
 
 // multiply poly P and Q mod q
 // some efficient way of doing it?
