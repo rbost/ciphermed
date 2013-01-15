@@ -98,9 +98,9 @@ poly karatsuba(const poly & P, const poly & Q){
 	uint deg = P.deg();
 	uint n = deg+1;
 
-	vector<mpz_class> * di = newvec(n);
+	vector<mpz_class> di(n);
 	for(uint i=0; i <= deg; i++){
-		(*di)[i] = P[i]*Q[i];
+		di[i] = P[i]*Q[i];
 	}
 	
 	num_mult += deg;
@@ -108,8 +108,8 @@ poly karatsuba(const poly & P, const poly & Q){
 	uint limit = 2*n - 1;
 	vector<mpz_class> * dst = newvec(limit);
 
-	(*dst)[0] = (*di)[0];
-	(*dst)[limit-1] = (*di)[deg];
+	(*dst)[0] = di[0];
+	(*dst)[limit-1] = di[deg];
 
 	if(limit<2)
 		return poly(dst);
@@ -122,12 +122,12 @@ poly karatsuba(const poly & P, const poly & Q){
 			num_mult+=1;
 			if(t>s && t < n){
 //				cerr <<" ENTERED "<<endl;
-				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - (*di)[s] - (*di)[t];
+				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
 			}
 		}
 		if(odd) odd = false;
 		else {
-			(*dst)[i] += (*di)[i>>1];
+			(*dst)[i] += di[i>>1];
 			odd = true;
 		}
 		
@@ -140,18 +140,18 @@ poly karatsuba(const poly & P, const poly & Q){
 //			cerr<<"i: "<<i<<" s: "<<s<<" t: "<<t<<" n: "<<n<<endl;
 			if(t>s && t < n){
 //				cerr <<" ENTERED "<<endl;
-				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - (*di)[s] - (*di)[t];
+				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
 			}
 		}
 		if (odd) odd = false;
 		else {
-			(*dst)[i] += (*di)[i>>1];
+			(*dst)[i] += di[i>>1];
 			odd = true;
 		}
 		
 	}
 
-	cerr << " karatsuba takes " << num_mult <<" mults." << endl;
+//	cerr << " karatsuba takes " << num_mult <<" mults." << endl;
 	return poly(dst);
 }
 

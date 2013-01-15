@@ -106,7 +106,6 @@ main(int ac, char **av)
 	float norm_time = end_norm_time.tv_sec - begin_norm_time.tv_sec + \
         (end_norm_time.tv_usec*1.0)/(1000000.0) - (begin_norm_time.tv_usec*1.0)/(1000000.0);
 
-
 	if( !(mc == mcorrect) ){
 		cerr << "karatsuba is wrong!" << endl;
 		cerr << "polyA: " << ma << endl;
@@ -114,21 +113,10 @@ main(int ac, char **av)
 		cerr << "calculated poly = " << mc << endl;
 		cerr << "correct poly = " << mcorrect << endl;
 	}else{
-/*		cerr << "polyA: " << ma << endl;
-		cerr << "polyB: " << mb << endl;
-		cerr << "calculated poly = " << mc << endl;
-		cerr << "correct poly = " << mcorrect << endl;
-*/
 		cerr << "karatsuba is correct for degree " << deg << endl;
 		cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
 	}
 
 
     }
-/*
-    poly ma = make_poly({2, 6, 3, 7, 5, 3, 7, 21});
-    poly mb = make_poly({-5, 8, 5, 3, 6, 1, 6, 34});
-
-    poly mc = karatsuba(ma, mb);
-    poly mcorrect = ma * mb;*/
 }
