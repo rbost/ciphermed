@@ -72,9 +72,9 @@ main(int ac, char **av)
     //Karatsuba test
     srand(time(NULL));
 
-    uint max_degree = 10000;
+    uint max_degree = 1000;
 
-    for(uint deg = 9999; deg < max_degree; deg++){
+    for(uint deg = 999; deg < max_degree; deg++){
 	vector<mpz_class> poly1_coeffs(deg+1);
 	vector<mpz_class> poly2_coeffs(deg+1);
 

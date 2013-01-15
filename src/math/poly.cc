@@ -91,7 +91,9 @@ poly operator+(const poly & P, const poly & Q){
 //attempt at karatsuba poly multiplication
 poly karatsuba(const poly & P, const poly & Q){
 
-	assert_s(P.deg()==Q.deg(), "Trying to use karatsuba with polynomials of different degrees");
+	uint num_mult = 0;
+
+//	assert_s(P.deg()==Q.deg(), "Trying to use karatsuba with polynomials of different degrees");
 	
 	uint deg = P.deg();
 	uint n = deg+1;
@@ -100,7 +102,9 @@ poly karatsuba(const poly & P, const poly & Q){
 	for(uint i=0; i <= deg; i++){
 		(*di)[i] = P[i]*Q[i];
 	}
-
+	
+	num_mult += deg;
+	
 	uint limit = 2*n - 1;
 	vector<mpz_class> * dst = newvec(limit);
 
@@ -110,31 +114,62 @@ poly karatsuba(const poly & P, const poly & Q){
 	if(limit<2)
 		return poly(dst);
 
-	for(uint i=1; i <= limit-2; i++){
+	bool odd = true;
+	for(uint i=1; i < n; i++){
 		for(uint s = 0; s <= i/2; s++){
 			uint t = i-s;
-			if(t>s && t < n)
+//			cerr<<"i: "<<i<<" s: "<<s<<" t: "<<t<<" n: "<<n<<endl;
+			num_mult+=1;
+			if(t>s && t < n){
+//				cerr <<" ENTERED "<<endl;
 				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - (*di)[s] - (*di)[t];
+			}
 		}
-		if (i%2 == 0) {
-			(*dst)[i] += (*di)[i/2];
+		if(odd) odd = false;
+		else {
+			(*dst)[i] += (*di)[i>>1];
+			odd = true;
+		}
+		
+	}
+//multiples of 2 still enter loop extra time
+	for(uint i=n; i <= limit-2; i++){
+		for(uint s = i-n+1; s <= i/2; s++){
+			uint t = i-s;
+			num_mult+=1;
+//			cerr<<"i: "<<i<<" s: "<<s<<" t: "<<t<<" n: "<<n<<endl;
+			if(t>s && t < n){
+//				cerr <<" ENTERED "<<endl;
+				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - (*di)[s] - (*di)[t];
+			}
+		}
+		if (odd) odd = false;
+		else {
+			(*dst)[i] += (*di)[i>>1];
+			odd = true;
 		}
 		
 	}
 
+	cerr << " karatsuba takes " << num_mult <<" mults." << endl;
 	return poly(dst);
 }
 
 // multiply poly P and Q mod q
 // some efficient way of doing it?
 poly operator*(const poly & P, const poly & Q) {
+
+    uint num_mult = 0;
+
     vector<mpz_class> * res = newvec(P.deg() + Q.deg() + 1);
 
     for (uint i = 0; i < P.size(); i++) {
 	for (uint j = 0; j < Q.size(); j++) {
+	    num_mult += 1;
 	    res->at(i+j) = res->at(i+j) + (P[i] * Q[j]);
 	}
     }
+    cerr << " txtbk mult takes " << num_mult <<" mults."<<endl;
 
     return poly(res); 
 }
