@@ -51,12 +51,12 @@ int main(){
 
         float mult_time = end_mult_time.tv_sec - begin_mult_time.tv_sec + \
         (end_mult_time.tv_usec*1.0)/(1000000.0) - (begin_mult_time.tv_usec*1.0)/(1000000.0);
+
+	//Make sure compiler doesn't optimize
 	for ( int i=0; i < trial_run; i++ ){
 		mpz_class tmp(store[i]);
 		sum += tmp;
 	}
-	cout << sum << endl;
-
 	cout << sum << endl;
 	cout << "mpz_t add: " <<add_time << " : " <<  add_time/(trial_run *1.0) << endl;
 	cout << "mpz_t mult: " << mult_time << " : " << mult_time/(trial_run *1.0) << endl;
