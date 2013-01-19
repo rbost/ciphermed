@@ -16,13 +16,21 @@ int main(){
 
 	//Init w/ large string
 	for(int i=0; i< trial_run; i++){
+                mpz_init(store[i]);
+
 		// FAST:
-		if(mpz_init_set_str(store[i], "1340710934871093470931470134", 10) == -1) cout << "ERROR" << endl;
+		// if(mpz_set_str(store[i], "1340710934871093470931470134", 10) == -1) cout << "ERROR" << endl;
 
 		// SLOW:
 		// mpz_t v;
 		// if(mpz_init_set_str(v, "1340710934871093470931470134", 10) == -1) cout << "ERROR" << endl;
-		// mpz_init_set(store[i], v);
+		// mpz_set(store[i], v);
+
+		// ALMOST AS FAST AGAIN:
+		mpz_t v;
+		if(mpz_init_set_str(v, "1340710934871093470931470134", 10) == -1) cout << "ERROR" << endl;
+		_mpz_realloc(store[i], 3);
+		mpz_set(store[i], v);
 	}
 
 	//Time addition
