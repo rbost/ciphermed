@@ -16,7 +16,13 @@ int main(){
 
 	//Init w/ large string
 	for(int i=0; i< trial_run; i++){
+		// FAST:
 		if(mpz_init_set_str(store[i], "1340710934871093470931470134", 10) == -1) cout << "ERROR" << endl;
+
+		// SLOW:
+		// mpz_t v;
+		// if(mpz_init_set_str(v, "1340710934871093470931470134", 10) == -1) cout << "ERROR" << endl;
+		// mpz_init_set(store[i], v);
 	}
 
 	//Time addition
