@@ -53,7 +53,7 @@ int main(){
 	//Reset
 	for(int i=0; i< trial_run; i++){
 		if(mpz_init_set_str(store[i], "1340710934871093470931470134", 10) == -1) cout << "ERROR" << endl;
-
+		_mpz_realloc(store[i], 4);
 	}
 
 	//Time multiplication

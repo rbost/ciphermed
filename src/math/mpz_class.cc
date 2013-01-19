@@ -41,7 +41,7 @@ int main(){
 	for(int i=0; i< trial_run; i++){
 		mpz_class tmp("1340710934871093470931470134", 10);
 		store[i] = tmp;
-
+		_mpz_realloc(store[i].get_mpz_t(), 4);
 	}
 
 	//Time multiplication
