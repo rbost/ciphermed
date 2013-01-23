@@ -100,6 +100,7 @@ poly karatsuba(const poly & P, const poly & Q){
 
 	vector<mpz_class> di(n);
 	for(uint i=0; i <= deg; i++){
+		_mpz_realloc(di[i].get_mpz_t(), 4);
 		di[i] = P[i]*Q[i];
 	}
 	
@@ -108,6 +109,16 @@ poly karatsuba(const poly & P, const poly & Q){
 	uint limit = 2*n - 1;
 	vector<mpz_class> * dst = newvec(limit);
 
+        mpz_class tmp1("0",10), tmp2("0", 10), tmp3 ("0", 10), mult("0", 10);
+        _mpz_realloc(tmp1.get_mpz_t(), 3);
+        _mpz_realloc(tmp2.get_mpz_t(), 3);
+        _mpz_realloc(tmp3.get_mpz_t(), 3);
+        _mpz_realloc(mult.get_mpz_t(), 4);
+
+        for(uint i = 0; i < limit; i++){
+                _mpz_realloc((*dst)[i].get_mpz_t(), 4);
+        }
+
 	(*dst)[0] = di[0];
 	(*dst)[limit-1] = di[deg];
 
@@ -115,14 +126,23 @@ poly karatsuba(const poly & P, const poly & Q){
 		return poly(dst);
 
 	bool odd = true;
+	uint t = 0, s = 0;
 	for(uint i=1; i < n; i++){
-		for(uint s = 0; s <= i/2; s++){
-			uint t = i-s;
+		for(s = 0; s <= i/2; s++){
+			t = i-s;
 //			cerr<<"i: "<<i<<" s: "<<s<<" t: "<<t<<" n: "<<n<<endl;
 			num_mult+=1;
 			if(t>s && t < n){
 //				cerr <<" ENTERED "<<endl;
-				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
+//				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
+
+                                tmp1 = P[s]+P[t];
+                                tmp2 = Q[s]+Q[t];
+                                tmp3 = di[s]+di[t];
+                                mult = tmp1*tmp2;
+
+                                (*dst)[i] += mult;
+                                (*dst)[i] -= tmp3;
 			}
 		}
 		if(odd) odd = false;
@@ -134,13 +154,22 @@ poly karatsuba(const poly & P, const poly & Q){
 	}
 //multiples of 2 still enter loop extra time
 	for(uint i=n; i <= limit-2; i++){
-		for(uint s = i-n+1; s <= i/2; s++){
-			uint t = i-s;
+		for(s = i-n+1; s <= i/2; s++){
+			t = i-s;
 			num_mult+=1;
 //			cerr<<"i: "<<i<<" s: "<<s<<" t: "<<t<<" n: "<<n<<endl;
 			if(t>s && t < n){
 //				cerr <<" ENTERED "<<endl;
-				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
+//				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
+
+                                tmp1 = P[s]+P[t];
+                                tmp2 = Q[s]+Q[t];
+                                tmp3 = di[s]+di[t];
+                                mult = tmp1*tmp2;
+
+                                (*dst)[i] += mult;
+                                (*dst)[i] -= tmp3;
+
 			}
 		}
 		if (odd) odd = false;

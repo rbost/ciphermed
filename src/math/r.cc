@@ -84,8 +84,8 @@ main(int ac, char **av)
 			coeff1 = rand();
 			coeff2 = rand();
 		}while(coeff1==0 || coeff2==0);
-		poly1_coeffs[i] = rand();
-		poly2_coeffs[i] = rand();
+		poly1_coeffs[i] = coeff1;
+		poly2_coeffs[i] = coeff2;
 
 	}
 
@@ -108,10 +108,12 @@ main(int ac, char **av)
 
 	if( !(mc == mcorrect) ){
 		cerr << "karatsuba is wrong!" << endl;
-		cerr << "polyA: " << ma << endl;
-		cerr << "polyB: " << mb << endl;
-		cerr << "calculated poly = " << mc << endl;
-		cerr << "correct poly = " << mcorrect << endl;
+//		cerr << "polyA: " << ma << endl;
+//		cerr << "polyB: " << mb << endl;
+//		cerr << "calculated poly = " << mc << endl;
+//		cerr << "correct poly = " << mcorrect << endl;
+		cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
+
 	}else{
 		cerr << "karatsuba is correct for degree " << deg << endl;
 		cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
