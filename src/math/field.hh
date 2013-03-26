@@ -11,7 +11,7 @@
 #include <math/poly.hh>
 
 class RLWEField {
-    RLWEField(mpz_class _q, int _degree): q(_q), degree(_degree) {}
+    RLWEField(mpz_class _q, int degree): q(_q), deg(degree) {}
 
     add(poly a, poly b);
     mul(poly a, poly b);
@@ -19,6 +19,6 @@ class RLWEField {
 
 private:
     mpz_class q;
-    int degree;
+    int deg;
 }
 

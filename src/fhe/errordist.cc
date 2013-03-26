@@ -15,7 +15,12 @@ ErrorDist::ErrorDist(uint lambda, uint mu, mpz_class q) {
 
 poly
 ErrorDist::sample() {
-    //a poly with small coeffs
-    return poly();
+    //a poly with small coeffs: TODO this is a placeholder
+
+    vector<mpz_class> * c = new vector<mpz_class>(Rq.deg+1);
+    for (uint i = 0; i< Rq.deg+1; i++) {
+	c->at(i) = 1;
+    }
+    return poly(c);
 }
 
