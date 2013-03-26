@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ "$1" = "" -o "$2" = "" ]; then
+  echo "Usage: $0 input.pdf output.pdf"
+  exit 1
+fi
+
+exec gs -sOutputFile=$2 -sDEVICE=pdfwrite \
+        -sColorConversionStrategy=Gray -dProcessColorModel=/DeviceGray \
+        -dCompatibilityLevel=1.4 -dNOPAUSE -dBATCH $1
+

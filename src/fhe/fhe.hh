@@ -4,20 +4,10 @@
 #include <string>
 #include <math/matrix.hh>
 
-//distribution from which we sample random errors
-class ErrorDist {
-public:
-    ErrorDist(uint lambda, uint mu, mpz_class q);
-    poly sample();
-
-private:
-    mpz_class B;
-    
-};
 
 struct PK {
     mpz_class b;
-    mpz_class aa;
+    mpz_class ap;
 };
 
 struct SK {
@@ -30,16 +20,14 @@ public:
 
     PK PKKeyGen();
     SK SKKeyGen();
-    
 
+    static vec Enc(PK pk, int m);
+    static int m Dec(SK sk, vec);    
 
 private:
-    uint lambda;
-    uint d; //degree of poly
-    mpz_class q;
     uint N;
-    uint mu;
     ErrorDist chi;
+    RLWEField Rq;
 };
 
 

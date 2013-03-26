@@ -1,5 +1,5 @@
 \documentclass[11pt]{article}
-
+ 
 \usepackage{fullpage}
 
 \input{commands}
@@ -37,20 +37,18 @@ $\esetup$ takes as input $1^\lambda$, a security parameter and $\mu$, another pa
 
 \ALGORITHM{$\eskkeygen(\params)$}{}{}{
 \item Let $s' \gets \chi$.
-\item Output $\sk = s \gets (1, s')$.
+\item Output $\sk = s'$.
 }
 
 \ALGORITHM{$\epkkeygen(\sk, \params)$}{}{}{
-\item Parse $\sk = s = (1, s')$. 
-\item Generate column vector $A' \gets R_q^N$ and a row vector $e \gets \chi^N$. 
-\item Let $b \gets A' s' + 2 e \in R_q^N$.
-\item Output $\pk = A = (b, -A') \in R_q^{N \times 2}$. 
+\item Generate column vector $a' \gets R_q^N$ and a row vector $e \gets \chi^N$. 
+\item Let $b \gets a' s' + 2 e \in R_q^N$.
+\item Output $\pk = A = (b, -a') \in R_q^{N \times 2}$. 
 }
 
 \ALGORITHM{$\eenc(\params, \pk, m \in R_2)$}{}{}{
-\item ${\bf m} \gets (m, 0)$
 \item Sample ${\bf r} \gets R_2^N$
-\item Output $c = (m+\langle b, r \rangle, \langle -A', r \rangle)$. 
+\item Output $c = (m+\langle b, r \rangle, \langle -a', r \rangle)$. 
 }
 
 
@@ -62,8 +60,8 @@ $\esetup$ takes as input $1^\lambda$, a security parameter and $\mu$, another pa
 Let's see why this should be true.
 
 \begin{eqnarray*}
-[[\langle c, s \rangle]_q]_2 &=& [[m + \langle b, r \rangle + s'(\langle -A', r \rangle) ]_q]_2 \\
-&=& [[m + \langle A's'+2e, r \rangle + s'(\langle -A', r \rangle) ]_q]_2  \\
+[[\langle c, s \rangle]_q]_2 &=& [[m + \langle b, r \rangle + s'(\langle -a', r \rangle) ]_q]_2 \\
+&=& [[m + \langle a's'+2e, r \rangle + s'(\langle -a', r \rangle) ]_q]_2  \\
 &=& [[m + \langle 2e, r \rangle ]_q]_2,
 \end{eqnarray*}
 
