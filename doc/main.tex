@@ -43,7 +43,7 @@ $\esetup$ takes as input $1^\lambda$, a security parameter and $\mu$, another pa
 \ALGORITHM{$\epkkeygen(\sk, \params)$}{}{}{
 \item Generate column vector $a' \gets R_q^N$ and a row vector $e \gets \chi^N$. 
 \item Let $b \gets a' s' + 2 e \in R_q^N$.
-\item Output $\pk = A = (b, -a') \in R_q^{N \times 2}$. 
+\item Output $\pk = (b, -a') \in R_q^{N \times 2}$. 
 }
 
 \ALGORITHM{$\eenc(\params, \pk, m \in R_2)$}{}{}{
