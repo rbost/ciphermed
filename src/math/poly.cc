@@ -2,6 +2,8 @@
 
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <util/util.hh>
 
 using namespace std;
 
@@ -57,6 +59,7 @@ poly::~poly() {
 
 mpz_class &
 poly::operator[](uint i) const {
+    if(i > deg() ) return *(new mpz_class(0));
     return coeffs->at(i);
 }
 
@@ -85,17 +88,117 @@ poly operator+(const poly & P, const poly & Q){
     return poly(res);
 }
 
+//attempt at karatsuba poly multiplication
+poly karatsuba(const poly & P, const poly & Q){
+
+	uint num_mult = 0;
+
+//	assert_s(P.deg()==Q.deg(), "Trying to use karatsuba with polynomials of different degrees");
+	
+	uint deg = P.deg();
+	uint n = deg+1;
+
+	vector<mpz_class> di(n);
+	for(uint i=0; i <= deg; i++){
+		_mpz_realloc(di[i].get_mpz_t(), 4);
+		di[i] = P[i]*Q[i];
+	}
+	
+	num_mult += deg;
+	
+	uint limit = 2*n - 1;
+	vector<mpz_class> * dst = newvec(limit);
+
+        mpz_class tmp1("0",10), tmp2("0", 10), tmp3 ("0", 10), mult("0", 10);
+        _mpz_realloc(tmp1.get_mpz_t(), 3);
+        _mpz_realloc(tmp2.get_mpz_t(), 3);
+        _mpz_realloc(tmp3.get_mpz_t(), 3);
+        _mpz_realloc(mult.get_mpz_t(), 4);
+
+        for(uint i = 0; i < limit; i++){
+                _mpz_realloc((*dst)[i].get_mpz_t(), 4);
+        }
+
+	(*dst)[0] = di[0];
+	(*dst)[limit-1] = di[deg];
+
+	if(limit<2)
+		return poly(dst);
+
+	bool odd = true;
+	uint t = 0, s = 0;
+	for(uint i=1; i < n; i++){
+		for(s = 0; s <= i/2; s++){
+			t = i-s;
+//			cerr<<"i: "<<i<<" s: "<<s<<" t: "<<t<<" n: "<<n<<endl;
+			num_mult+=1;
+			if(t>s && t < n){
+//				cerr <<" ENTERED "<<endl;
+//				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
+
+                                tmp1 = P[s]+P[t];
+                                tmp2 = Q[s]+Q[t];
+                                tmp3 = di[s]+di[t];
+                                mult = tmp1*tmp2;
+
+                                (*dst)[i] += mult;
+                                (*dst)[i] -= tmp3;
+			}
+		}
+		if(odd) odd = false;
+		else {
+			(*dst)[i] += di[i>>1];
+			odd = true;
+		}
+		
+	}
+//multiples of 2 still enter loop extra time
+	for(uint i=n; i <= limit-2; i++){
+		for(s = i-n+1; s <= i/2; s++){
+			t = i-s;
+			num_mult+=1;
+//			cerr<<"i: "<<i<<" s: "<<s<<" t: "<<t<<" n: "<<n<<endl;
+			if(t>s && t < n){
+//				cerr <<" ENTERED "<<endl;
+//				(*dst)[i] += (P[s]+P[t])*(Q[s]+Q[t]) - di[s] - di[t];
+
+                                tmp1 = P[s]+P[t];
+                                tmp2 = Q[s]+Q[t];
+                                tmp3 = di[s]+di[t];
+                                mult = tmp1*tmp2;
+
+                                (*dst)[i] += mult;
+                                (*dst)[i] -= tmp3;
+
+			}
+		}
+		if (odd) odd = false;
+		else {
+			(*dst)[i] += di[i>>1];
+			odd = true;
+		}
+		
+	}
+
+//	cerr << " karatsuba takes " << num_mult <<" mults." << endl;
+	return poly(dst);
+}
 
 // multiply poly P and Q mod q
 // some efficient way of doing it?
 poly operator*(const poly & P, const poly & Q) {
+
+    uint num_mult = 0;
+
     vector<mpz_class> * res = newvec(P.deg() + Q.deg() + 1);
 
     for (uint i = 0; i < P.size(); i++) {
 	for (uint j = 0; j < Q.size(); j++) {
+	    num_mult += 1;
 	    res->at(i+j) = res->at(i+j) + (P[i] * Q[j]);
 	}
     }
+    cerr << " txtbk mult takes " << num_mult <<" mults."<<endl;
 
     return poly(res); 
 }

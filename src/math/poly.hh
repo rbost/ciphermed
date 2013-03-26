@@ -29,6 +29,7 @@ struct poly {
     ~poly();
 };
 
+poly karatsuba(const poly & P, const poly & Q);
 
 //P+Q
 poly operator+(const poly & P, const poly & Q);
