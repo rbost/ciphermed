@@ -15,14 +15,14 @@ using namespace std;
 //TODO: currently I set the params at random! need to figure what security needs
 //TODO: setup should run based on depth wanted, current setting can support one multiplication
 void FHE::Setup(){
-    lambda = 100;
-    d = 100;
-    q = 1048576;
-    N = ceil(3 * log q);
-    Rq = RLWEField(q, d);
-    mu = 100;
-    chi = ErrorDist(lambda, mu, Rq);
-    
+    //lambda = 100;
+    //d = 100;
+    //q = 1048576;
+    //N = ceil(3 * log q);
+    //Rq = RLWEField(q, d);
+    //mu = 100;
+    //chi = ErrorDist(lambda, mu, Rq);
+
 }
 
 SK FHE::SKKeyGen() {
@@ -36,8 +36,8 @@ SK FHE::SKKeyGen() {
 PK FHE::PKKeyGen() {
     assert_s(false, "unimpl");
     return PK();
-    
-    
+
+
 }
 
 

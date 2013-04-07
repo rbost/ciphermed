@@ -5,13 +5,13 @@
 #include <stdexcept>
 #include <string>
 
-typedef struct FHEError {
+struct FHEError {
  public:
     FHEError(const std::string &m) : msg(m)
     {
     }
     std::string msg;
-} FHEError;
+};
 
 class fatal : public std::stringstream {
  public:
@@ -23,7 +23,7 @@ class fatal : public std::stringstream {
 
 class fhe_err : public std::stringstream {
  public:
-    ~fhe_err() throw (FHEError) {
+    ~fhe_err() {
         std::cerr << str() << std::endl;
         throw FHEError(str());
     }

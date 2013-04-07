@@ -1,17 +1,13 @@
 OBJDIR	 := obj
 TOP	 := $(shell echo $${PWD-`pwd`})
 CXX	 := g++
-# -O2
-CXXFLAGS := -g -O0 -fno-strict-aliasing -fno-rtti -fwrapv -fPIC \
+CXXFLAGS := -g -fno-strict-aliasing -fno-rtti -fwrapv -fPIC \
 	    -Wall -Werror -Wpointer-arith -Wendif-labels -Wformat=2  \
 	    -Wextra -Wmissing-noreturn -Wwrite-strings -Wno-unused-parameter \
 	    -Wmissing-declarations -Woverloaded-virtual  \
 	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x -I$(TOP)
-LDFLAGS	 := -lz -llua5.1 -lcrypto -lntl \
-	    -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)
-
-
-LDFLAGS	 += -lpthread -lrt -ldl -lcrypt -lreadline -lgmp
+LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
+LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)
 
 ## To be populated by Makefrag files
 OBJDIRS	:=

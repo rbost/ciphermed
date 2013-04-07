@@ -1,13 +1,14 @@
 #pragma once
 
 /*
- * Distribution for sampling random errors. 
+ * Distribution for sampling random errors.
  *
  */
 
 #include <stdint.h>
 #include <string>
 #include <math/matrix.hh>
+#include <math/field.hh>
 
 
 class ErrorDist {
@@ -18,6 +19,6 @@ public:
 
 private:
     mpz_class B;
-    
+
 };
 

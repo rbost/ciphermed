@@ -19,7 +19,7 @@ RLWEField::RLWEField(mpz_class _q, int degree) : q(_q), deg(degree) {
     c->at(0) = 1;
     c->at(deg) = 1;
 
-    monic = poly(c);
+    //monic = poly(c);
 
 }
 

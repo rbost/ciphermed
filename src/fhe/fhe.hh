@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string>
 #include <math/matrix.hh>
-
+#include <fhe/errordist.hh>
 
 struct PK {
     mpz_class b;
@@ -22,7 +22,7 @@ public:
     SK SKKeyGen();
 
     static vec Enc(PK pk, int m);
-    static int m Dec(SK sk, vec);    
+    static int Dec(SK sk, vec);
 
 private:
     uint N;
