@@ -1,20 +1,59 @@
-#include <math/matrix.hh>
-
-#include <util/util.hh>
-
 #include <iostream>
 #include <sys/time.h>
+
+#include <math/matrix.hh>
+#include <math/mpz_class.hh>
+#include <util/util.hh>
 
 using namespace std;
 
 static poly
-make_poly(const vector<mpz_class> &v) {
+make_poly(const vector<mpz_class> &v)
+{
     return poly(v);
 }
 
 int
 main(int ac, char **av)
 {
+    // test the nearest_div(p, q), for odd q
+    {
+        assert_s(mpz_class_nearest_div(3, 3) == 1, "nearest(3/3)");
+        assert_s(mpz_class_nearest_div(4, 3) == 1, "nearest(4/3)");
+        assert_s(mpz_class_nearest_div(5, 3) == 2, "nearest(5/3)");
+
+        assert_s(mpz_class_nearest_div(2, 3) == 1, "nearest(2/3)");
+        assert_s(mpz_class_nearest_div(1, 3) == 0, "nearest(1/3)");
+        assert_s(mpz_class_nearest_div(0, 3) == 0, "nearest(0/3)");
+
+        assert_s(mpz_class_nearest_div(-1, 3) == 0, "nearest(-1/3)");
+        assert_s(mpz_class_nearest_div(-2, 3) == -1, "nearest(-2/3)");
+        assert_s(mpz_class_nearest_div(-3, 3) == -1, "nearest(-3/3)");
+        assert_s(mpz_class_nearest_div(-4, 3) == -1, "nearest(-4/3)");
+        assert_s(mpz_class_nearest_div(-5, 3) == -2, "nearest(-5/3)");
+    }
+
+    // test the nearest_div(p, q) for even q
+    {
+        assert_s(mpz_class_nearest_div(3, 6) == 1, "nearest(3/6)");
+        assert_s(mpz_class_nearest_div(4, 6) == 1, "nearest(4/6)");
+        assert_s(mpz_class_nearest_div(5, 6) == 1, "nearest(5/6)");
+        assert_s(mpz_class_nearest_div(6, 6) == 1, "nearest(6/6)");
+        assert_s(mpz_class_nearest_div(7, 6) == 1, "nearest(7/6)");
+        assert_s(mpz_class_nearest_div(8, 6) == 1, "nearest(8/6)");
+        assert_s(mpz_class_nearest_div(9, 6) == 2, "nearest(9/6)");
+
+        // XXX: not sure if this behavior is correct
+        assert_s(mpz_class_nearest_div(-3, 6) == 0, "nearest(-3/6)");
+        assert_s(mpz_class_nearest_div(-4, 6) == -1, "nearest(-4/6)");
+        assert_s(mpz_class_nearest_div(-5, 6) == -1, "nearest(-5/6)");
+        assert_s(mpz_class_nearest_div(-6, 6) == -1, "nearest(-6/6)");
+        assert_s(mpz_class_nearest_div(-7, 6) == -1, "nearest(-7/6)");
+        assert_s(mpz_class_nearest_div(-8, 6) == -1, "nearest(-8/6)");
+        assert_s(mpz_class_nearest_div(-9, 6) == -1, "nearest(-9/6)");
+        assert_s(mpz_class_nearest_div(-10, 6) == -2, "nearest(-10/6)");
+    }
+
     // test poly's
 
     poly a = make_poly({1, 8});
@@ -127,3 +166,5 @@ main(int ac, char **av)
 
     }
 }
+
+/* vim:set shiftwidth=4 ts=4 sts=4 et: */

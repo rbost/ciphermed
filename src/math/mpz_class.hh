@@ -21,8 +21,8 @@ mpz_class_nearest_div(const mpz_class &p, const mpz_class &q)
     if (mpz_divisible_p(p.get_mpz_t(), q.get_mpz_t()))
         return p/q;
     mpz_class ret;
-    mpz_class pplusq = p + q;
-    mpz_fdiv_q(ret.get_mpz_t(), pplusq.get_mpz_t(), q.get_mpz_t());
+    mpz_class pplusq2 = p + (q/2);
+    mpz_fdiv_q(ret.get_mpz_t(), pplusq2.get_mpz_t(), q.get_mpz_t());
     return ret;
 }
 
