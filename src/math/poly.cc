@@ -158,6 +158,19 @@ operator*(const poly &p, const mpz_class &q)
     return res;
 }
 
+mpz_class
+poly::eval(const mpz_class &x) const
+{
+    mpz_class ret, xv;
+    if (coeffs_.empty())
+        return ret;
+    ret = coeffs_[0];
+    xv = x;
+    for (size_t i = 1; i < coeffs_.size(); i++, xv *= x)
+        ret += coeffs_[i] * xv;
+    return ret;
+}
+
 poly
 poly::modshift(const mpz_class &q) const
 {

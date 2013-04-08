@@ -49,6 +49,11 @@ main(int ac, char **av)
 
     cerr << "after f, a is " << a << "\n";
 
+    poly g = make_poly({3, 15, 20}); // 20x^2 + 15x + 3
+    assert_s(mpz_class(3) == g(mpz_class(0)), "p(0) incorrect");
+    assert_s(mpz_class(38) == g(mpz_class(1)), "p(1) incorrect");
+    assert_s(mpz_class(383) == g(mpz_class(4)), "p(4) incorrect");
+
     //test vecs
 
     vec v = {a, b};

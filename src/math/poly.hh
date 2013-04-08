@@ -65,6 +65,15 @@ public:
         return coeffs_;
     }
 
+    mpz_class
+    eval(const mpz_class &x) const;
+
+    inline mpz_class
+    operator()(const mpz_class &x) const
+    {
+        return eval(x);
+    }
+
     // P mod scalar q - note that we shift into the range (-q/2, q/2] when q is
     // even, and range [-(q-1)/2, (q-1)/2] when q is odd.
     poly modshift(const mpz_class &q) const;
