@@ -65,6 +65,18 @@ public:
         return coeffs_;
     }
 
+    inline void
+    reserve(size_t sz)
+    {
+        coeffs_.reserve(sz);
+    }
+
+    inline void
+    resize(size_t sz)
+    {
+        coeffs_.resize(sz);
+    }
+
     mpz_class
     eval(const mpz_class &x) const;
 

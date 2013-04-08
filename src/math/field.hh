@@ -92,7 +92,7 @@ public:
         poly p;
         for (unsigned int i = 0; i < deg_ + 1; i++)
             p[i] = g.get_z_range(q_);
-        return p;
+        return reduce(p);
     }
 
 private:

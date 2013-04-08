@@ -19,6 +19,12 @@ main(int argc, char **argv)
 {
     TestSHE sh;
     sh.SanityCheck();
+    auto sk = sh.SKKeyGen();
+    auto pk = sh.PKKeyGen(sk);
+    mpz_class m(12345);
+    auto ct = sh.encrypt(pk, m);
+    auto m0 = sh.decrypt(sk, ct);
+    assert(m == m0);
 
     //DefaultSHE sh;
     //auto sk = sh.SKKeyGen();
