@@ -8,8 +8,8 @@
 using namespace std;
 
 static poly
-make_poly(vector<mpz_class> v) {
-    return poly(&v, true);
+make_poly(const vector<mpz_class> &v) {
+    return poly(v);
 }
 
 int
@@ -20,10 +20,10 @@ main(int ac, char **av)
     poly a = make_poly({1, 8});
     poly b = make_poly({2, 3});
 
-    mpz_class q = 9; 
+    mpz_class q = 9;
 
     cerr << "a is " << a << "\n b is " << b << "\n q is " << q << "\n";
-    
+
     poly c = (a+b) % q;
 
     cerr << "sum is " << c << "\n";
@@ -36,19 +36,19 @@ main(int ac, char **av)
     assert_s(d == make_poly({2, 1, 6}), "incorrect multiply");
 
     cerr << "after d, a is " << a << "\n";
-	
+
     poly e = modpoly(d, 2);
     cerr << "mult is (mod q) mod n^2+1" << e << "\n";
     assert_s(e == make_poly({-4, 1}), "incorrect modpoly");
 
     cerr << "after e, a is " << a << "\n";
-    
+
     poly f = modpoly(d, 1);
     cerr << "d=" << d << " mod x+1 is " << f << "\n";
     assert_s(f == make_poly({7}), "incorrect modpoly");
-    
+
     cerr << "after f, a is " << a << "\n";
-    
+
     //test vecs
 
     vec v = {a, b};
@@ -65,7 +65,7 @@ main(int ac, char **av)
 
 
     cerr << "v dot w is " << dot(v, w) << "\n";
-    cerr << "v dot w mod x^4+1" << modpoly(dot(v, w), 4) << " and mod q" << modpoly(dot(v, w), 4) % q << "\n"; 
+    cerr << "v dot w mod x^4+1" << modpoly(dot(v, w), 4) << " and mod q" << modpoly(dot(v, w), 4) % q << "\n";
 
     cerr << "OK\n";
 

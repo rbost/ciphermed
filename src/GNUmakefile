@@ -1,7 +1,16 @@
+-include config.mk
+
+DEBUG ?= 0
+ifeq ($(strip $(DEBUG)),1)
+	CXXOPT := 
+else
+	CXXOPT := -O3
+endif
+
 OBJDIR	 := obj
 TOP	 := $(shell echo $${PWD-`pwd`})
 CXX	 := g++
-CXXFLAGS := -g -fno-strict-aliasing -fno-rtti -fwrapv -fPIC \
+CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fno-rtti -fwrapv -fPIC \
 	    -Wall -Werror -Wpointer-arith -Wendif-labels -Wformat=2  \
 	    -Wextra -Wmissing-noreturn -Wwrite-strings -Wno-unused-parameter \
 	    -Wmissing-declarations -Woverloaded-virtual  \

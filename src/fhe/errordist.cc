@@ -1,26 +1,22 @@
 #include <fhe/fhe.hh>
 #include <util/util.hh>
-
 #include <vector>
-
 
 using namespace std;
 
-// TODO: need to implement the actual distribution
-// now it samples randomly
-ErrorDist::ErrorDist(uint lambda, uint mu, mpz_class q) {
-    B = 10;
-    //seed it 
+ErrorDist::ErrorDist(uint lambda, uint sigma, const PolyRing &r)
+ : r_(r), gen_(), gauss_(0.0, sigma)
+{
 }
 
 poly
-ErrorDist::sample() {
-    //a poly with small coeffs: TODO this is a placeholder
-
-    vector<mpz_class> * c = new vector<mpz_class>(Rq.deg+1);
-    for (uint i = 0; i< Rq.deg+1; i++) {
-	c->at(i) = 1;
-    }
-    return poly(c);
+ErrorDist::sample()
+{
+    // XXX(stephentu): Not correct discrete gaussian, but OK for now
+    poly x;
+    for (size_t i = 0; i < r_.monomial_degree() + 1; i++)
+        x[i] = mpz_class(gauss_(gen_));
+    return r_.reduce(x);
 }
 
+/* vim:set shiftwidth=4 ts=4 et: */

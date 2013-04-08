@@ -5,17 +5,17 @@
 #include <math/matrix.hh>
 #include <fhe/errordist.hh>
 
-struct PK {
-    mpz_class b;
-    mpz_class ap;
-};
-
-struct SK {
-    std::vector<poly> s;
-};
-
 class FHE {
 public:
+    struct PK {
+        mpz_class b;
+        mpz_class ap;
+    };
+
+    struct SK {
+        std::vector<poly> s;
+    };
+
     void Setup();
 
     PK PKKeyGen();
@@ -29,6 +29,3 @@ private:
     ErrorDist chi;
     RLWEField Rq;
 };
-
-
-

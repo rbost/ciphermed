@@ -25,20 +25,15 @@ void FHE::Setup(){
 
 }
 
-SK FHE::SKKeyGen() {
+FHE::SK FHE::SKKeyGen() {
     SK sk = SK();
     sk.s = vector<poly>(2);
-    sk.s[0] = poly(new vector<mpz_class>({1}));
+    sk.s[0] = poly({1});
     sk.s[1] = chi.sample();
     return sk;
 }
 
-PK FHE::PKKeyGen() {
+FHE::PK FHE::PKKeyGen() {
     assert_s(false, "unimpl");
     return PK();
-
-
 }
-
-
-

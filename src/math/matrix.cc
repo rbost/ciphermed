@@ -39,7 +39,7 @@ poly
 dot(const vec & v1, const vec & v2) {
     assert(v1.size() == v2.size());
 
-    poly res = poly::zero();
+    poly res;
 
     for (uint i = 0; i < v1.size(); i++) {
 	res = res + (v1[i] * v2[i]);

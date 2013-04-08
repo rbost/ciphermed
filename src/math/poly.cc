@@ -7,94 +7,40 @@
 
 using namespace std;
 
-static vector<mpz_class> *
-newvec(uint sz) {
-    vector<mpz_class> * res = new vector<mpz_class>(sz);
-    for (auto it = res->begin(); it != res->end(); it++) {
-	*it = 0;
-    }
-    return res;
+static inline vector<mpz_class>
+zerovec(size_t sz)
+{
+    vector<mpz_class> ret(sz);
+    return ret;
 }
 
-static vector<mpz_class> *
-copy(vector<mpz_class> * x) {
-    uint sz = x->size();
-    vector<mpz_class> * r = newvec(sz);
-    
-    for (uint i = 0; i < sz; i++) {
-	r->at(i) = x->at(i);
-    }
-
-    return r;
-}
-
+// add polynomial P and Q
 poly
-poly::zero() {
-    return poly(new vector<mpz_class>({0}));
-}
-
-poly::poly(std::vector<mpz_class> * c, bool makecopy) {
-    if (!makecopy) {
-	coeffs = c;
-    } else {
-	coeffs = ::copy(c);
-    }
-}
-
-poly::poly(const poly & P) {
-    coeffs = ::copy(P.coeffs);
-}
-
-void
-poly::operator=(const poly & P) {
-    coeffs = ::copy(P.coeffs);
-}
-
-
-poly::~poly() {
-    coeffs->clear();
-    delete coeffs;
-}
-
-
-mpz_class &
-poly::operator[](uint i) const {
-    if(i > deg() ) return *(new mpz_class(0));
-    return coeffs->at(i);
-}
-
-// add polynomial P and Q mod q
-poly operator+(const poly & P, const poly & Q){
-    uint max_sz = max(P.size(),Q.size());
-    uint min_sz = min(P.size(), Q.size());
-    
-    vector<mpz_class> * res = newvec(max_sz);
-
-
-    for (uint i = 0; i < min_sz; i++) {
-	res->at(i) = P[i] + Q[i];
-    }
-
+operator+(const poly &P, const poly &Q)
+{
+    const size_t max_sz = max(P.size(),Q.size());
+    const size_t min_sz = min(P.size(), Q.size());
+    vector<mpz_class> res = zerovec(max_sz);
+    for (size_t i = 0; i < min_sz; i++)
+        res[i] = P[i] + Q[i];
     if (P.size() > min_sz) {
-	for (uint i = min_sz; i < P.size(); i++) {
-	    res->at(i) = P[i];
-	}
+        for (size_t i = min_sz; i < P.size(); i++)
+            res[i] = P[i];
     } else {
-	for (uint i = min_sz; i < Q.size(); i++) {
-	    res->at(i) = Q[i];
-	}
+        for (size_t i = min_sz; i < Q.size(); i++)
+            res[i] = Q[i];
     }
-
-    return poly(res);
+    return poly(move(res));
 }
 
 //attempt at karatsuba poly multiplication
-poly karatsuba(const poly & P, const poly & Q){
-
+poly
+karatsuba(const poly & P, const poly & Q)
+{
 	uint num_mult = 0;
 
 //	assert_s(P.deg()==Q.deg(), "Trying to use karatsuba with polynomials of different degrees");
-	
+
 	uint deg = P.deg();
 	uint n = deg+1;
 
@@ -103,11 +49,11 @@ poly karatsuba(const poly & P, const poly & Q){
 		_mpz_realloc(di[i].get_mpz_t(), 4);
 		di[i] = P[i]*Q[i];
 	}
-	
+
 	num_mult += deg;
-	
+
 	uint limit = 2*n - 1;
-	vector<mpz_class> * dst = newvec(limit);
+	vector<mpz_class> dst = zerovec(limit);
 
         mpz_class tmp1("0",10), tmp2("0", 10), tmp3 ("0", 10), mult("0", 10);
         _mpz_realloc(tmp1.get_mpz_t(), 3);
@@ -116,14 +62,14 @@ poly karatsuba(const poly & P, const poly & Q){
         _mpz_realloc(mult.get_mpz_t(), 4);
 
         for(uint i = 0; i < limit; i++){
-                _mpz_realloc((*dst)[i].get_mpz_t(), 4);
+                _mpz_realloc(dst[i].get_mpz_t(), 4);
         }
 
-	(*dst)[0] = di[0];
-	(*dst)[limit-1] = di[deg];
+	dst[0] = di[0];
+	dst[limit-1] = di[deg];
 
 	if(limit<2)
-		return poly(dst);
+		return poly(move(dst));
 
 	bool odd = true;
 	uint t = 0, s = 0;
@@ -141,16 +87,16 @@ poly karatsuba(const poly & P, const poly & Q){
                                 tmp3 = di[s]+di[t];
                                 mult = tmp1*tmp2;
 
-                                (*dst)[i] += mult;
-                                (*dst)[i] -= tmp3;
+                                dst[i] += mult;
+                                dst[i] -= tmp3;
 			}
 		}
 		if(odd) odd = false;
 		else {
-			(*dst)[i] += di[i>>1];
+			dst[i] += di[i>>1];
 			odd = true;
 		}
-		
+
 	}
 //multiples of 2 still enter loop extra time
 	for(uint i=n; i <= limit-2; i++){
@@ -167,109 +113,117 @@ poly karatsuba(const poly & P, const poly & Q){
                                 tmp3 = di[s]+di[t];
                                 mult = tmp1*tmp2;
 
-                                (*dst)[i] += mult;
-                                (*dst)[i] -= tmp3;
+                                dst[i] += mult;
+                                dst[i] -= tmp3;
 
 			}
 		}
 		if (odd) odd = false;
 		else {
-			(*dst)[i] += di[i>>1];
+			dst[i] += di[i>>1];
 			odd = true;
 		}
-		
+
 	}
 
 //	cerr << " karatsuba takes " << num_mult <<" mults." << endl;
-	return poly(dst);
+	return poly(move(dst));
 }
 
 // multiply poly P and Q mod q
 // some efficient way of doing it?
-poly operator*(const poly & P, const poly & Q) {
-
+poly
+operator*(const poly & P, const poly & Q)
+{
     uint num_mult = 0;
-
-    vector<mpz_class> * res = newvec(P.deg() + Q.deg() + 1);
+    vector<mpz_class> res = zerovec(P.deg() + Q.deg() + 1);
 
     for (uint i = 0; i < P.size(); i++) {
-	for (uint j = 0; j < Q.size(); j++) {
-	    num_mult += 1;
-	    res->at(i+j) = res->at(i+j) + (P[i] * Q[j]);
-	}
+        for (uint j = 0; j < Q.size(); j++) {
+            num_mult += 1;
+            res[i+j] = res[i+j] + (P[i] * Q[j]);
+        }
     }
     cerr << " txtbk mult takes " << num_mult <<" mults."<<endl;
 
-    return poly(res); 
+    return poly(move(res));
 }
 
-poly operator%(const poly & P, const mpz_class & q) {
-    vector<mpz_class> * res = newvec(P.size());
+poly
+poly::modshift(const mpz_class &q) const
+{
+    mpz_class shift;
+    if (mpz_odd_p(q.get_mpz_t()))
+        shift = (q - 1) / 2;
+    else
+        shift = (q / 2) - 1;
+    vector<mpz_class> res = zerovec(size());
+    for (uint i = 0; i < size(); i++)
+        // XXX: make more efficient
+        res[i] = (coeffs_[i] % q) - shift;
+    return poly(move(res));
+}
 
-    for (uint i = 0; i < P.size(); i++) {
-	res->at(i) = P[i] % q;
-    }
+poly
+operator%(const poly & P, const mpz_class & q)
+{
+    vector<mpz_class> res = zerovec(P.size());
+    for (uint i = 0; i < P.size(); i++)
+        res[i] = P[i] % q;
+    return poly(move(res));
+}
 
-    return poly(res);
+poly
+operator-(const poly &P)
+{
+    poly ret = P;
+    for (size_t i = 0; i < ret.size(); i++)
+        ret[i] = -ret[i];
+    return ret;
 }
 
 static void
-subtract_monomial(poly & res, const mpz_class & c, uint n, uint delta) {
+subtract_monomial(poly & res, const mpz_class & c, uint n, uint delta)
+{
     res[delta] = res[delta] - c;
-    res.coeffs->resize(res.coeffs->size() - 1);
-}
-
-
-poly
-poly::copy() const {
-    return poly(::copy(coeffs));
+    res.unsafe().resize(res.unsafe().size() - 1);
 }
 
 poly
-modpoly(const poly & P, uint n) {
+modpoly(const poly & P, uint n)
+{
     //we only divide by poly of the form x^n + 1
-    // TODO: this could be optimized 
-
-    poly res = P.copy();
-        
+    // TODO: this could be optimized
+    poly res = P;
     while (res.deg() >= n) {
-	// the coeff for largest power
-	mpz_class c = res[res.size()-1];
-	subtract_monomial(res, c, n, res.deg()-n);
+        // the coeff for largest power
+        mpz_class &c = res[res.size()-1];
+        subtract_monomial(res, c, n, res.deg()-n);
     }
-
     return res;
 }
 
-
-
 ostream&
-operator<<(ostream & res, const poly & P) {
-
+operator<<(ostream & res, const poly & P)
+{
     res << "{";
-
-    for (uint i = 0; i < P.coeffs->size(); i++) {
-	res << P.coeffs->at(i);
-	if (i != P.coeffs->size()-1)
-	    res << ", ";
+    for (uint i = 0; i < P.view().size(); i++) {
+        res << P.view()[i];
+        if (i != P.view().size()-1)
+            res << ", ";
     }
-    
     res << "}";
-
     return res;
 }
 
 bool
 operator==(const poly & P, const poly & Q) {
-    if (P.deg() != Q.deg()) {
-	return false;
-    }
-
-    for (uint i = 0; i < P.size(); i++) {
-	if (P[i] != Q[i]) {
-	    return false;
-	}
-    }
-
+    if (P.deg() != Q.deg())
+        return false;
+    for (uint i = 0; i < P.size(); i++)
+        if (P[i] != Q[i])
+            return false;
     return true;
 }
+
+/* vim:set shiftwidth=4 ts=4 et: */

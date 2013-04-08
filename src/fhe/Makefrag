@@ -1,5 +1,5 @@
 OBJDIRS     += fhe
-FHESRC   := fhe.cc
+FHESRC   := errordist.cc fhe.cc
 FHEOBJ   := $(patsubst %.cc,$(OBJDIR)/fhe/%.o,$(FHESRC))
 
 all:    $(OBJDIR)/libfhe.so
