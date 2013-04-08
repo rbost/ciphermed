@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <gmpxx.h>
+#include <math/mpz_class.hh>
 
 class poly {
 public:
@@ -103,16 +103,6 @@ operator!=(const poly &P, const poly &Q)
 
 std::ostream&
 operator<<(std::ostream&, const poly & P);
-
-// mpz_class is pretty limited in its
-// C++ interface...
-inline mpz_class
-operator-(const mpz_class &z)
-{
-    mpz_class neg;
-    mpz_neg(neg.get_mpz_t(), z.get_mpz_t());
-    return neg;
-}
 
 //TODO: one way to speed up performance for some operations may be to have them
 //do mod automatically so you work with small numbers (also avoid looping a
