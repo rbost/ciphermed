@@ -187,6 +187,15 @@ poly::modshift(const mpz_class &q) const
 }
 
 poly
+poly::nearest_div(const mpz_class &q) const
+{
+    vector<mpz_class> copy(coeffs_);
+    for (auto &c : copy)
+        c = mpz_class_nearest_div(c, q);
+    return poly(move(copy));
+}
+
+poly
 operator%(const poly & P, const mpz_class & q)
 {
     vector<mpz_class> res = zerovec(P.size());
@@ -248,4 +257,4 @@ operator==(const poly & P, const poly & Q) {
     return true;
 }
 
-/* vim:set shiftwidth=4 ts=4 et: */
+/* vim:set shiftwidth=4 ts=4 sts=4 et: */

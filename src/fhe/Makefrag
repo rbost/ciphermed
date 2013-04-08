@@ -8,7 +8,7 @@ $(OBJDIR)/libfhe.so: $(FHEOBJ) $(OBJDIR)/libfhemath.so
 
 all:    $(OBJDIR)/fhe/test
 $(OBJDIR)/fhe/test: $(OBJDIR)/fhe/test.o $(OBJDIR)/libfhemath.so $(OBJDIR)/libfhe.so
-	$(CXX) $< -o $@ $(LDFLAGS) -lfhemath -lfhe
+	$(CXX) $< -o $@ $(LDFLAGS) -lfhemath -lfhe -lfheutil
 	
 install: install_fhe
 

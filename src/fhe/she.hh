@@ -18,17 +18,20 @@ public:
     static const unsigned int LogQ       = Parameters::LogQ;
     static const unsigned int LogT       = Parameters::LogT;
     static const unsigned int Sigma      = Parameters::Sigma;
-    static const unsigned int D          = Parameters::D;
+    static const unsigned int LogD       = Parameters::LogD;
     static const unsigned int LogMsgBase = Parameters::LogMsgBase;
 
     typedef poly SK;
     typedef std::pair<poly, poly> PK;
-    typedef std::pair<poly, poly> CT;
+    typedef std::vector<poly> CT;
 
     SHE()
-        : r_(D),
-          rq_(mpz_class(1) << LogQ, D),
-          rt_(mpz_class(1) << LogT, D),
+        : q_(mpz_class(1) << LogQ),
+          t_(mpz_class(1) << LogT),
+          d_(1UL << LogD),
+          r_(d_),
+          rq_(q_, d_),
+          rt_(t_, d_),
           delta_(mpz_class(1) << (LogQ - LogT)),
           chi_(0 /* XXX: security parameter? */, Sigma, r_),
           g_(gmp_randinit_default)
@@ -46,16 +49,25 @@ public:
     CT add(const PK &pk, const CT &ct0, const CT &ct1) const;
     CT multiply(const PK &pk, const CT &ct0, const CT &ct1) const;
 
+    void SanityCheck();
+
 private:
 
     // sanity checks
     static_assert(LogQ > LogT, "XX");
+    static_assert(LogD <= sizeof(unsigned long) * 8, "YY");
+    static_assert(LogT >= LogMsgBase, "ZZ");
 
     // encode message as a element of R_t.  the coefficients of the message
     // polynomial are simply the base 2^LogMsgBase representation of m (ML
     // Confidential uses LogMsgBase = 1, ie the binary representation, but this
     // seems wasteful)
     poly encode(const mpz_class &m) const;
+    mpz_class decode(const poly &p) const;
+
+    mpz_class q_;
+    mpz_class t_;
+    unsigned long d_;
 
     PolyRing r_;   // Z[x]/f(x)
     RLWEField rq_; // Z_q[x]/f(x)
@@ -93,7 +105,17 @@ SHE<P>::encrypt(const PK &pk, const mpz_class &m)
     poly g = chi_.sample();
     poly c0 = rq_.reduce(pk.first * u + g + delta_ * mz);
     poly c1 = rq_.reduce(pk.second * u + f);
-    return std::make_pair(c0, c1);
+    return {c0, c1};
+}
+
+template <typename P>
+mpz_class
+SHE<P>::decrypt(const SK &sk, const CT &ct) const
+{
+    // XXX: general case
+    assert(ct.size() == 2);
+    poly top = t_ * rq_.reduce(ct[0] + ct[1] * sk);
+    return decode(rt_.reduce(top.nearest_div(q_)));
 }
 
 template <typename P>
@@ -115,14 +137,36 @@ SHE<P>::encode(const mpz_class &m) const
     return ret;
 }
 
+template <typename P>
+mpz_class
+SHE<P>::decode(const poly &p) const
+{
+    // reduce the polynomial in R_t to a message in Z
+    mpz_class ret;
+    mpz_class x(1);
+    for (size_t i = 0; i < p.size(); i++, x <<= LogMsgBase)
+        ret += x * p[i];
+    return ret;
+}
+
+template <typename P>
+void
+SHE<P>::SanityCheck()
+{
+    mpz_class m0(123456789);
+    auto mz0 = encode(m0);
+    auto md0 = decode(mz0);
+    assert_s(m0 == md0, "encode/decode failed");
+}
+
 struct default_she_parameters {
     static const unsigned int LogQ       = 128;
     static const unsigned int LogT       = 15;
     static const unsigned int Sigma      = 16;
-    static const unsigned int D          = 4096;
+    static const unsigned int LogD       = 12;
     static const unsigned int LogMsgBase = 8;
 };
 
 typedef SHE<default_she_parameters> DefaultSHE;
 
-/* vim:set shiftwidth=4 ts=4 et: */
+/* vim:set shiftwidth=4 ts=4 sts=4 et: */

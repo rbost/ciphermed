@@ -78,6 +78,9 @@ public:
     // even, and range [-(q-1)/2, (q-1)/2] when q is odd.
     poly modshift(const mpz_class &q) const;
 
+    // coefficient-wise nearest_div
+    poly nearest_div(const mpz_class &q) const;
+
 private:
     // first coefficient is for power 0
     std::vector<mpz_class> coeffs_;
@@ -117,7 +120,7 @@ bool operator==(const poly &P, const poly & Q);
 inline bool
 operator!=(const poly &P, const poly &Q)
 {
-  return !operator==(P, Q);
+    return !operator==(P, Q);
 }
 
 std::ostream&
@@ -129,4 +132,4 @@ operator<<(std::ostream&, const poly & P);
 // also some values do not have to be mpz
 // Not clear what optimizations matter right now.
 
-/* vim:set shiftwidth=4 ts=4 et: */
+/* vim:set shiftwidth=4 ts=4 sts=4 et: */
