@@ -71,7 +71,7 @@ public:
     inline poly
     reduce(poly a) const
     {
-        return modpoly(a, deg_) % q_;
+        return modpoly(a, deg_).modshift(q_);
     }
 
     inline const mpz_class &
