@@ -130,7 +130,7 @@ karatsuba(const poly & P, const poly & Q)
 	return poly(move(dst));
 }
 
-// multiply poly P and Q mod q
+// multiply poly P and Q
 // some efficient way of doing it?
 poly
 operator*(const poly & P, const poly & Q)
@@ -147,6 +147,15 @@ operator*(const poly & P, const poly & Q)
     cerr << " txtbk mult takes " << num_mult <<" mults."<<endl;
 
     return poly(move(res));
+}
+
+poly
+operator*(const poly &p, const mpz_class &q)
+{
+    poly res = p;
+    for (size_t i = 0; i < res.size(); i++)
+        res[i] *= q;
+    return res;
 }
 
 poly

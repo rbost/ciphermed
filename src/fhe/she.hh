@@ -29,6 +29,7 @@ public:
         : r_(D),
           rq_(mpz_class(1) << LogQ, D),
           rt_(mpz_class(1) << LogT, D),
+          delta_(mpz_class(1) << (LogQ - LogT)),
           chi_(0 /* XXX: security parameter? */, Sigma, r_),
           g_(gmp_randinit_default)
     {}
@@ -38,7 +39,7 @@ public:
     inline PK PKKeyGen(const SK &sk);
 
     // basic interface
-    CT encrypt(const PK &pk, const mpz_class &m) const;
+    CT encrypt(const PK &pk, const mpz_class &m);
     mpz_class decrypt(const SK &sk, const CT &ct) const;
 
     // homomorphic interface
@@ -46,6 +47,9 @@ public:
     CT multiply(const PK &pk, const CT &ct0, const CT &ct1) const;
 
 private:
+
+    // sanity checks
+    static_assert(LogQ > LogT, "XX");
 
     // encode message as a element of R_t.  the coefficients of the message
     // polynomial are simply the base 2^LogMsgBase representation of m (ML
@@ -56,6 +60,7 @@ private:
     PolyRing r_;   // Z[x]/f(x)
     RLWEField rq_; // Z_q[x]/f(x)
     RLWEField rt_; // Z_t[x]/f(x) [for message]
+    mpz_class delta_; // floor(q/t)
 
     ErrorDist chi_;
     gmp_randclass g_;
@@ -80,11 +85,15 @@ SHE<P>::PKKeyGen(const SK &sk)
 
 template <typename P>
 typename SHE<P>::CT
-SHE<P>::encrypt(const PK &pk, const mpz_class &m) const
+SHE<P>::encrypt(const PK &pk, const mpz_class &m)
 {
     poly mz = encode(m);
-    assert_s(false, "unimpl");
-    return CT();
+    poly u = chi_.sample();
+    poly f = chi_.sample();
+    poly g = chi_.sample();
+    poly c0 = rq_.reduce(pk.first * u + g + delta_ * mz);
+    poly c1 = rq_.reduce(pk.second * u + f);
+    return std::make_pair(c0, c1);
 }
 
 template <typename P>

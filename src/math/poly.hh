@@ -84,6 +84,16 @@ poly operator+(const poly & P, const poly & Q);
 //P*Q
 poly operator*(const poly & P, const poly & Q);
 
+// P*q
+poly operator*(const poly &P, const mpz_class &q);
+
+// p*Q
+inline poly
+operator*(const mpz_class &p, const poly &Q)
+{
+    return operator*(Q, p);
+}
+
 // computes P mod x^n + 1
 poly modpoly(const poly & P, uint n);
 
