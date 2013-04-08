@@ -26,6 +26,18 @@ mpz_class_nearest_div(const mpz_class &p, const mpz_class &q)
     return ret;
 }
 
+// precondition: q is positive
+//
+// computes p mod q, handling negative values of p such that the return value r is
+// always positive (0 <= r < q)
+inline mpz_class
+mpz_class_mod(const mpz_class &p, const mpz_class &q)
+{
+    mpz_class r;
+    mpz_mod(r.get_mpz_t(), p.get_mpz_t(), q.get_mpz_t());
+    return r;
+}
+
 } // empty namespace
 
 /* vim:set shiftwidth=4 ts=4 sts=4 et: */

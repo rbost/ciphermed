@@ -61,7 +61,7 @@ modRq(const vec & v, uint n, mpz_class q) {
     vec res = vector<poly>(v.size());
 
     for (uint i = 0; i < v.size(); i++) {
-	res[i] = modpoly(v[i], n) % q;
+	res[i] = modpoly(v[i], n).modshift(q);
     }
 
     return res;

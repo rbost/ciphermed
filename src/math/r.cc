@@ -93,6 +93,23 @@ main(int ac, char **av)
     assert_s(mpz_class(38) == g(mpz_class(1)), "p(1) incorrect");
     assert_s(mpz_class(383) == g(mpz_class(4)), "p(4) incorrect");
 
+    // test modulo q w/ remainder shift into -q/2, q/2 (exact bounds depend
+    // on q even or odd)
+
+    // q even case, require (-q/2, q/2]. we test q = 4
+    poly h0({0, 1, 2, 3,
+             4, 5, 6, 7,
+             -1, -2, -3, -4});
+    poly hshift0 = h0.modshift(4);
+    assert_s(hshift0 == poly({-1, 0, 1, 2, -1, 0, 1, 2, 2, 1, 0, -1}), "modshift(4) failed");
+
+    // q odd case, require [-(q-1)/2, (q-1)/2]. we test q = 3
+    poly h1({0, 1, 2,
+             3, 4, 5,
+             -1, -2, -3});
+    poly hshift1 = h1.modshift(3);
+    assert_s(hshift1 == poly({-1, 0, 1, -1, 0, 1, 1, 0, -1}), "modshift(3) failed");
+
     //test vecs
 
     vec v = {a, b};

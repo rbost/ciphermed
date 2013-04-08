@@ -182,7 +182,7 @@ poly::modshift(const mpz_class &q) const
     vector<mpz_class> res = zerovec(size());
     for (uint i = 0; i < size(); i++)
         // XXX: make more efficient
-        res[i] = (coeffs_[i] % q) - shift;
+        res[i] = mpz_class_mod(coeffs_[i], q) - shift;
     return poly(move(res));
 }
 
@@ -200,7 +200,7 @@ operator%(const poly & P, const mpz_class & q)
 {
     vector<mpz_class> res = zerovec(P.size());
     for (uint i = 0; i < P.size(); i++)
-        res[i] = P[i] % q;
+        res[i] = mpz_class_mod(P[i], q);
     return poly(move(res));
 }
 
