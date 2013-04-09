@@ -43,6 +43,18 @@ main(int argc, char **argv)
         cout << "encrypt-decrypt passed" << endl;
     }
 
+    // test one addition
+    {
+        mpz_class m0(12345);
+        mpz_class m1(54321);
+        auto ct0 = sh.encrypt(pk, m0);
+        auto ct1 = sh.encrypt(pk, m1);
+        auto ct2 = sh.add(ct0, ct1);
+        auto p = sh.decrypt(sk, ct2);
+        assert_s(p == (m0 + m1), "add failed");
+        cout << "one-addition passed" << endl;
+    }
+
     // test one mulitplication
     {
         mpz_class m0(123);
@@ -55,16 +67,21 @@ main(int argc, char **argv)
         cout << "one-multiplication passed" << endl;
     }
 
-    // test one addition
+    // test one addition + one multiplication
     {
-        mpz_class m0(12345);
-        mpz_class m1(54321);
+        mpz_class m0(958253);
+        mpz_class m1(342);
+        mpz_class m2(9235392);
         auto ct0 = sh.encrypt(pk, m0);
         auto ct1 = sh.encrypt(pk, m1);
-        auto ct2 = sh.add(ct0, ct1);
-        auto p = sh.decrypt(sk, ct2);
-        assert_s(p == (m0 + m1), "add failed");
-        cout << "one-addition passed" << endl;
+        auto ct2 = sh.encrypt(pk, m2);
+
+        auto ct3 = sh.add(ct0, ct1);
+        auto ct4 = sh.multiply(ct2, ct3);
+
+        auto p = sh.decrypt(sk, ct4);
+        assert_s(p == ((m0 + m1) * m2), "add+multiply failed");
+        cout << "one-addition+one-mulitplication passed" << endl;
     }
 
     //DefaultSHE sh;
