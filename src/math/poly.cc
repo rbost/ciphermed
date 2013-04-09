@@ -174,15 +174,20 @@ poly::eval(const mpz_class &x) const
 poly
 poly::modshift(const mpz_class &q) const
 {
-    mpz_class shift;
+    assert(mpz_sgn(q.get_mpz_t()) == 1);
+    mpz_class upper;
     if (mpz_odd_p(q.get_mpz_t()))
-        shift = (q - 1) / 2;
+        upper = (q - 1) >> 1;
     else
-        shift = (q / 2) - 1;
+        upper = q >> 1;
     vector<mpz_class> res = zerovec(size());
-    for (uint i = 0; i < size(); i++)
+    for (uint i = 0; i < size(); i++) {
         // XXX: make more efficient
-        res[i] = mpz_class_mod(coeffs_[i], q) - shift;
+        mpz_class c = mpz_class_mod(coeffs_[i], q);
+        if (c > upper)
+            c -= q;
+        res[i] = c;
+    }
     return poly(move(res));
 }
 
@@ -214,7 +219,7 @@ operator-(const poly &P)
 }
 
 static void
-subtract_monomial(poly & res, const mpz_class & c, uint n, uint delta)
+subtract_monomial(poly &res, const mpz_class &c, uint delta)
 {
     res[delta] = res[delta] - c;
     res.unsafe().resize(res.unsafe().size() - 1);
@@ -228,8 +233,8 @@ modpoly(const poly & P, uint n)
     poly res = P;
     while (res.deg() >= n) {
         // the coeff for largest power
-        mpz_class &c = res[res.size()-1];
-        subtract_monomial(res, c, n, res.deg()-n);
+        mpz_class &c = res[res.size() - 1];
+        subtract_monomial(res, c, res.deg() - n);
     }
     return res;
 }

@@ -86,8 +86,10 @@ public:
         return eval(x);
     }
 
-    // P mod scalar q - note that we shift into the range (-q/2, q/2] when q is
+    // P mod q - note that we shift into the range (-q/2, q/2] when q is
     // even, and range [-(q-1)/2, (q-1)/2] when q is odd.
+    //
+    // precondition: q > 0
     poly modshift(const mpz_class &q) const;
 
     // coefficient-wise nearest_div
