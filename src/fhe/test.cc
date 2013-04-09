@@ -43,6 +43,18 @@ main(int argc, char **argv)
         cout << "encrypt-decrypt passed" << endl;
     }
 
+    // test one mulitplication
+    {
+        mpz_class m0(123);
+        mpz_class m1(5235);
+        auto ct0 = sh.encrypt(pk, m0);
+        auto ct1 = sh.encrypt(pk, m1);
+        auto ct2 = sh.multiply(ct0, ct1);
+        auto p = sh.decrypt(sk, ct2);
+        assert_s(p == (m0 * m1), "multiply failed");
+        cout << "one-multiplication passed" << endl;
+    }
+
     // test one addition
     {
         mpz_class m0(12345);
