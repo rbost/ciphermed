@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 #include <util/util.hh>
+#include <math/util.hh>
 
 using namespace std;
 
@@ -135,18 +136,8 @@ karatsuba(const poly & P, const poly & Q)
 poly
 operator*(const poly & P, const poly & Q)
 {
-    uint num_mult = 0;
-    vector<mpz_class> res = zerovec(P.deg() + Q.deg() + 1);
-
-    for (uint i = 0; i < P.size(); i++) {
-        for (uint j = 0; j < Q.size(); j++) {
-            num_mult += 1;
-            res[i+j] = res[i+j] + (P[i] * Q[j]);
-        }
-    }
-    cerr << " txtbk mult takes " << num_mult <<" mults."<<endl;
-
-    return poly(move(res));
+    cerr << " txtbk mult takes " << (P.size() * Q.size()) <<" mults."<<endl;
+    return naive_multiply(P, Q);
 }
 
 poly
@@ -161,14 +152,7 @@ operator*(const poly &p, const mpz_class &q)
 mpz_class
 poly::eval(const mpz_class &x) const
 {
-    mpz_class ret, xv;
-    if (coeffs_.empty())
-        return ret;
-    ret = coeffs_[0];
-    xv = x;
-    for (size_t i = 1; i < coeffs_.size(); i++, xv *= x)
-        ret += coeffs_[i] * xv;
-    return ret;
+    return naive_polyeval(*this, x);
 }
 
 poly
@@ -253,13 +237,30 @@ operator<<(ostream & res, const poly & P)
 }
 
 bool
-operator==(const poly & P, const poly & Q) {
-    if (P.deg() != Q.deg())
+operator==(const poly &P, const poly &Q)
+{
+    const size_t pd = P.deg();
+    const size_t qd = Q.deg();
+    if (pd != qd)
         return false;
-    for (uint i = 0; i < P.size(); i++)
+    for (size_t i = 0; i < pd; i++)
         if (P[i] != Q[i])
             return false;
     return true;
+}
+
+poly &
+poly::operator+=(const poly &q)
+{
+    *this = (*this + q);
+    return *this;
+}
+
+poly &
+poly::operator*=(const poly &q)
+{
+    *this = (*this * q);
+    return *this;
 }
 
 /* vim:set shiftwidth=4 ts=4 sts=4 et: */

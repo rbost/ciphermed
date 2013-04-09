@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <math/field.hh>
+#include <math/util.hh>
 #include <fhe/errordist.hh>
 #include <util/util.hh>
 
@@ -112,9 +113,7 @@ template <typename P>
 mpz_class
 SHE<P>::decrypt(const SK &sk, const CT &ct) const
 {
-    // XXX: general case
-    assert(ct.size() == 2);
-    poly top = t_ * rq_.reduce(ct[0] + ct[1] * sk);
+    poly top = t_ * rq_.reduce(naive_polyeval(ct, sk));
     return decode(rt_.reduce(top.nearest_div(q_)));
 }
 
@@ -127,6 +126,18 @@ SHE<P>::add(const CT &ct0, const CT &ct1) const
     for (size_t i = 0; i < ct1.size(); i++)
         ret[i] = rq_.reduce(ret[i] + ct1[i]);
     return ret;
+}
+
+template <typename P>
+typename SHE<P>::CT
+SHE<P>::multiply(const CT &ct0, const CT &ct1) const
+{
+    CT prod = naive_multiply(ct0, ct1);
+    for (size_t i = 0; i < prod.size(); i++) {
+        poly p = prod[i] * t_;
+        prod[i] = p.nearest_div(q_);
+    }
+    return prod;
 }
 
 template <typename P>
