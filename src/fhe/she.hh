@@ -46,8 +46,8 @@ public:
     mpz_class decrypt(const SK &sk, const CT &ct) const;
 
     // homomorphic interface
-    CT add(const PK &pk, const CT &ct0, const CT &ct1) const;
-    CT multiply(const PK &pk, const CT &ct0, const CT &ct1) const;
+    CT add(const CT &ct0, const CT &ct1) const;
+    CT multiply(const CT &ct0, const CT &ct1) const;
 
     void SanityCheck();
 
@@ -116,6 +116,17 @@ SHE<P>::decrypt(const SK &sk, const CT &ct) const
     assert(ct.size() == 2);
     poly top = t_ * rq_.reduce(ct[0] + ct[1] * sk);
     return decode(rt_.reduce(top.nearest_div(q_)));
+}
+
+template <typename P>
+typename SHE<P>::CT
+SHE<P>::add(const CT &ct0, const CT &ct1) const
+{
+    CT ret(ct0);
+    ret.resize(std::max(ct0.size(), ct1.size()));
+    for (size_t i = 0; i < ct1.size(); i++)
+        ret[i] = rq_.reduce(ret[i] + ct1[i]);
+    return ret;
 }
 
 template <typename P>
