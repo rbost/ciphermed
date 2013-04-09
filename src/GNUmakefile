@@ -12,7 +12,7 @@ TOP	 := $(shell echo $${PWD-`pwd`})
 CXX	 := g++
 CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fno-rtti -fwrapv -fPIC \
 	    -Wall -Werror -Wpointer-arith -Wendif-labels -Wformat=2  \
-	    -Wextra -Wmissing-noreturn -Wwrite-strings -Wno-unused-parameter \
+	    -Wextra -Wwrite-strings -Wno-unused-parameter \
 	    -Wmissing-declarations -Woverloaded-virtual  \
 	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x -I$(TOP)
 LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
