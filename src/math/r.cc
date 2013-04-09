@@ -137,49 +137,49 @@ main(int ac, char **av)
     uint max_degree = 1000;
 
     for(uint deg = 999; deg < max_degree; deg++){
-	vector<mpz_class> poly1_coeffs(deg+1);
-	vector<mpz_class> poly2_coeffs(deg+1);
+        vector<mpz_class> poly1_coeffs(deg+1);
+        vector<mpz_class> poly2_coeffs(deg+1);
 
-	for(uint i=0; i < deg+1; i++){
-		int coeff1, coeff2;
-		do{
-			coeff1 = rand();
-			coeff2 = rand();
-		}while(coeff1==0 || coeff2==0);
-		poly1_coeffs[i] = coeff1;
-		poly2_coeffs[i] = coeff2;
+        for(uint i=0; i < deg+1; i++){
+            int coeff1, coeff2;
+            do{
+                coeff1 = rand();
+                coeff2 = rand();
+            }while(coeff1==0 || coeff2==0);
+            poly1_coeffs[i] = coeff1;
+            poly2_coeffs[i] = coeff2;
 
-	}
+        }
 
-	poly ma = make_poly(poly1_coeffs);
-	poly mb = make_poly(poly2_coeffs);
+        poly ma = make_poly(poly1_coeffs);
+        poly mb = make_poly(poly2_coeffs);
 
-	struct timeval begin_k_time, end_k_time, begin_norm_time, end_norm_time;
+        struct timeval begin_k_time, end_k_time, begin_norm_time, end_norm_time;
 
-	gettimeofday(&begin_k_time, 0);
-	poly mc = karatsuba(ma, mb);
-	gettimeofday(&end_k_time, 0);
-	float k_time = end_k_time.tv_sec - begin_k_time.tv_sec + \
-        (end_k_time.tv_usec*1.0)/(1000000.0) - (begin_k_time.tv_usec*1.0)/(1000000.0);
+        gettimeofday(&begin_k_time, 0);
+        poly mc = karatsuba(ma, mb);
+        gettimeofday(&end_k_time, 0);
+        float k_time = end_k_time.tv_sec - begin_k_time.tv_sec + \
+                       (end_k_time.tv_usec*1.0)/(1000000.0) - (begin_k_time.tv_usec*1.0)/(1000000.0);
 
-	gettimeofday(&begin_norm_time, 0);
-	poly mcorrect = ma*mb;
-	gettimeofday(&end_norm_time, 0);
-	float norm_time = end_norm_time.tv_sec - begin_norm_time.tv_sec + \
-        (end_norm_time.tv_usec*1.0)/(1000000.0) - (begin_norm_time.tv_usec*1.0)/(1000000.0);
+        gettimeofday(&begin_norm_time, 0);
+        poly mcorrect = ma*mb;
+        gettimeofday(&end_norm_time, 0);
+        float norm_time = end_norm_time.tv_sec - begin_norm_time.tv_sec + \
+                          (end_norm_time.tv_usec*1.0)/(1000000.0) - (begin_norm_time.tv_usec*1.0)/(1000000.0);
 
-	if( !(mc == mcorrect) ){
-		cerr << "karatsuba is wrong!" << endl;
-//		cerr << "polyA: " << ma << endl;
-//		cerr << "polyB: " << mb << endl;
-//		cerr << "calculated poly = " << mc << endl;
-//		cerr << "correct poly = " << mcorrect << endl;
-		cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
+        if( !(mc == mcorrect) ){
+            cerr << "karatsuba is wrong!" << endl;
+            //        cerr << "polyA: " << ma << endl;
+            //        cerr << "polyB: " << mb << endl;
+            //        cerr << "calculated poly = " << mc << endl;
+            //        cerr << "correct poly = " << mcorrect << endl;
+            cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
 
-	}else{
-		cerr << "karatsuba is correct for degree " << deg << endl;
-		cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
-	}
+        }else{
+            cerr << "karatsuba is correct for degree " << deg << endl;
+            cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
+        }
 
 
     }
