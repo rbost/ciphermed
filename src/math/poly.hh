@@ -47,7 +47,7 @@ public:
     deg() const
     {
         ssize_t i = coeffs_.size() - 1;
-        while (i >= 0 && !coeffs_[i])
+        while (i >= 0 && coeffs_[i] != 0)
             i--;
         return (i == -1) ? 0 : i;
     }
