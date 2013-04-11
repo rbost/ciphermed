@@ -96,6 +96,9 @@ main(int ac, char **av)
     // test modulo q w/ remainder shift into -q/2, q/2 (exact bounds depend
     // on q even or odd)
 
+    poly xx({-6});
+    assert_s(xx.modshift(7) == poly({1}), "modshift(7) failed");
+
     // q even case, require (-q/2, q/2]. we test q = 4, so x \in [-1, 0, 1, 2]
     poly h0({0, 1, 2, 3,
              4, 5, 6, 7,
