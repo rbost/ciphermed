@@ -45,10 +45,10 @@ Realloc(mpz_class &m, size_t nlimbs)
 poly
 karatsuba2(const poly &p, const poly &q)
 {
-    const size_t n = max(p.size(), q.size());
+    const size_t n = max(p.deg() + 1, q.deg() + 1);
     if (unlikely(!n))
         return poly();
-    vector<mpz_class> di(2 * n - 1);
+    vector<mpz_class> di(n);
     for (size_t i = 0; i < n; i++) {
         Realloc(di[i], 4);
         di[i] = p.element(i) * q.element(i);
@@ -64,13 +64,14 @@ karatsuba2(const poly &p, const poly &q)
     for (auto &m : coeffs)
         Realloc(m, 4);
 
-    coeffs[0] = di[0];
     for (size_t i = 1; i < 2 * n - 1; i++) {
         const bool odd = i % 2;
         const size_t upper = odd ? (i/2 + 1) : (i/2);
         mpz_class &ci = coeffs[i];
         for (size_t s = 0; s < upper; s++) {
             const size_t t = i - s;
+            if (t >= n)
+                continue;
 
             //ci += (p.element(s) + p.element(t)) * (q.element(s) + q.element(t));
             //ci -= (di[s] + di[t]);
@@ -87,6 +88,13 @@ karatsuba2(const poly &p, const poly &q)
         if (!odd)
             ci += di[i / 2];
     }
+
+    //coeffs[0].swap(di[0]);
+    //coeffs[2 * n - 2].swap(di[n - 1]);
+
+    // XXX: could avoid un-necessary copy here if mpz_class had swap()
+    // we can implement it by using rob utilities
+    coeffs[0] = di[0];
     coeffs[2 * n - 2] = di[n - 1];
     return poly(move(coeffs));
 }

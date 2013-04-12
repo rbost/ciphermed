@@ -41,6 +41,7 @@ public:
     inline const mpz_class &
     operator[](size_t i) const
     {
+        assert(i < coeffs_.size());
         return coeffs_[i];
     }
 
