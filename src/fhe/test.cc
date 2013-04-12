@@ -7,9 +7,9 @@ using namespace std;
 // not cryptographically secure parameters
 struct test_she_parameters {
     static const unsigned int LogQ       = 128;
-    static const unsigned int LogT       = 28;
+    static const unsigned int LogT       = 15;
     static const unsigned int Sigma      = 16;
-    static const unsigned int LogD       = 9;
+    static const unsigned int LogD       = 12;
     static const unsigned int LogMsgBase = 8;
 };
 
@@ -47,7 +47,7 @@ main(int argc, char **argv)
     //cerr << "sk: " << sk << endl;
     //cerr << "pk: " << pk << endl;
 
-    // test encrypt-decrypt
+    /*   // test encrypt-decrypt
     {
         mpz_class m(12345);
         auto ct = sh.encrypt(pk, m);
@@ -98,12 +98,12 @@ main(int argc, char **argv)
         assert_s(p1 == (m0 * m1 * m2), "multiply failed");
         cout << "two-multiplications passed" << endl;
     }
-
+    */
     // test one addition + one multiplication
     {
-        mpz_class m0(958253);
-        mpz_class m1(342);
-        mpz_class m2(9235392);
+        mpz_class m0(93);
+        mpz_class m1(42);
+        mpz_class m2(923);
         auto ct0 = sh.encrypt(pk, m0);
         auto ct1 = sh.encrypt(pk, m1);
         auto ct2 = sh.encrypt(pk, m2);

@@ -35,6 +35,8 @@ public:
           rt_(t_, d_),
           delta_(mpz_class(1) << (LogQ - LogT)),
           chi_(0 /* XXX: security parameter? */, Sigma, r_),
+	  //where is the security parameter in chi?
+	  //also it should get q or a bound as a paramters?
           g_(gmp_randinit_default)
     {}
 
@@ -65,7 +67,6 @@ private:
     // seems wasteful)
     poly encode(const mpz_class &m) const;
     mpz_class decode(const poly &p) const;
-
     mpz_class q_;
     mpz_class t_;
     unsigned long d_;
