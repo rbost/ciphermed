@@ -34,9 +34,47 @@ operator+(const poly &P, const poly &Q)
     return poly(move(res));
 }
 
+static inline ALWAYS_INLINE const mpz_class &
+checked_element(const vector<mpz_class> &v, size_t i)
+{
+    static const mpz_class s_zero;
+    if (i >= v.size())
+        return s_zero;
+    return v[i];
+}
+
+// based off the general 1-pass KA:
+// http://weimerskirch.org/papers/Weimerskirch_Karatsuba.pdf
+poly
+karatsuba2(const poly &p, const poly &q)
+{
+    const size_t n = max(p.size(), q.size());
+    if (unlikely(!n))
+        return poly();
+    vector<mpz_class> di(n);
+    for (size_t i = 0; i < n; i++)
+        di[i] = p.element(i) * q.element(i);
+    vector<mpz_class> coeffs(2 * n - 1);
+    coeffs[0] = di[0];
+    for (size_t i = 1; i < 2 * n - 1; i++) {
+        const bool odd = i % 2;
+        const size_t upper = odd ? (i/2 + 1) : (i/2);
+        mpz_class &ci = coeffs[i];
+        for (size_t s = 0; s < upper; s++) {
+            const size_t t = i - s;
+            ci += (p.element(s) + p.element(t)) * (q.element(s) + q.element(t));
+            ci -= (checked_element(di, s) + checked_element(di, t));
+        }
+        if (!odd)
+            ci += di[i / 2];
+    }
+    coeffs[2 * n - 2] = di[n - 1];
+    return poly(move(coeffs));
+}
+
 //attempt at karatsuba poly multiplication
 poly
-karatsuba(const poly & P, const poly & Q)
+karatsuba(const poly &P, const poly &Q)
 {
 	uint num_mult = 0;
 
@@ -173,7 +211,7 @@ poly::modshift(const mpz_class &q) const
             c -= q;
         res[i] = c;
     }
-    
+
     return poly(move(res));
 }
 

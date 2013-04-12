@@ -27,7 +27,8 @@ public:
     poly &operator=(const poly &p) = default;
 
     // accesses the i-th coefficient, where the 0-th coefficient is the
-    // scalar coefficient
+    // scalar coefficient. safe regardless of i, but larger i's will cause
+    // the internal representation to grow
     inline mpz_class &
     operator[](size_t i)
     {
@@ -36,10 +37,20 @@ public:
         return coeffs_[i];
     }
 
-    // unchecked
+    // precondition: i < size()
     inline const mpz_class &
     operator[](size_t i) const
     {
+        return coeffs_[i];
+    }
+
+    // safe even if i >= size()
+    inline const mpz_class &
+    element(size_t i) const
+    {
+        static const mpz_class s_zero;
+        if (i >= coeffs_.size())
+            return s_zero;
         return coeffs_[i];
     }
 
@@ -47,7 +58,7 @@ public:
     deg() const
     {
         ssize_t i = coeffs_.size() - 1;
-        while (i >= 0 && coeffs_[i] != 0)
+        while (i >= 0 && coeffs_[i] == 0)
             i--;
         return (i == -1) ? 0 : i;
     }
@@ -118,6 +129,8 @@ private:
 };
 
 poly karatsuba(const poly & P, const poly & Q);
+
+poly karatsuba2(const poly &p, const poly &q);
 
 //P+Q
 poly operator+(const poly & P, const poly & Q);

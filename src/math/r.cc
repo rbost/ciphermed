@@ -61,32 +61,34 @@ main(int ac, char **av)
 
     mpz_class q = 9;
 
-    cerr << "a is " << a << "\n b is " << b << "\n q is " << q << "\n";
+    cerr << "a is " << a << "\n b is " << b << "\n q is " << q << endl;
 
     poly c = (a+b) % q;
 
-    cerr << "sum is " << c << "\n";
+    cerr << "sum is " << c << endl;
     assert_s(c == make_poly({3, 2}), "incorrect sum");
 
-    cerr << "after sum a is " << a << "\n";
+    cerr << "after sum a is " << a << endl;
 
     poly d = a * b % q;
-    cerr << "mult is (mod q) " << d << "\n";
+    cerr << "mult is (mod q) " << d << endl;
+    cerr << "deg(d): " << d.deg() << endl;
+    assert_s(d.deg() == 2, "incorrect deg");
     assert_s(d == make_poly({2, 1, 6}), "incorrect multiply");
 
-    cerr << "after d, a is " << a << "\n";
+    cerr << "after d, a is " << a << endl;
 
     poly e = modpoly(d, 2);
-    cerr << "mult is (mod q) mod n^2+1" << e << "\n";
+    cerr << "mult is (mod q) mod n^2+1" << e << endl;
     assert_s(e == make_poly({-4, 1}), "incorrect modpoly");
 
-    cerr << "after e, a is " << a << "\n";
+    cerr << "after e, a is " << a << endl;
 
     poly f = modpoly(d, 1);
-    cerr << "d=" << d << " mod x+1 is " << f << "\n";
+    cerr << "d=" << d << " mod x+1 is " << f << endl;
     assert_s(f == make_poly({7}), "incorrect modpoly");
 
-    cerr << "after f, a is " << a << "\n";
+    cerr << "after f, a is " << a << endl;
 
     poly g = make_poly({3, 15, 20}); // 20x^2 + 15x + 3
     assert_s(mpz_class(3) == g(mpz_class(0)), "p(0) incorrect");
@@ -96,7 +98,7 @@ main(int ac, char **av)
     // test modulo q w/ remainder shift into -q/2, q/2 (exact bounds depend
     // on q even or odd)
 
-    poly xx({-6});
+    poly xx(vector<mpz_class>({-6}));
     assert_s(xx.modshift(7) == poly({1}), "modshift(7) failed");
 
     // q even case, require (-q/2, q/2]. we test q = 4, so x \in [-1, 0, 1, 2]
@@ -119,20 +121,38 @@ main(int ac, char **av)
     vec v = {a, b};
     vec w = {c, d};
 
-    cerr << "poly a is " << a << " and b " << b << "\n";
-    cerr << "vec v is " << v << "\n";
-    cerr << "vec w is " << w << "\n";
-    cerr << "poly c is " << c << "\n";
+    cerr << "poly a is " << a << " and b " << b << endl;
+    cerr << "vec v is " << v << endl;
+    cerr << "vec w is " << w << endl;
+    cerr << "poly c is " << c << endl;
 
-    cerr << "v + w is " << (v+w) << "\n";
-    cerr << "v * c is " << (v*c) << "\n";
-    cerr << "w * c is " << (w*c) << "\n";
+    cerr << "v + w is " << (v+w) << endl;
+    cerr << "v * c is " << (v*c) << endl;
+    cerr << "w * c is " << (w*c) << endl;
 
 
-    cerr << "v dot w is " << dot(v, w) << "\n";
-    cerr << "v dot w mod x^4+1" << modpoly(dot(v, w), 4) << " and mod q" << modpoly(dot(v, w), 4) % q << "\n";
+    cerr << "v dot w is " << dot(v, w) << endl;
+    cerr << "v dot w mod x^4+1" << modpoly(dot(v, w), 4) << " and mod q" << modpoly(dot(v, w), 4) % q << endl;
 
     cerr << "OK\n";
+
+    {
+        // karatsuba simple test
+        const poly a({1, 2, 3});
+        const poly b({4, 5, 6});
+        const poly c = karatsuba2(a, b);
+        assert_s(c == poly({4, 13, 28, 27, 18}), "ka failed");
+
+        const poly a1({1, 2, 3, 4});
+        const poly b1({3, 4, 5});
+        const poly c1 = karatsuba2(a1, b1);
+        assert_s(c1 == poly({3, 10, 22, 34, 31, 20}), "ka failed");
+
+        const poly a2({1, 2, 3, 4, 0, 1, 2, 3, 5, 68, 23});
+        const poly b2({3, 4, 5, 23, 342, 0, 0, 1, 235});
+        const poly c2 = karatsuba2(a2, b2);
+        assert_s(c2 == poly({3, 10, 22, 57, 419, 776, 1128, 1391, 297, 1100, 1828, 2513, 3390, 24022, 8339, 710, 1243, 16003, 5405}), "ka, failed");
+    }
 
     //Karatsuba test
     srand(time(NULL));
