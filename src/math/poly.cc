@@ -196,8 +196,9 @@ karatsuba(const poly &P, const poly &Q)
 poly
 operator*(const poly & P, const poly & Q)
 {
-    cerr << " txtbk mult takes " << (P.size() * Q.size()) <<" mults."<<endl;
-    return naive_multiply(P, Q);
+    //cerr << " txtbk mult takes " << (P.size() * Q.size()) <<" mults."<<endl;
+    //return naive_multiply(P, Q);
+    return karatsuba2(P, Q);
 }
 
 poly
