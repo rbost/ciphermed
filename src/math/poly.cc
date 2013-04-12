@@ -155,6 +155,7 @@ poly::eval(const mpz_class &x) const
     return naive_polyeval(*this, x);
 }
 
+
 poly
 poly::modshift(const mpz_class &q) const
 {
@@ -172,6 +173,7 @@ poly::modshift(const mpz_class &q) const
             c -= q;
         res[i] = c;
     }
+    
     return poly(move(res));
 }
 

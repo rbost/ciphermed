@@ -187,7 +187,7 @@ struct default_she_parameters {
     static const unsigned int LogT       = 15;
     static const unsigned int Sigma      = 16;
     static const unsigned int LogD       = 12;
-    static const unsigned int LogMsgBase = 8;
+    static const unsigned int LogMsgBase = 2;
 };
 
 typedef SHE<default_she_parameters> DefaultSHE;

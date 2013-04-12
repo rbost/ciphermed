@@ -17,7 +17,7 @@ ErrorDist::sample()
     x.resize(r_.monomial_degree());
     for (size_t i = 0; i < r_.monomial_degree(); i++)
         x[i] = mpz_class(gauss_(gen_));
-
+    assert_s(x == r_.reduce(x), "it needs reduction");
     return x;
 }
 
