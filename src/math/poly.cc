@@ -34,15 +34,6 @@ operator+(const poly &P, const poly &Q)
     return poly(move(res));
 }
 
-static inline ALWAYS_INLINE const mpz_class &
-checked_element(const vector<mpz_class> &v, size_t i)
-{
-    static const mpz_class s_zero;
-    if (i >= v.size())
-        return s_zero;
-    return v[i];
-}
-
 static inline ALWAYS_INLINE void
 Realloc(mpz_class &m, size_t nlimbs)
 {
@@ -57,7 +48,7 @@ karatsuba2(const poly &p, const poly &q)
     const size_t n = max(p.size(), q.size());
     if (unlikely(!n))
         return poly();
-    vector<mpz_class> di(n);
+    vector<mpz_class> di(2 * n - 1);
     for (size_t i = 0; i < n; i++) {
         Realloc(di[i], 4);
         di[i] = p.element(i) * q.element(i);
@@ -82,12 +73,12 @@ karatsuba2(const poly &p, const poly &q)
             const size_t t = i - s;
 
             //ci += (p.element(s) + p.element(t)) * (q.element(s) + q.element(t));
-            //ci -= (checked_element(di, s) + checked_element(di, t));
+            //ci -= (di[s] + di[t]);
 
             // use the scratch space
             tmp1 = p.element(s) + p.element(t);
             tmp2 = q.element(s) + q.element(t);
-            tmp3 = checked_element(di, s) + checked_element(di, t);
+            tmp3 = di[s] + di[t];
             tmp4 = tmp1 * tmp2;
 
             ci += tmp4;
