@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <assert.h>
 #include <iostream>
+#include <string>
 
 #include <util/errstream.hh>
 #include <util/compiler.hh>
@@ -40,6 +41,24 @@ class Timer {
     uint64_t start;
 };
 
+class ScopedTimer {
+public:
+    ScopedTimer(const std::string &m) : m_(m) {}
+
+    ScopedTimer(const ScopedTimer&) = delete;
+    ScopedTimer(ScopedTimer &&) = delete;
+    ScopedTimer &operator=(const ScopedTimer &) = delete;
+
+    ~ScopedTimer()
+    {
+        const double e = t_.lap_ms();
+        std::cerr << "region " << m_ << " took " << e << " ms" << std::endl;
+    }
+
+private:
+    std::string m_;
+    Timer t_;
+};
 
 inline void
 assert_s(bool value, const std::string &msg) throw (FHEError)

@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <fhe/she.hh>
+#include <fhe/timedfhe.hh>
 
 using namespace std;
 
@@ -39,8 +40,8 @@ main(int argc, char **argv)
     //ErrorDist chi(0, 16, PolyRing(1 << 9));
     //cerr << "rand: " << chi.sample() << endl;
 
-    TestSHE sh;
-    sh.SanityCheck();
+    TimedFHE<TestSHE> sh;
+    sh.underlying().SanityCheck();
     auto sk = sh.SKKeyGen();
     auto pk = sh.PKKeyGen(sk);
 
@@ -99,7 +100,7 @@ main(int argc, char **argv)
         assert_s(p1 == (m0 * m1 * m2), "multiply failed");
         cout << "two-multiplications passed" << endl;
     }
-    
+
     // test one addition + one multiplication
     {
         mpz_class m0(93);
