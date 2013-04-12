@@ -2,14 +2,14 @@
 
 DEBUG ?= 0
 ifeq ($(strip $(DEBUG)),1)
-	CXXOPT := 
+	CXXOPT :=
 else
 	CXXOPT := -O3
 endif
 
 OBJDIR	 := obj
 TOP	 := $(shell echo $${PWD-`pwd`})
-CXX	 := g++
+CXX	 ?= g++
 CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fno-rtti -fwrapv -fPIC \
 	    -Wall -Werror -Wpointer-arith -Wendif-labels -Wformat=2  \
 	    -Wextra -Wwrite-strings -Wno-unused-parameter \
