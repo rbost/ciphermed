@@ -18,7 +18,7 @@ ErrorDist::sample()
     for (size_t i = 0; i < r_.monomial_degree(); i++)
         x[i] = mpz_class(gauss_(gen_));
 
-    return r_.reduce(x);
+    return x;
 }
 
 /* vim:set shiftwidth=4 ts=4 et: */
