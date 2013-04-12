@@ -94,7 +94,6 @@ public:
         for (unsigned int i = 0; i < deg_; i++)
             p[i] = g.get_z_range(q_) - (q_>>1) + 1;
 
-	assert_s(p == reduce(p), "it needs reduction");
         return p;
     }
 
