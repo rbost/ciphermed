@@ -13,6 +13,46 @@ make_poly(const vector<mpz_class> &v)
     return poly(v);
 }
 
+// returns time in millis to do multiplication
+// also checks correctness
+template <typename MultAlgorithm>
+static double
+TestMultiplication(const poly &a, const poly &b, const poly &expected,
+                   MultAlgorithm algo = MultAlgorithm())
+{
+    Timer t;
+    const poly ans = algo(a, b);
+    const double d = t.lap_ms();
+    assert_s(ans == expected, "algo failed");
+    return d;
+}
+
+// various algo functors:
+// XXX: should replace w/ C++11 lambdas
+namespace algo {
+    struct naive {
+        inline poly
+        operator()(const poly &a, const poly &b) const
+        {
+            return a * b;
+        }
+    };
+    struct karatsuba {
+        inline poly
+        operator()(const poly &a, const poly &b) const
+        {
+            return ::karatsuba(a, b);
+        }
+    };
+    struct karatsuba2 {
+        inline poly
+        operator()(const poly &a, const poly &b) const
+        {
+            return ::karatsuba2(a, b);
+        }
+    };
+}
+
 int
 main(int ac, char **av)
 {
@@ -158,53 +198,32 @@ main(int ac, char **av)
     srand(time(NULL));
 
     uint max_degree = 1000;
-
-    for(uint deg = 999; deg < max_degree; deg++){
+    for (uint deg = 999; deg < max_degree; deg++){
         vector<mpz_class> poly1_coeffs(deg+1);
         vector<mpz_class> poly2_coeffs(deg+1);
 
-        for(uint i=0; i < deg+1; i++){
+        for (uint i=0; i < deg+1; i++){
             int coeff1, coeff2;
-            do{
+            do {
                 coeff1 = rand();
                 coeff2 = rand();
-            }while(coeff1==0 || coeff2==0);
+            } while (coeff1==0 || coeff2==0);
             poly1_coeffs[i] = coeff1;
             poly2_coeffs[i] = coeff2;
-
         }
 
-        poly ma = make_poly(poly1_coeffs);
-        poly mb = make_poly(poly2_coeffs);
+        const poly ma = make_poly(poly1_coeffs);
+        const poly mb = make_poly(poly2_coeffs);
+        const poly correct = ma * mb;
 
-        struct timeval begin_k_time, end_k_time, begin_norm_time, end_norm_time;
+        const double naive = TestMultiplication(ma, mb, correct, algo::naive());
+        const double karatsuba = TestMultiplication(ma, mb, correct, algo::karatsuba());
+        const double karatsuba2 = TestMultiplication(ma, mb, correct, algo::karatsuba2());
 
-        gettimeofday(&begin_k_time, 0);
-        poly mc = karatsuba(ma, mb);
-        gettimeofday(&end_k_time, 0);
-        float k_time = end_k_time.tv_sec - begin_k_time.tv_sec + \
-                       (end_k_time.tv_usec*1.0)/(1000000.0) - (begin_k_time.tv_usec*1.0)/(1000000.0);
-
-        gettimeofday(&begin_norm_time, 0);
-        poly mcorrect = ma*mb;
-        gettimeofday(&end_norm_time, 0);
-        float norm_time = end_norm_time.tv_sec - begin_norm_time.tv_sec + \
-                          (end_norm_time.tv_usec*1.0)/(1000000.0) - (begin_norm_time.tv_usec*1.0)/(1000000.0);
-
-        if( !(mc == mcorrect) ){
-            cerr << "karatsuba is wrong!" << endl;
-            //        cerr << "polyA: " << ma << endl;
-            //        cerr << "polyB: " << mb << endl;
-            //        cerr << "calculated poly = " << mc << endl;
-            //        cerr << "correct poly = " << mcorrect << endl;
-            cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
-
-        }else{
-            cerr << "karatsuba is correct for degree " << deg << endl;
-            cerr <<" karatsuba time: " << k_time <<" normal time: " << norm_time << endl;
-        }
-
-
+        cerr << "time breakdown (milliseconds):"  << endl;
+        cerr << "  naive     : " << naive << endl;
+        cerr << "  karatsuba : " << karatsuba << endl;
+        cerr << "  karatsuba2: " << karatsuba2 << endl;
     }
 }
 

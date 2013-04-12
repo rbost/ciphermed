@@ -8,10 +8,11 @@
 #include <util/compiler.hh>
 #include <sys/time.h>
 
-
 class Timer {
  private:
-    Timer(const Timer &t);  /* no reason to copy timer objects */
+    Timer(const Timer&) = delete;  /* no reason to copy timer objects */
+    Timer(Timer &&) = delete;
+    Timer &operator=(const Timer &) = delete;
 
  public:
     Timer() { lap(); }

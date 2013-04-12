@@ -43,6 +43,12 @@ checked_element(const vector<mpz_class> &v, size_t i)
     return v[i];
 }
 
+static inline ALWAYS_INLINE void
+Realloc(mpz_class &m, size_t nlimbs)
+{
+    _mpz_realloc(m.get_mpz_t(), nlimbs);
+}
+
 // based off the general 1-pass KA:
 // http://weimerskirch.org/papers/Weimerskirch_Karatsuba.pdf
 poly
@@ -52,9 +58,21 @@ karatsuba2(const poly &p, const poly &q)
     if (unlikely(!n))
         return poly();
     vector<mpz_class> di(n);
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++) {
+        Realloc(di[i], 4);
         di[i] = p.element(i) * q.element(i);
+    }
     vector<mpz_class> coeffs(2 * n - 1);
+
+    // reserve space to avoid allocation overheads
+    mpz_class tmp1, tmp2, tmp3, tmp4;
+    Realloc(tmp1, 3);
+    Realloc(tmp2, 3);
+    Realloc(tmp3, 3);
+    Realloc(tmp4, 4);
+    for (auto &m : coeffs)
+        Realloc(m, 4);
+
     coeffs[0] = di[0];
     for (size_t i = 1; i < 2 * n - 1; i++) {
         const bool odd = i % 2;
@@ -62,8 +80,18 @@ karatsuba2(const poly &p, const poly &q)
         mpz_class &ci = coeffs[i];
         for (size_t s = 0; s < upper; s++) {
             const size_t t = i - s;
-            ci += (p.element(s) + p.element(t)) * (q.element(s) + q.element(t));
-            ci -= (checked_element(di, s) + checked_element(di, t));
+
+            //ci += (p.element(s) + p.element(t)) * (q.element(s) + q.element(t));
+            //ci -= (checked_element(di, s) + checked_element(di, t));
+
+            // use the scratch space
+            tmp1 = p.element(s) + p.element(t);
+            tmp2 = q.element(s) + q.element(t);
+            tmp3 = checked_element(di, s) + checked_element(di, t);
+            tmp4 = tmp1 * tmp2;
+
+            ci += tmp4;
+            ci -= tmp3;
         }
         if (!odd)
             ci += di[i / 2];
