@@ -89,13 +89,8 @@ karatsuba2(const poly &p, const poly &q)
             ci += di[i / 2];
     }
 
-    //coeffs[0].swap(di[0]);
-    //coeffs[2 * n - 2].swap(di[n - 1]);
-
-    // XXX: could avoid un-necessary copy here if mpz_class had swap()
-    // we can implement it by using rob utilities
-    coeffs[0] = di[0];
-    coeffs[2 * n - 2] = di[n - 1];
+    swap(coeffs[0], di[0]);
+    swap(coeffs[2 * n - 2], di[n - 1]);
     return poly(move(coeffs));
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <gmpxx.h>
 
 namespace {
@@ -39,5 +40,15 @@ mpz_class_mod(const mpz_class &p, const mpz_class &q)
 }
 
 } // empty namespace
+
+// specialize std::swap()
+namespace std {
+    template <>
+    inline void
+    swap(mpz_class &a, mpz_class &b)
+    {
+        std::swap(*a.get_mpz_t(), *b.get_mpz_t());
+    }
+}
 
 /* vim:set shiftwidth=4 ts=4 sts=4 et: */

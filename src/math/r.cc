@@ -56,6 +56,15 @@ namespace algo {
 int
 main(int ac, char **av)
 {
+    // test swap
+    {
+        mpz_class x0(12345);
+        mpz_class x1(54321);
+        swap(x0, x1);
+        assert_s(x0 == 54321, "swap failed");
+        assert_s(x1 == 12345, "swap failed");
+    }
+
     // test the nearest_div(p, q), for odd q
     {
         assert_s(mpz_class_nearest_div(3, 3) == 1, "nearest(3/3)");
