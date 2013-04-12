@@ -12,12 +12,12 @@ ErrorDist::ErrorDist(uint lambda, uint sigma, const PolyRing &r)
 poly
 ErrorDist::sample()
 {
-    // XXX(stephentu): Not correct discrete gaussian, but OK for now
-    // XXX(stephentu): Super slow for now
+    // TODO: can optimize?
     poly x;
-    x.resize(r_.monomial_degree() + 1);
-    for (size_t i = 0; i < r_.monomial_degree() + 1; i++)
+    x.resize(r_.monomial_degree());
+    for (size_t i = 0; i < r_.monomial_degree(); i++)
         x[i] = mpz_class(gauss_(gen_));
+
     return r_.reduce(x);
 }
 
