@@ -154,9 +154,11 @@ SHE<P>::encode(const mpz_class &m) const
     unsigned int i = 0;
     while (z != 0) {
         const unsigned long rem = mpz_fdiv_ui(z.get_mpz_t(), base);
+        assert(rem <= (t_/2));
         ret[i++] = sgn * rem;
         z = z >> LogMsgBase;
     }
+    assert(ret.deg() <= d_);
     return ret;
 }
 
