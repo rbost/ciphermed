@@ -90,10 +90,10 @@ public:
     poly
     sample(gmp_randclass &g) const
     {
-        poly p;
+        mpz_class shift = -(q_>>1) + 1;
+        poly p(deg_);
         for (unsigned int i = 0; i < deg_; i++)
-            p[i] = g.get_z_range(q_) - (q_>>1) + 1;
-
+            p[i] = g.get_z_range(q_) + shift;
         return p;
     }
 
