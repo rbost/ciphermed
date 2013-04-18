@@ -102,7 +102,7 @@ static void TestSuite()
         assert_s(sh.decrypt(sk, ct1) == m1, "dec failed");
         assert_s(sh.decrypt(sk, ct2) == m2, "dec failed");
 
-        Auto ct3 = sh.add(pk, ct0, ct1);
+        auto ct3 = sh.add(pk, ct0, ct1);
         {
             auto p = sh.decrypt(sk, ct3);
             assert_s(p == ((m0 + m1)), "add failed");
