@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <fhe/she.hh>
+#include <fhe/she_relin.hh>
 #include <fhe/timedfhe.hh>
 
 using namespace std;
@@ -15,6 +16,7 @@ struct test_she_parameters {
 };
 
 typedef SHE<test_she_parameters> TestSHE;
+typedef DefaultSHERelin TestSHERelin;
 
 template <typename A, typename B>
 static ostream &
@@ -24,23 +26,10 @@ operator<<(ostream &o, const pair<A, B> &p)
     return o;
 }
 
-int
-main(int argc, char **argv)
+template <typename Impl>
+static void TestSuite()
 {
-    //poly s({1, 1, 1, 1, 0});
-    //poly a({1, 0, 1, 0, 0});
-    //auto q = 16;
-    //poly sa = s * a;
-    //cerr << "s * a: " << sa << endl;
-    //PolyRing R(4); // Z[x]/(x^4 + 1)
-    //poly sa_r = R.reduce(sa);
-    //cerr << "s * a mod (x^4 + 1): " << sa_r << endl;
-    //poly sa_rq = sa_r.modshift(q);
-    //cerr << "s * a mod (x^4 + 1) mod 16: " << sa_rq << endl;
-    //ErrorDist chi(0, 16, PolyRing(1 << 9));
-    //cerr << "rand: " << chi.sample() << endl;
-
-    TimedFHE<TestSHE> sh;
+    TimedFHE<Impl> sh;
     sh.underlying().SanityCheck();
     auto sk = sh.SKKeyGen();
     auto pk = sh.PKKeyGen(sk);
@@ -64,7 +53,7 @@ main(int argc, char **argv)
         mpz_class m1(54321);
         auto ct0 = sh.encrypt(pk, m0);
         auto ct1 = sh.encrypt(pk, m1);
-        auto ct2 = sh.add(ct0, ct1);
+        auto ct2 = sh.add(pk, ct0, ct1);
         auto p = sh.decrypt(sk, ct2);
         assert_s(p == (m0 + m1), "add failed");
         cout << "one-addition passed" << endl;
@@ -76,7 +65,7 @@ main(int argc, char **argv)
         mpz_class m1(5235);
         auto ct0 = sh.encrypt(pk, m0);
         auto ct1 = sh.encrypt(pk, m1);
-        auto ct2 = sh.multiply(ct0, ct1);
+        auto ct2 = sh.multiply(pk, ct0, ct1);
         auto p = sh.decrypt(sk, ct2);
         assert_s(p == (m0 * m1), "multiply failed");
         cout << "one-multiplication passed" << endl;
@@ -90,10 +79,10 @@ main(int argc, char **argv)
         auto ct0 = sh.encrypt(pk, m0);
         auto ct1 = sh.encrypt(pk, m1);
         auto ct2 = sh.encrypt(pk, m2);
-        auto ct3 = sh.multiply(ct0, ct1);
+        auto ct3 = sh.multiply(pk, ct0, ct1);
         auto p = sh.decrypt(sk, ct3);
         assert_s(p == (m0 * m1), "multiply failed");
-        auto ct4 = sh.multiply(ct3, ct2);
+        auto ct4 = sh.multiply(pk, ct3, ct2);
         auto p1 = sh.decrypt(sk, ct4);
         cerr << "p1 was     : " << p1 << endl;
         cerr << "p1 expected: " << (m0 * m1 * m2) << endl;
@@ -113,13 +102,13 @@ main(int argc, char **argv)
         assert_s(sh.decrypt(sk, ct1) == m1, "dec failed");
         assert_s(sh.decrypt(sk, ct2) == m2, "dec failed");
 
-        auto ct3 = sh.add(ct0, ct1);
+        Auto ct3 = sh.add(pk, ct0, ct1);
         {
             auto p = sh.decrypt(sk, ct3);
             assert_s(p == ((m0 + m1)), "add failed");
         }
 
-        auto ct4 = sh.multiply(ct2, ct3);
+        auto ct4 = sh.multiply(pk, ct2, ct3);
         auto p = sh.decrypt(sk, ct4);
         cerr << "p was      : " << p << endl;
         cerr << "p should be: " << ((m0 + m1) * m2) << endl;
@@ -127,7 +116,27 @@ main(int argc, char **argv)
         cout << "one-addition+one-mulitplication passed" << endl;
     }
 
-    cerr << "took " << t.lap() << "\n";
+    cerr << typeid(Impl).name() << " took " << t.lap() << endl;
+}
+
+int
+main(int argc, char **argv)
+{
+    //poly s({1, 1, 1, 1, 0});
+    //poly a({1, 0, 1, 0, 0});
+    //auto q = 16;
+    //poly sa = s * a;
+    //cerr << "s * a: " << sa << endl;
+    //PolyRing R(4); // Z[x]/(x^4 + 1)
+    //poly sa_r = R.reduce(sa);
+    //cerr << "s * a mod (x^4 + 1): " << sa_r << endl;
+    //poly sa_rq = sa_r.modshift(q);
+    //cerr << "s * a mod (x^4 + 1) mod 16: " << sa_rq << endl;
+    //ErrorDist chi(0, 16, PolyRing(1 << 9));
+    //cerr << "rand: " << chi.sample() << endl;
+
+    TestSuite<TestSHERelin>();
+    TestSuite<TestSHE>();
 
     return 0;
 }

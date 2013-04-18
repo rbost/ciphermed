@@ -18,7 +18,7 @@
 class ErrorDist {
 public:
     /* lambda = sec parameter lambda and mu, and the field Rq*/
-    ErrorDist(uint lambda, uint sigma, const PolyRing &r);
+    ErrorDist(uint lambda, double sigma, const PolyRing &r);
     poly sample();
 
 private:

@@ -49,8 +49,8 @@ public:
     mpz_class decrypt(const SK &sk, const CT &ct) const;
 
     // homomorphic interface
-    CT add(const CT &ct0, const CT &ct1) const;
-    CT multiply(const CT &ct0, const CT &ct1) const;
+    CT add(const PK &pk, const CT &ct0, const CT &ct1) const;
+    CT multiply(const PK &pk, const CT &ct0, const CT &ct1) const;
 
     void SanityCheck();
 
@@ -120,7 +120,7 @@ SHE<P>::decrypt(const SK &sk, const CT &ct) const
 
 template <typename P>
 typename SHE<P>::CT
-SHE<P>::add(const CT &ct0, const CT &ct1) const
+SHE<P>::add(const PK &pk, const CT &ct0, const CT &ct1) const
 {
     CT ret(ct0);
     ret.resize(std::max(ct0.size(), ct1.size()));
@@ -131,7 +131,7 @@ SHE<P>::add(const CT &ct0, const CT &ct1) const
 
 template <typename P>
 typename SHE<P>::CT
-SHE<P>::multiply(const CT &ct0, const CT &ct1) const
+SHE<P>::multiply(const PK &pk, const CT &ct0, const CT &ct1) const
 {
     CT prod = naive_multiply(ct0, ct1);
     for (size_t i = 0; i < prod.size(); i++) {

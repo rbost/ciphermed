@@ -30,16 +30,17 @@ public:
     }
 
     CT
-    add(const CT &ct0, const CT &ct1) const
+    add(const PK &pk, const CT &ct0, const CT &ct1) const
     {
         ScopedTimer t("add");
-        return impl_.add(ct0, ct1);
+        return impl_.add(pk, ct0, ct1);
     }
 
-    CT multiply(const CT &ct0, const CT &ct1) const
+    CT
+    multiply(const PK &pk, const CT &ct0, const CT &ct1) const
     {
         ScopedTimer t("multiply");
-        return impl_.multiply(ct0, ct1);
+        return impl_.multiply(pk, ct0, ct1);
     }
 
     Impl &underlying() { return impl_; }

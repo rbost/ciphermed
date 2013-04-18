@@ -4,7 +4,7 @@
 
 using namespace std;
 
-ErrorDist::ErrorDist(uint lambda, uint sigma, const PolyRing &r)
+ErrorDist::ErrorDist(uint lambda, double sigma, const PolyRing &r)
  : r_(r), gen_(), gauss_(0.0, sigma)
 {
 }

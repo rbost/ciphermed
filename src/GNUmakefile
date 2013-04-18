@@ -10,7 +10,7 @@ endif
 OBJDIR	 := obj
 TOP	 := $(shell echo $${PWD-`pwd`})
 CXX	 ?= g++
-CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fno-rtti -fwrapv -fPIC \
+CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
 	    -Wall -Werror -Wpointer-arith -Wendif-labels -Wformat=2  \
 	    -Wextra -Wwrite-strings -Wno-unused-parameter \
 	    -Wmissing-declarations -Woverloaded-virtual  \
