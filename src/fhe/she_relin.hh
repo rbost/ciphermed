@@ -158,13 +158,13 @@ template <typename P>
 typename SHERelin<P>::CT
 SHERelin<P>::multiply(const PK &pk, const CT &ct0, const CT &ct1) const
 {
-    poly c0top = t_ * rq_.reduce(ct0.first * ct1.first);
+    poly c0top = t_ * (ct0.first * ct1.first);
     poly c0 = rq_.reduce(c0top.nearest_div(q_));
 
-    poly c1top = t_ * rq_.reduce(ct0.first * ct1.second + ct0.second * ct1.first);
+    poly c1top = t_ * (ct0.first * ct1.second + ct0.second * ct1.first);
     poly c1 = rq_.reduce(c1top.nearest_div(q_));
 
-    poly c2top = t_ * rq_.reduce(ct0.second * ct1.second);
+    poly c2top = t_ * (ct0.second * ct1.second);
     poly c2 = rq_.reduce(c2top.nearest_div(q_));
 
     poly c20 = rq_.reduce((c2 * std::get<2>(pk)).nearest_div(p_));
