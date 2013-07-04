@@ -1,5 +1,10 @@
 -include config.mk
 
+SHAIFHEPATH ?= $(HOME)/HElib/src
+NTLLIBPATH ?= $(HOME)/ntl-6.0.0-bin/lib
+NTLINCPATH ?= $(HOME)/ntl-6.0.0-bin/include
+GF2XLIBPATH ?= $(HOME)/gf2x-1.1-bin/lib
+
 DEBUG ?= 0
 ifeq ($(strip $(DEBUG)),1)
 	CXXOPT :=
@@ -11,10 +16,12 @@ OBJDIR	 := obj
 TOP	 := $(shell echo $${PWD-`pwd`})
 CXX	 ?= g++
 CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
-	    -Wall -Werror -Wpointer-arith -Wendif-labels -Wformat=2  \
+	    -Wall -Wpointer-arith -Wendif-labels -Wformat=2  \
 	    -Wextra -Wwrite-strings -Wno-unused-parameter \
+	    -Wno-ignored-qualifiers \
 	    -Wmissing-declarations -Woverloaded-virtual  \
-	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x -I$(TOP)
+	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x -I$(TOP) \
+	    -I$(SHAIFHEPATH) -I$(NTLINCPATH)
 LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
 LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)
 
@@ -47,6 +54,7 @@ $(OBJDIR)/%.o: %.cc
 include util/Makefrag
 include math/Makefrag
 include fhe/Makefrag
+include shaifhe/Makefrag
 
 $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
 	@mkdir -p $(@D)
