@@ -9,7 +9,7 @@ DEBUG ?= 0
 ifeq ($(strip $(DEBUG)),1)
 	CXXOPT :=
 else
-	CXXOPT := -O3
+	CXXOPT := -O3 -DNDEBUG
 endif
 
 OBJDIR	 := obj
@@ -21,7 +21,7 @@ CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
 	    -Wno-ignored-qualifiers \
 	    -Wmissing-declarations -Woverloaded-virtual  \
 	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x -I$(TOP) \
-	    -I$(SHAIFHEPATH) -I$(NTLINCPATH)
+	    -fno-omit-frame-pointer -I$(SHAIFHEPATH) -I$(NTLINCPATH)
 LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
 LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)
 

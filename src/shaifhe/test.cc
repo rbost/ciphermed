@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <unistd.h>
+#include <sys/types.h>
 
 #include <FHE.h>
 #include <EncryptedArray.h>
@@ -120,17 +121,26 @@ test(const configuration &config, results &res)
 
   Ctxt c0(publicKey); Ctxt c1(publicKey); Ctxt c2(publicKey);
 
+  cerr << "starting FHE tests..." << endl;
+
   Timer timer;
   ea.encrypt(c0, publicKey, p0);
   ea.encrypt(c1, publicKey, p1);
   ea.encrypt(c2, publicKey, p2);
   res.encrypt_rate_ms = timer.lap_ms() / 3.;
 
-  const size_t niters = 10;
-  for (size_t i = 0; i < niters; i++)
-    c0.addCtxt(c1);
-  const double t0 = timer.lap_ms();
-  res.add_rate_batch_ms = (t0 / double(niters));
+  cerr << "doing adds" << endl;
+
+  //for (size_t outer = 0; outer < 1; outer++) {
+  //  Ctxt cc(publicKey);
+  //  cc = c0;
+    timer.lap_ms();
+    const size_t niters = 10;
+    for (size_t i = 0; i < niters; i++)
+      c0.addCtxt(c1);
+    const double t0 = timer.lap_ms();
+    res.add_rate_batch_ms = (t0 / double(niters));
+  //}
 
   timer.lap_ms();
   for (size_t i = 0; i < 1; i++)
@@ -146,6 +156,8 @@ test(const configuration &config, results &res)
 int
 main(int argc, char **argv)
 {
+  cerr << "pid=" << getpid() << endl;
+
   int ch;
 
   long p = 2;
