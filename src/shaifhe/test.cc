@@ -1,4 +1,7 @@
 #include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <unistd.h>
 
 #include <FHE.h>
 #include <EncryptedArray.h>
@@ -32,6 +35,22 @@ struct configuration {
   long k;
   long chosen_m;
 };
+
+static inline ostream &
+operator<<(ostream &o, const configuration &cfg)
+{
+  o << "{p=" << cfg.p
+    << ",r=" << cfg.r
+    << ",d=" << cfg.d
+    << ",c=" << cfg.c
+    << ",L=" << cfg.L
+    << ",w=" << cfg.w
+    << ",s=" << cfg.s
+    << ",k=" << cfg.k
+    << ",chosen_m=" << cfg.chosen_m
+    << "}";
+  return o;
+}
 
 struct results {
   double encrypt_rate_ms; // per op
@@ -127,30 +146,64 @@ test(const configuration &config, results &res)
 int
 main(int argc, char **argv)
 {
+  int ch;
 
-  configuration c;
+  long p = 2;
+  long r = 16;
+  long d = 1; // XXX: check?
+  long c = 2;
+  long L = 4;
+  long w = 64;
+  long s = 0; // XXX: check?
+  long k = 80;
+  long m = 0; // XXX: check?
 
-  c.p = 2;
-  c.r = 16;
-  //c.r = 32;
-  c.d = 1; // XXX: check?
-  c.c = 2;
-  c.L = 4;
-  c.w = 64;
-  c.s = 0; // XXX: check?
-  c.k = 80;
-  c.chosen_m = 0; // XXX: check?
+  opterr = 0;
+  while ((ch = getopt(argc, argv, "p:r:d:c:L:w:s:k:m:")) != -1) {
+    switch (ch) {
 
-  //long m = FindM(k, L, c, p, d, s, chosen_m, true);
+#define CASE_X(c) \
+    case (#c)[0]: \
+      c = atol(optarg); \
+      break;
 
-  results r;
-  test(c, r);
+    CASE_X(p)
+    CASE_X(r)
+    CASE_X(d)
+    CASE_X(c)
+    CASE_X(L)
+    CASE_X(w)
+    CASE_X(s)
+    CASE_X(k)
+    CASE_X(m)
 
-  cout << "encrypt_rate_ms=" << r.encrypt_rate_ms << endl;
-  cout << "decrypt_rate_ms=" << r.decrypt_rate_ms << endl;
-  cout << "add_rate_batch_ms=" << r.add_rate_batch_ms << endl;
-  cout << "add_rate_per_op=" << r.add_rate_per_op() << endl;
-  cout << "mult_rate_batch_ms=" << r.mult_rate_batch_ms << endl;
-  cout << "mult_rate_per_op=" << r.mult_rate_per_op() << endl;
+    case '?':
+    default:
+      return 1;
+    }
+  }
+
+  configuration cfg;
+
+  cfg.p = p;
+  cfg.r = r;
+  cfg.d = d;
+  cfg.c = c;
+  cfg.L = L;
+  cfg.w = w;
+  cfg.s = s;
+  cfg.k = k;
+  cfg.chosen_m = m;
+  cerr << cfg << endl;
+
+  results res;
+  test(cfg, res);
+
+  cout << "encrypt_rate_ms=" << res.encrypt_rate_ms << endl;
+  cout << "decrypt_rate_ms=" << res.decrypt_rate_ms << endl;
+  cout << "add_rate_batch_ms=" << res.add_rate_batch_ms << endl;
+  cout << "add_rate_per_op=" << res.add_rate_per_op() << endl;
+  cout << "mult_rate_batch_ms=" << res.mult_rate_batch_ms << endl;
+  cout << "mult_rate_per_op=" << res.mult_rate_per_op() << endl;
   return 0;
 }
