@@ -66,7 +66,7 @@ struct results {
 };
 
 static void
-test(const configuration &config, results &res)
+test(const configuration &config)
 {
   long p = config.p;
   long r = config.r;
@@ -107,8 +107,7 @@ test(const configuration &config, results &res)
   //cerr << "done\n";
 
   long nslots = ea.size();
-  //cerr << "nslots=" << nslots << endl;
-  res.batchsize = nslots;
+  cerr << "nslots=" << nslots << endl;
 
   PlaintextArray p0(ea);
   PlaintextArray p1(ea);
@@ -118,55 +117,34 @@ test(const configuration &config, results &res)
   PlaintextArray pp0(ea);
   PlaintextArray pp2(ea);
 
-  p0.random(); // add-accumulator
-  p1.random(); // addition
-  p2.encode(2); // mult-accumulator
-  p2.negate();
-  p3.encode(3); // multiplier
+  p0.encode({0, 0, 1});
+  p0.print(cerr); cerr << endl;
+
+  p1.encode({0, 0, 1});
+
+  //p0.random(); // add-accumulator
+  //p1.random(); // addition
+  //p2.encode(2); // mult-accumulator
+  //p2.negate();
+  //p3.encode(3); // multiplier
   //p3.negate();
 
   Ctxt c0(publicKey); Ctxt c1(publicKey);
   Ctxt c2(publicKey); Ctxt c3(publicKey);
 
-  cerr << "starting FHE tests..." << endl;
-
-  Timer timer;
   ea.encrypt(c0, publicKey, p0);
   ea.encrypt(c1, publicKey, p1);
-  ea.encrypt(c2, publicKey, p2);
-  ea.encrypt(c3, publicKey, p3);
-  res.encrypt_rate_ms = timer.lap_ms() / 4.;
 
-  cerr << "doing adds" << endl;
+  ea.rotate(c0, -2);
+  //c0.multiplyBy(c1);
 
-  //for (size_t outer = 0; outer < 1; outer++) {
-  //  Ctxt cc(publicKey);
-  //  cc = c0;
-    timer.lap_ms();
-    const size_t niters = 10;
-    for (size_t i = 0; i < niters; i++)
-      c0.addCtxt(c1);
-    const double t0 = timer.lap_ms();
-    res.add_rate_batch_ms = (t0 / double(niters));
-  //}
-
-  timer.lap_ms();
-  for (size_t i = 0; i < 1; i++)
-    c2.multiplyBy(c3);
-  const double t1 = timer.lap_ms();
-  res.mult_rate_batch_ms = (t1);
-
-  timer.lap_ms();
   ea.decrypt(c0, secretKey, pp0);
-  res.decrypt_rate_ms = timer.lap_ms();
-
-  ea.decrypt(c2, secretKey, pp2);
+  //ea.decrypt(c2, secretKey, pp2);
   vector<long> vls;
-  pp2.decode(vls);
+  pp0.decode(vls);
   cerr << vls.front() << endl;
 
-  //pp1.print(cerr);
-  //cerr << endl;
+  pp0.print(cerr); cerr << endl;
 }
 
 int
@@ -176,8 +154,8 @@ main(int argc, char **argv)
 
   int ch;
 
-  long p = 2;
-  long r = 16;
+  long p = 2; // plaintext base
+  long r = 1; // lifting
   long d = 1; // XXX: check?
   long c = 2;
   long L = 4;
@@ -224,14 +202,7 @@ main(int argc, char **argv)
   cfg.chosen_m = m;
   cerr << cfg << endl;
 
-  results res;
-  test(cfg, res);
+  test(cfg);
 
-  cout << "encrypt_rate_ms=" << res.encrypt_rate_ms << endl;
-  cout << "decrypt_rate_ms=" << res.decrypt_rate_ms << endl;
-  cout << "add_rate_batch_ms=" << res.add_rate_batch_ms << endl;
-  cout << "add_rate_per_op=" << res.add_rate_per_op() << endl;
-  cout << "mult_rate_batch_ms=" << res.mult_rate_batch_ms << endl;
-  cout << "mult_rate_per_op=" << res.mult_rate_per_op() << endl;
   return 0;
 }

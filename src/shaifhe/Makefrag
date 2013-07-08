@@ -6,8 +6,14 @@ SHAIFHEOBJ   := $(patsubst %.cc,$(OBJDIR)/fhe/%.o,$(FHESRC))
 #$(OBJDIR)/libfhe.so: $(FHEOBJ) $(OBJDIR)/libfhemath.so
 #	$(CXX) -shared -o $@ $(FHEOBJ) $(LDFLAGS) -lgmpxx -lgmp -lfhemath
 
-all:    $(OBJDIR)/shaifhe/test
+all:    $(OBJDIR)/shaifhe/test $(OBJDIR)/shaifhe/shiftfun
+
 $(OBJDIR)/shaifhe/test: $(OBJDIR)/shaifhe/test.o 
+	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) \
+	  -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl \
+	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH) -lgf2x -lgmp
+
+$(OBJDIR)/shaifhe/shiftfun: $(OBJDIR)/shaifhe/shiftfun.o 
 	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) \
 	  -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl \
 	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH) -lgf2x -lgmp
