@@ -59,10 +59,14 @@ The idea is to use a new experiment that has a chance of outputting the correct 
 
 We now analyze this protocol to show that the probability of success is greater
 than half. Let $r \in \bbZ_q$, and $\epsilon \in \bbZ_q$ be drawn uniformly at
-random. We also assume that all $r \in \bbZ_q$ are equally likely. For now, we
+random. We also assume that all $r \in \bbZ_q$ are equally likely.
+\rnote{We don't need to assume that r is equally likely. Our correctness holds for all $r$. If we assume all r-s are equally likely, we only prove that our protocol succeeds on barely more than half the possible results, but we can in fact show that it should succeed for all possible results with high probability.}
+
+ For now, we
 restrict ourselves to odd $q$. Denote $\bbZ_q^+$ as the integers in $[0,
 \frac{q-1}{2}]$, and $\bbZ_q^-$ as the integers in $[\frac{q-1}{2}+1, q)$.
 
+\rnote{once you fix an $r$, you should be able to write the probabilities below in terms of $q-r$ or $r$, for the case when $r>q/2$ and $r<q/2$. }
 That means $r \in \bbZ_q^+$ we will consider to encode a number $\geq 0$, and
 $r \in \bbZ_q^-$ we will consider to encode a number $< 0$. Let $v$ be defined
 as before. We want to show that:
@@ -81,6 +85,10 @@ $\Pr\left[(r+\epsilon)\text{ mod }q<v\right] > 1/2$:
         &= \frac{1}{q}\left[ \sum\limits_{i=0}^{(q-1)/2-1} \frac{(q-1)/2}{(q-1)/2+1} + \sum\limits_{i=(q-1)/2}^{q-1} \frac{i-(q-1)/2}{(q-1)/2+1} \right] \\
         &= \frac{1}{4}\left[3+\frac{1}{q}-\frac{8}{1+q}\right]
 \end{align*}
+
+
+\rnote{the probability statements above and below should be over the random choice of $\epsilon$ rather than $r$}
+
 Notice that this quantity is always $> 1/2$ if $q \geq 7$. We now show the other side, that
 if $r \in \bbZ_q^-$, then $\Pr\left[(r+\epsilon)\text{ mod }q<v\right] < 1/2$:
 \begin{align*}
@@ -91,6 +99,10 @@ if $r \in \bbZ_q^-$, then $\Pr\left[(r+\epsilon)\text{ mod }q<v\right] < 1/2$:
 \end{align*}
 It is clear that for $q \geq 3$, this quantity is $< 1/2$. Since we already
 require $q \geq 7$ above, this is ok.
+
+\rnote{as a small nit for style, I (and cryptographers) find this notation more clear : $\Pr[\eps \gets \bbZ_q: (r+\eps) \mod q < v]$ because it is clearer where the randomness comes from and what is the order of steps in the experiment.}
+
+\rnote{based on this probability bound, would be good to estimate how many repetitions we need, for example, using Hoeffding's inequality -- see end of Wikipedia page -- or other inequality you prefer}
 
 %if r > q/2
  %if e > q/2 : correct result always
