@@ -42,7 +42,7 @@ The challenge is deciding if $\res > 0$. Simply giving the client $\enc(\res)$ l
 
 Instead, the idea is for the server to choose a random $\epsilon \in \bbZ_q$ where $q$ is the space of the plaintext in FHE. The server computes $\enc(\epsilon + \res)$ and the client is able to decrypt this ciphertext and obtain $\epsilon + \res \mod q$, which information-theoretically leaks nothing about $\res$. 
 
-Now, ideally we would like the client to compare $\epsilon + \res$ to $\res + q/2$, because $\res > q/2$ indicates a negative $\res$ (that wrapped around). We can use Yao's comparison protocol (the millionaires problem -- a simple one interaction protocol) to decide the result of this comparison without leaking any private information. The challenge though is that the client has $\epsilon + \res \mod q$, and $\mod q$ affects correctness.
+Now, ideally we would like the client to compare $\epsilon + \res$ to $\epsilon + q/2$, because $\res > q/2$ indicates a negative $\res$ (that wrapped around). We can use Yao's comparison protocol (the millionaires problem -- a simple one interaction protocol) to decide the result of this comparison without leaking any private information. The challenge though is that the client has $\epsilon + \res \mod q$, and $\mod q$ affects correctness.
 
 The idea is to use a new experiment that has a chance of outputting the correct result $>1/2$, and to repeat this protocol a few times and take majority in order to amplify correctness (which increases exponentially in the number of repeats):
 
@@ -66,7 +66,7 @@ The idea is to use a new experiment that has a chance of outputting the correct 
  
 \subsection{Na\"ive Bayes solution}
 
-For na\"ive Bayes, we need to convert the table of values into a matrix so we can FHE multiply it to the input $x$. TODO: we need to figure out how to compute the maximum of $k$ values over FHE, likely using the idea above which gives us $\max(\res, 0)$. 
+For na\"ive Bayes, we need to convert the table of values into a matrix so we can FHE multiply it to the input $x$. TODO: we need to figure out how to compute the maximum of $k$ values over FHE, likely using the idea above which computes $\max$ of $q/2$ and $\res$. 
 
 
 
