@@ -10,13 +10,76 @@
 
 \begin{document}
 
+\date{}
+
 \maketitle
+
+\vspace{-2cm}
+
+
+\section{Model decision over FHE}
+
+Problem: Two parties have private data and want to learn the result of a function on their data. 
+
+\noindent Example use case:  A hospital  has some private medical records of patients and a client wants to learn whether he is likely to get some disease or to get some good treatment from a doctor based on that data. Neither the hospital nor the client want to share their private data. 
+
+Discussion:
+We realized that using FHE for running the machine learning algorithm is not that useful because the hospital can learn on plaintext data. Instead, what is more interesting is to hide the resulting learned model from the patient (another example is Google flu trends because Google does not want to release its parameters). So we want to perform FHE on the decision algorithm that uses the model to predict the outcome, and even this was non-trivial to figure out.
+Using FHE here makes sense because we are going to use it for security benefits rather than performance benefits. 
+
+
+\subsection{Our solution for SVM decision}
+
+\newcommand{\res}{\mathsf{res}}
+
+The server has a vector $v$ and the client has a vector $x$. The client wants to know whether $\langle x, v \rangle > 0$, where 
+$\langle \rangle$ denotes dot product. 
+The client provides $\enc(x)$ to the server, which can easily compute $\enc(\langle x, v \rangle)$ by only using 1-depth FHE. Let $\res = \langle x, v \rangle$. 
+
+
+
+The challenge is deciding if $\res > 0$. Simply giving the client $\enc(\res)$ leaks $\res$ to the client, which is more information about the model than the final decision. 
+
+Instead, the idea is for the server to choose a random $\epsilon \in \bbZ_q$ where $q$ is the space of the plaintext in FHE. The server computes $\enc(\epsilon + \res)$ and the client is able to decrypt this ciphertext and obtain $\epsilon + \res \mod q$, which information-theoretically leaks nothing about $\res$. 
+
+Now, ideally we would like the client to compare $\epsilon + \res$ to $\res + q/2$, because $\res > q/2$ indicates a negative $\res$ (that wrapped around). We can use Yao's comparison protocol (the millionaires problem -- a simple one interaction protocol) to decide the result of this comparison without leaking any private information. The challenge though is that the client has $\epsilon + \res \mod q$, and $\mod q$ affects correctness.
+
+The idea is to use a new experiment that has a chance of outputting the correct result $>1/2$, and to repeat this protocol a few times and take majority in order to amplify correctness (which increases exponentially in the number of repeats):
+
+\newcommand{\eps}{\epsilon}
+
+\begin{enumerate}
+\item The server chooses $\epsilon \in \bbZ_q$ at random. If $\epsilon > q/2$,  let $v = \eps - q/2$. The intuition is that an $\eps > q/2$ is likely to wrap around when added to another number. If $\eps < q/2$, let $v = \eps + q/2$. 
+\item Run Yao's protocol, where the client's input is $\eps + \res \mod q$ and the server's input is $v$. 
+\end{enumerate}
+
+
+%if r > q/2 
+ %if e > q/2 : correct result always
+ %if e < q/2 for  q - r < e < q/2 incorrect result -- but for e < q-r it is correct
+%each case for e happens with chance 1/2
+
+%if r < q/2 :
+%if e < q/2 : correct result always
+%if e > q/2: correct result sometimes
+
+ 
+\subsection{Na\"ive Bayes solution}
+
+For na\"ive Bayes, we need to convert the table of values into a matrix so we can FHE multiply it to the input $x$. TODO: we need to figure out how to compute the maximum of $k$ values over FHE, likely using the idea above which gives us $\max(\res, 0)$. 
+
+
+
+\newpage
+
+\textcolor{red}{OLD things:}
+
+\section{Basic FHE - somewhat homomorphic}
+
+
 
 Below is a pseudocode for the FHE scheme extracted from ~\cite{BGV12}, where I figured out what some parameters should be and instantiated the scheme for the RLWE assumption. 
 For RLWE-based scheme, so the dimension $n=1$ and the degree of the polynomial $d>1$. I still need to figure out a bunch of things. 
-
-
-\section{Basic FHE - somewhat homomorphic}
 
 
 \textbf{Notation.} $\langle a, b \rangle$ indicates dot product between $a$ and $b$.  $[a]_q$ indicates modulo $q$ but my considering the remainder in the interval $(-q/2, q/2)$ ($q$ is odd). 
