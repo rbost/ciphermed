@@ -5,6 +5,7 @@
 \input{commands}
 
 \newcommand{\mysection}[1]{\vspace{3mm}\noindent\textbf{#1} \\}
+\DeclareMathOperator*{\argmax}{\mathsf{argmax}}
 
 \title{Notes}
 
@@ -131,9 +132,26 @@ require $q \geq 7$ above, this is ok.
 
 \subsection{Na\"ive Bayes solution}
 
-For na\"ive Bayes, we need to convert the table of values into a matrix so we can FHE multiply it to the input $x$. TODO: we need to figure out how to compute the maximum of $k$ values over FHE, likely using the idea above which computes $\max$ of $q/2$ and $\res$.
+%For na\"ive Bayes, we need to convert the table of values into a matrix so we can FHE multiply it to the input $x$. TODO: we need to figure out how to compute the maximum of $k$ values over FHE, likely using the idea above which computes $\max$ of $q/2$ and $\res$.
+%
+\newcommand{\NB}{Na\"ive Bayes}
 
+We now consider categorial \NB{}. Suppose we have $k$ classes and $n$ features.
+Then recall that a \NB{} classifier is parameterized by $\theta_{\mathcal{C}} =
+\{\theta_{c}=p(\mathcal{C}=c)\}_{c=1}^{k}$ and $\theta_{\mathcal{F}|c} =
+\{\theta_{f|c}= \{ p(\mathcal{F}_f=x|c) \}_{x=1}^{|\mathcal{F}_f|}
+\}_{f=1}^{n}$ for each $c = 1,...,k$. The decision function is simply:
+\begin{equation*}
+  \hat{y}(x) = \argmax_{c} p(c, x) = p(c)\prod\limits_{i=1}^{n}p(x_i|c)
+\end{equation*}
+To make this easier for FHE eval, we assume that the client supplies us with each feature value
+in $1$-of-$k$ encoding, so we receive $n$ ciphertexts $(\enc(x_1), ..., \enc(x_n))$. So now we
+can express the decision function as a product of dot products:
+\begin{equation*}
+  \hat{y}(x) = \argmax_{c} p(c, x) = p(c)\prod\limits_{i=1}^{n} \langle \theta_{\mathcal{F}_i|c}, x_i \rangle
+\end{equation*}
 
+$\max$ is tricky and we currently do not know how to do it.
 
 \newpage
 
