@@ -77,6 +77,7 @@ We now analyze this protocol to show that the probability of success is greater
 than half. Let $r \in \bbZ_q$, and $\epsilon \in \bbZ_q$ be drawn uniformly at
 random. We also assume that all $r \in \bbZ_q$ are equally likely.
 \rnote{We don't need to assume that r is equally likely. Our correctness holds for all $r$. If we assume all r-s are equally likely, we only prove that our protocol succeeds on barely more than half the possible results, but we can in fact show that it should succeed for all possible results with high probability.}
+\rbnote{Assuming that the distribution of $r$ is uniform is also problematic as it would basically imply that the distribution of $x$ is uniform (we can discuss about that). The following proof is not correct anymore when we don't suppose that the distribution is uniform: for example, for the second part of the proof ($r \in \bbZ_q^-$), if the distribution is concentrated around $(q-1)/4$ and that the probability of having $(q-1)/2 < r < q-1$ is small, the last probability can be bigger than $1/2$.}
 
  For now, we
 restrict ourselves to odd $q$. Denote $\bbZ_q^+$ as the integers in $[0,
@@ -118,7 +119,9 @@ require $q \geq 7$ above, this is ok.
 
 \rnote{as a small nit for style, I (and cryptographers) find this notation more clear : $\Pr[\eps \gets \bbZ_q: (r+\eps) \mod q < v]$ because it is clearer where the randomness comes from and what is the order of steps in the experiment.}
 
-\rnote{based on this probability bound, would be good to estimate how many repetitions we need, for example, using Hoeffding's inequality -- see end of Wikipedia page -- or other inequality you prefer}
+\rnote{based on this probability bound, would be good to estimate how many repetitions we need, for example, using Hoeffding's inequality -- see end of Wikipedia page -- or other inequality you prefer }
+
+\rbnote{Hoeffding's inequality requires the random variables to be independent, which is -- I think -- not the case here: remember that the random variable that we consider is the variable that is zero if the guess is correct, and one is incorrect. We could try to draw from the proof of Goldreich-Levin theorem for this point.}
 
 %if r > q/2
  %if e > q/2 : correct result always
