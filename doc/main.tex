@@ -30,6 +30,7 @@ Using FHE here makes sense because we are going to use it for security benefits 
 
 
 \subsection{Our solution for hyperplane decision surfaces}
+\label{sub:hyperplane_decision}      
 
 \newcommand{\res}{\mathsf{res}}
 
@@ -131,6 +132,38 @@ require $q \geq 7$ above, this is ok.
 %if r < q/2 :
 %if e < q/2 : correct result always
 %if e > q/2: correct result sometimes
+
+\subsection{Another solution for rerandomization and comparison}
+                                                               
+We propose an other protocol for the hyperplane decision surfaces. The idea is very similar to the one propose in section~\ref{sub:hyperplane_decision}.
+
+The server and the client do the same computations as in~\ref{sub:hyperplane_decision} so the server gets an encrypted version of $r$ under the client secret key. The client wants to know the sign of $v$ and we have to ensure server's security \emph{i.e.} the client can only learn the sign of $r$.
+
+\begin{itemize}
+	\item The server choose $\varepsilon \getsr \bbZ_q$ and sends the encryption of $r + \varepsilon \mod q$ to the client who decrypts it.
+	\item Run Yao's protocol, where the client's input is $r + \varepsilon$ and the server's input is $\varepsilon$.
+\end{itemize} 
+
+In this section, when we work modulo $q$, we consider elements in the interval $(-q/2, q/2]$. The client gets the right sign of $r$ if and only if $r + \varepsilon$ does not wrap \emph{i.e.}
+\[
+	-q/2 < r + \varepsilon \leq q/2 \Leftrightarrow  -q/2 - r< \varepsilon \leq q/2 - r
+\]
+
+As a consequence, given $r$, the probability that the protocol is correct is 
+\[ 
+	\Pr[\varepsilon \getsr \bbZ_q\text{ : Protocol is correct} | r] = \frac{q - |r|}{q} = 1 - \frac{|r|}{q}
+\]
+and the probability that the client gets the correct sign when $r$ is distributed according to $\mathcal{D}$ is 
+\begin{align*}
+	\Pr[\varepsilon \getsr \bbZ_q, r \gets \mathcal{D}\text{ : Protocol is correct}] 
+		&= \sum_{r \in \mathcal{D}} \Pr[r] (1 - \frac{|r|}{q}) \\
+		&= 1 - \frac{1}{q}\sum_{r \in \mathcal{D}} |v| \Pr[v]  \\
+		&= 1 - \frac{\mathbb{E}(|\mathcal{D}|)}{q}
+\end{align*}
+In particular, if $\mathcal{D}$ is bounded by $B$ ($\Pr[ r \gets \mathcal{D} : |r| > B]$), we have
+\[
+\Pr[\varepsilon \getsr \bbZ_q, r \gets \mathcal{D}\text{ : Protocol is correct}] \geq 1 - \frac{B}{q}
+\] 
 
 
 \subsection{Na\"ive Bayes solution}
