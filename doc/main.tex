@@ -134,7 +134,8 @@ require $q \geq 7$ above, this is ok.
 %if e > q/2: correct result sometimes
 
 \subsection{Another solution for rerandomization and comparison}
-                                                               
+           
+\subsubsection{Description} 
 We propose an other protocol for the hyperplane decision surfaces. The idea is very similar to the one propose in section~\ref{sub:hyperplane_decision}.
 
 The server and the client do the same computations as in~\ref{sub:hyperplane_decision} so the server gets an encrypted version of $r$ under the client secret key. The client wants to know the sign of $v$ and we have to ensure server's security \emph{i.e.} the client can only learn the sign of $r$.
@@ -164,6 +165,29 @@ In particular, if $\mathcal{D}$ is bounded by $B$ ($\Pr[ r \gets \mathcal{D} : |
 \[
 \Pr[\varepsilon \getsr \bbZ_q, r \gets \mathcal{D}\text{ : Protocol is correct}] \geq 1 - \frac{B}{q}
 \] 
+    
+\subsubsection{Repeating the experiment}
+
+We want to repeat the previous protocol $k$ times in order to decrease the probability of a wrong guess: we run the protocol $k$ times and take as an output the majority of outputs. 
+
+Let $X_i$ be the random variable that is 0 if the output of the $i$-th execution of the protocol is correct, and that is 1 otherwise. The final guess is correct if $\sum_{i=1}^k X_i > \frac{k}{2}$. Let $r$ be a possible output of $\mathcal{D}$. For a fixed $r$, it is easy to see that the $X_i$ are independent random variables. Thus, we can apply Chernov's bound:
+
+\[
+    \forall \delta > 0,  \Pr\left[ \sum_{i=0}^k X_i \geq (1 + \delta)\mu\right] \leq \left( \frac{e^\delta}{(1+\delta)^{1+\delta}} \right)^\mu
+\]
+where $\mu = \sum \mathbb{E}(X_i)$. Here, $\mu = k \frac{|r|}{q}$ (remember we fixed $r$). We assumed before that $|r| < q$ and WLOG we can also assume that $|r| < q/2$. And as we want that  $\sum_{i=1}^k X_i > \frac{k}{2}$ with high probability, we can take $\delta = \frac{q}{2|r|} -1 > 0$. We infer that, for $r \neq 0$,
+\[
+	\Pr[\text{Protocol is not correct} | r] \leq \left(\frac{e^{\frac{q}{2|r|} -1}}{\frac{q}{2|r|}^{\frac{q}{2|r|}}}\right)^{k \frac{|r|}{q}} 
+	\leq \left(\frac{2e}{q}\right)^{\frac{k}{2}}
+\]
+(if $r = 0$, one iteration of the protocol always succeeds as $r + \varepsilon$ does not wrap).
+
+
+However, repeating the experiment, leaks some informations about $r$: $\mathbb{E}(\sum X_i | v) = k \frac{|r|}{q}$ meaning that the number of incorrect experiments -- and as consequence, if we repeated a sufficient number of times, the number of experiments whose outcome is different from the final outcome -- is about $k \frac{|r|}{q}$. Thus, the more we repeat the protocol, the best we can approximate $|r|$.
+
+\rbnote{We must choose the parameters carefully if we do not want to disclose to many informations about $r$.}
+
+\rbnote{We should also have this issue when we repeat the previous protocol.}
 
 
 \subsection{Na\"ive Bayes solution}
