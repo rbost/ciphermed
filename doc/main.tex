@@ -212,6 +212,43 @@ can express the decision function as a product of dot products:
 \end{equation*}
 
 $\max$ is tricky and we currently do not know how to do it.
+      
+
+
+\section{Related Work} % (fold)
+\label{sec:related_work}
+        
+\begin{description}
+	\item[Secure Multiparty Computational Geometry] (\emph{Atallah, Du}) Some specialized secure MPC protocol for Computational Geometry. Very interesting for us as one of the problem they solve is point inclusion, which is closely related to hyperplane decision. They give protocols to compute dot products based on 1-out-of-N OT, one of which does not use homomorphic encryption.
+	\\ \href{https://www.cerias.purdue.edu/assets/pdf/bibtex_archive/2001-48.pdf}{Link}
+	
+	\item [Secure Multiparty Computation of Approximations](\emph{Feigenbaum, Ishai, Malkin, Nissim, Strauss, Wright}) Describes a protocol to efficiently approximate the Hamming distance and \#P-hard functions.                                               
+	\\ \href{http://cs-www.cs.yale.edu/homes/jf/FIMNSW.pdf}{Link}
+	
+	\item [ML Confidential:	Machine Learning on Encrypted Data](\emph{Graepel, Lauter, Naehrig}) An implementation, based on FHE, of basic machine learning classification algorithms.	   
+	\\ \href{http://research.microsoft.com/pubs/179548/323.pdf}{Link}
+	                                                                   
+	\item [Secure Multiparty Computation Goes Live](\emph{Bogetoft et al.}) A large-scale practical implementation of a secure auction using MPC. They describe and prove lots of efficient cryptographic protocols.  
+	\\ \href{http://eprint.iacr.org/2008/068.pdf}{Link}
+       
+	\item [Unconditionally Secure Constant Round Multi-Party Computation for Equality, Comparison, Bits and Exponentiation](\emph{Damgard, Fitzi, Kiltz, Nielsen, Toft})
+	\\ \href{http://www.iacr.org/cryptodb/archive/2006/TCC/3624/3624.pdf}{Link}
+             
+	\item [Oblivious Polynomial Evaluation](\emph{Naor, Pinkas}) How a receiver can evaluate $P(x)$ where $P$ is a polynomial owned by a sender, without disclosing $x$ while preserving the server's secret ($P$).
+	\\ \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.73.7197&rep=rep1&type=pdf}{Link}
+                                                                          
+	\item [Efficient Private Matching and Set Intersection](\emph{Freedman, Nissim, Pinkas}) Various secure MPC protocols to compute set intersection of private datasets.
+	\\ \href{http://www.cs.princeton.edu/~mfreed/docs/FNP04-pm.pdf}{Link}
+	
+	\item [Secure Multi-Party Sorting and Applications](\emph{Jonsson, Kreitz, Uddin})
+	\\ \href{http://eprint.iacr.org/2011/122.pdf}{Link}
+	
+\end{description}
+
+
+% section related_work (end)
+
+
 
 \newpage
 
