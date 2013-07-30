@@ -185,7 +185,7 @@ where $\mu = \sum \mathbb{E}(X_i)$. Here, $\mu = k \frac{|r|}{q}$ (remember we f
 
 However, repeating the experiment, leaks some informations about $r$: $\mathbb{E}(\sum X_i | v) = k \frac{|r|}{q}$ meaning that the number of incorrect experiments -- and as consequence, if we repeated a sufficient number of times, the number of experiments whose outcome is different from the final outcome -- is about $k \frac{|r|}{q}$. Thus, the more we repeat the protocol, the best we can approximate $|r|$.
 
-\rbnote{We must choose the parameters carefully if we do not want to disclose to many informations about $r$.}
+\rbnote{We must choose the parameters carefully if we do not want to disclose too many informations about $r$.}
 
 \rbnote{We should also have this issue when we repeat the previous protocol.}
 
@@ -240,7 +240,7 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 	\item [Secure Multiparty Computation of Approximations](\emph{Feigenbaum, Ishai, Malkin, Nissim, Strauss, Wright}) Describes a protocol to efficiently approximate the Hamming distance and \#P-hard functions.                                               
 	\\ \href{http://cs-www.cs.yale.edu/homes/jf/FIMNSW.pdf}{Link}
 	
-	\item [ML Confidential:	Machine Learning on Encrypted Data](\emph{Graepel, Lauter, Naehrig}) An implementation, based on FHE, of basic machine learning classification algorithms. Check the ``Related Work'' section for a small up-to-date survey of existing protocols.	   
+	\item [ML Confidential:	Machine Learning on Encrypted Data](\emph{Graepel, Lauter, Naehrig}) An implementation, based on FHE, of basic machine learning classification algorithms.	   
 	\\ \href{http://research.microsoft.com/pubs/179548/323.pdf}{Link}
 	  
 	\item [Privacy-Preserving Support Vector Machines Learning](\emph{Zhan,Chang, Matwin}) How to run a learning algorithm on distributed datas in a private way. They essentially show how to use Paillier to obliviously compute dot products.
@@ -251,7 +251,12 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 	
 	\item [Privacy-Preserving SVM using Nonlinear Kernels on Horizontally Partitioned Data] (\emph{Yu, Jiang, Vaidya})
 	\\ \href{http://cimic.rutgers.edu/~jsvaidya/pub-papers/vaidyaSVM-sac06.pdf}{Link}
-	                                         
+	      
+	\item [Privacy-Preserving SVM Classification on Vertically Partitioned Data] (\emph{Yu, Vaidya, Jiang})
+	Check the ``Related Work'' section for a small survey of existing protocols.
+	\\ \href{http://link.springer.com/content/pdf/10.1007%2F11731139_74.pdf}{Link}
+	
+	                                   
 	\item [Secure Multiparty Computation Goes Live](\emph{Bogetoft et al.}) A large-scale practical implementation of a secure auction using MPC. They describe and prove lots of efficient cryptographic protocols.  
 	\\ \href{http://eprint.iacr.org/2008/068.pdf}{Link}
        
@@ -269,6 +274,10 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 	                  
 	\item [State-of-the-art in Privacy Preserving Data Mining](\emph{Verykios, Bertino,Nai Fovino, Parasiliti Provenza, Saygin, Theodoridis})
 	\\ \href{http://www.sigmod.org/publications/sigmod-record/0403/B1.bertion-sigmod-record2.pdf}{Link}
+	
+	\item [An Efficient Solution to The Millionaires’ Problem Based on Homomorphic Encryption](\emph{Lin, Tzeng})
+	\\ \href{http://eprint.iacr.org/2005/043.pdf}{Link}
+	
 \end{description}
 
 
