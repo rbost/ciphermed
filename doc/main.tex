@@ -208,13 +208,25 @@ To make this easier for FHE eval, we assume that the client supplies us with eac
 in $1$-of-$k$ encoding, so we receive $n$ ciphertexts $(\enc(x_1), ..., \enc(x_n))$. So now we
 can express the decision function as a product of dot products:
 \begin{equation*}
-  \hat{y}(x) = \argmax_{c} p(c, x) = p(c)\prod\limits_{i=1}^{n} \langle \theta_{\mathcal{F}_i|c}, x_i \rangle
+  \hat{y}(x) = \argmax_{c} p(x,c) = p(c)\prod\limits_{i=1}^{n} \langle \theta_{\mathcal{F}_i|c}, x_i \rangle
 \end{equation*}
 
-$\max$ is tricky and we currently do not know how to do it.
       
+\paragraph{Proposed solution:}
+Very briefly, here is a solution we have (it has a few rough ends to improve, but it works): It uses the SIMD operations which can actually save us $c$ times computation and storage!
 
+Consider the data at the server in a table with $k$ columns (corresponding to classes -- possible outcomes of the decision) and $N$ rows, the size of domain of feature values. 
 
+The server encrypts each row into an SIMD FHE ciphertext, with a column per slot. 
+Let $(x_1, x_2, \dots, x_n)$ be the input to a client.
+For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selector is $\fheenc(1|1|1|1)$ and the others are $\fheenc(0|0|0|0)$, where the bits are located in different SIMD slots. Using these ciphertexts, the server can compute $\fheenc(p(x_i, 1)|p(x_i, 2)| \dots | p(x_i, k))$ by multiplying the selectors with the corresponding rows of the server database and then adding up all values for each $x_i$.  If the server multiplies these over all $x_i$, along with appropriate encryptions of $p(c)$, the server obtains:
+ $\fheenc(p(x,1)|p(x, 2)| \dots | p(x, k))$.
+ 
+ Now the client and the server need to sort these values to figure out what is the maximum.
+ First, the server chooses a random permutation $P$, and permutes the values in the SIMD slots, using SIMD permutations.
+ 
+ Then, the client and the server will run an oblivious sorting network in a different manner. At a very high level, the server will compute encryptions of $\fheenc(p(x, i_1) - p(x, j_1) | p(x, i_2) - p(x, j_2) | \dots )$ using SIMD operations for various stages of the oblivious sorting. Then, the client and the server will run the same protocol we have for the SVM classifier so that the client determines if each difference is positive or negative.  The client does not tell the server the outcome of the differences (based on our previous protocol). The client can nevertheless compute that the r-th entry was maximum based on this differences, and tells it to the server, who answers with the unpermuted $r$, $P^{-1}(r)$ which contains the result of the classification.
+  
 \section{Related Work} % (fold)
 \label{sec:related_work}
         
