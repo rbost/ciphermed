@@ -53,6 +53,7 @@ $(OBJDIR)/%.o: %.cc
 
 include util/Makefrag
 include math/Makefrag
+include crypto/Makefrag
 include fhe/Makefrag
 include shaifhe/Makefrag
 
