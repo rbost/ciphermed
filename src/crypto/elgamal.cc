@@ -54,6 +54,11 @@ pair<ZZ,ZZ> ElGamal::encrypt(const ZZ &plaintext)
     }
 }
 
+pair<ZZ,ZZ> ElGamal::randEncrypt()
+{                           
+	return encrypt(RandomLen_ZZ(qbits));
+}
+
 pair<ZZ,ZZ> ElGamal::mult(const pair<ZZ,ZZ> &c0, const pair<ZZ,ZZ> &c1) const
 {
     ZZ m1 = MulMod(get<0>(c0),get<0>(c1),p);
@@ -61,6 +66,21 @@ pair<ZZ,ZZ> ElGamal::mult(const pair<ZZ,ZZ> &c0, const pair<ZZ,ZZ> &c1) const
     
     return pair<ZZ,ZZ> (m1,m2);
 }
+
+pair<ZZ,ZZ> ElGamal::rerand(const pair<ZZ,ZZ> &c) const
+{                 
+	ZZ k = RandomLen_ZZ(qbits) % q;
+    ZZ m1 = PowerMod(get<0>(c),k,p);
+    ZZ m2 = PowerMod(get<1>(c),k,p);
+    
+    return pair<ZZ,ZZ> (m1,m2);
+}
+
+pair<ZZ,ZZ> ElGamal::multAndRerand(const pair<ZZ,ZZ> &c0, const pair<ZZ,ZZ> &c1) const       
+{
+	return rerand(mult(c0,c1));
+}
+
 
 ElGamal_priv::ElGamal_priv(const std::vector<NTL::ZZ> &sk)
     : ElGamal({sk[0],sk[1],sk[2]}), x(sk[3])
