@@ -1,4 +1,5 @@
 #include <mpc/millionaire.hh>
+#include <algorithm>                
 
 using namespace std;
 using namespace NTL;
@@ -41,7 +42,8 @@ Millionaire_Bob::Millionaire_Bob(const vector<ZZ> &pp)
 {
 	
 }
-
+int rndGen (int n) { return RandomBnd(n);} 
+  
 vector< pair<ZZ,ZZ> > Millionaire_Bob::encryptRound(const vector< array<pair<ZZ,ZZ>,2> > &T, unsigned int nbits,const ZZ &y) 
 {        
 	vector< pair<ZZ,ZZ> >C(nbits);  
@@ -59,7 +61,7 @@ vector< pair<ZZ,ZZ> > Millionaire_Bob::encryptRound(const vector< array<pair<ZZ,
 		buffer = nBuffer;
 	}
 	    
-	// ATTENTION     
-	// this is not secure : we still have to do a permutation over C
+	random_shuffle(C.begin(),C.end(),rndGen);
+
 	return C;
 }
