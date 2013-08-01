@@ -1,0 +1,12 @@
+OBJDIRS     += mpc
+MPCSRC  := millionaire.cc 
+
+all:    $(OBJDIR)/libmpc.so
+$(OBJDIR)/libmpc.so: $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC)) $(OBJDIR)/libcrypto.so
+	$(CXX) -shared -o $@ $^ $(LDFLAGS) -lgmp -lgmpxx -lcrypto
+
+all:	$(OBJDIR)/mpc/test_mpc 
+$(OBJDIR)/mpc/test_mpc: $(OBJDIR)/mpc/test_mpc.o $(OBJDIR)/libmpc.so
+	$(CXX) $< -o $@ $(LDFLAGS) -lmpc\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp 
+# vim: set noexpandtab:
