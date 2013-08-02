@@ -56,6 +56,7 @@ test_paillier()
 int
 main(int ac, char **av)
 {
+    SetSeed(to_ZZ(time(NULL)));
     test_elgamal();
 	test_paillier();
 	

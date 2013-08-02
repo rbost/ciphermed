@@ -28,6 +28,8 @@ static void test_millionaire()
 
 int main(int ac, char **av)
 {            
+    SetSeed(to_ZZ(time(NULL)));
+
 	test_millionaire();
 	
 	return 0;
