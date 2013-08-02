@@ -54,7 +54,8 @@ vector< pair<ZZ,ZZ> > Millionaire_Bob::encryptRound(const vector< array<pair<ZZ,
 		long b = bit(y,nbits-1-i);
 		pair<ZZ,ZZ> nBuffer =  eg_.mult(buffer, T[nbits-1-i][b]);
 		if(b == 0){        
-			C[i] = eg_.multAndRerand(buffer, T[nbits-1-i][1]); 
+			C[i] = eg_.mult(buffer, T[nbits-1-i][1]);
+			C[i] = eg_.scalarize(C[i]);
 		}else{
 			C[i] = eg_.randEncrypt();		
 		}

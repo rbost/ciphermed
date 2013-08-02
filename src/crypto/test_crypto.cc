@@ -20,18 +20,17 @@ test_elgamal()
     ElGamal p(pk);
     
     ZZ pt0 = RandomLen_ZZ(256);
-    ZZ pt1 = RandomLen_ZZ(256);
-    
+    ZZ pt1 = RandomLen_ZZ(256);    
 
     pair<ZZ,ZZ> ct0 = p.encrypt(pt0);
     pair<ZZ,ZZ> ct1 = p.encrypt(pt1);
     pair<ZZ,ZZ> prod = p.mult(ct0, ct1);
-	pair<ZZ,ZZ> rerand = p.rerand(ct0);
+	pair<ZZ,ZZ> scal = p.scalarize(p.encrypt(to_ZZ(1)));
 
     assert(pp.decrypt(ct0) == pt0);
     assert(pp.decrypt(ct1) == pt1);
     assert(pp.decrypt(prod) == (pt0 * pt1));
-    assert(pp.decrypt(rerand) == pt0);
+    assert(pp.decrypt(scal) == pt0);
 }
 
 static void

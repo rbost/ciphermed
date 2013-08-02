@@ -67,7 +67,7 @@ pair<ZZ,ZZ> ElGamal::mult(const pair<ZZ,ZZ> &c0, const pair<ZZ,ZZ> &c1) const
     return pair<ZZ,ZZ> (m1,m2);
 }
 
-pair<ZZ,ZZ> ElGamal::rerand(const pair<ZZ,ZZ> &c) const
+pair<ZZ,ZZ> ElGamal::scalarize(const pair<ZZ,ZZ> &c) const
 {                 
 	ZZ k = RandomLen_ZZ(qbits) % q;
     ZZ m1 = PowerMod(get<0>(c),k,p);
@@ -75,12 +75,6 @@ pair<ZZ,ZZ> ElGamal::rerand(const pair<ZZ,ZZ> &c) const
     
     return pair<ZZ,ZZ> (m1,m2);
 }
-
-pair<ZZ,ZZ> ElGamal::multAndRerand(const pair<ZZ,ZZ> &c0, const pair<ZZ,ZZ> &c1) const       
-{
-	return rerand(mult(c0,c1));
-}
-
 
 ElGamal_priv::ElGamal_priv(const std::vector<NTL::ZZ> &sk)
     : ElGamal({sk[0],sk[1],sk[2]}), x(sk[3])

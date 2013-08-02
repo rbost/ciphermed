@@ -11,8 +11,7 @@ public:
     std::pair<NTL::ZZ,NTL::ZZ> encrypt(const NTL::ZZ &plaintext);
     std::pair<NTL::ZZ,NTL::ZZ> randEncrypt();
     std::pair<NTL::ZZ,NTL::ZZ> mult(const std::pair<NTL::ZZ,NTL::ZZ> &c0, const std::pair<NTL::ZZ,NTL::ZZ> &c1) const;
-	std::pair<NTL::ZZ,NTL::ZZ> rerand(const std::pair<NTL::ZZ,NTL::ZZ> &c) const;
-	std::pair<NTL::ZZ,NTL::ZZ> multAndRerand(const std::pair<NTL::ZZ,NTL::ZZ> &c0, const std::pair<NTL::ZZ,NTL::ZZ> &c1) const;
+	std::pair<NTL::ZZ,NTL::ZZ> scalarize(const std::pair<NTL::ZZ,NTL::ZZ> &c) const;
 
     void rand_gen(size_t niter = 100, size_t nmax = 1000);
 
