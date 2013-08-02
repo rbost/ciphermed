@@ -11,6 +11,9 @@ class Paillier {
 
     NTL::ZZ encrypt(const NTL::ZZ &plaintext);
     NTL::ZZ add(const NTL::ZZ &c0, const NTL::ZZ &c1) const;
+    NTL::ZZ constMult(const NTL::ZZ &m, const NTL::ZZ &c) const;
+    NTL::ZZ constMult(long m, const NTL::ZZ &c) const;
+    NTL::ZZ constMult(const NTL::ZZ &c, long m) const { return constMult(m,c); };
 
     void rand_gen(size_t niter = 100, size_t nmax = 1000);
 

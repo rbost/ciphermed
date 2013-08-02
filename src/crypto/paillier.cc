@@ -51,6 +51,18 @@ Paillier::add(const ZZ &c0, const ZZ &c1) const
     return MulMod(c0, c1, n2);
 }
 
+ZZ
+Paillier::constMult(const ZZ &m, const ZZ &c) const
+{
+    return PowerMod(c, m, n2);
+}
+
+ZZ
+Paillier::constMult(long m, const ZZ &c) const
+{
+    return PowerMod(c, m, n2);
+}
+
 
 /*
  * Private-key operations

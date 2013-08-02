@@ -44,13 +44,17 @@ test_paillier()
 
     ZZ pt0 = RandomLen_ZZ(256);
     ZZ pt1 = RandomLen_ZZ(256);
+    ZZ m = RandomLen_ZZ(256);
 
     ZZ ct0 = p.encrypt(pt0);
     ZZ ct1 = p.encrypt(pt1);
     ZZ sum = p.add(ct0, ct1);
+    ZZ prod = p.constMult(m,ct0);
+    
     assert(pp.decrypt(ct0) == pt0);
     assert(pp.decrypt(ct1) == pt1);
     assert(pp.decrypt(sum) == (pt0 + pt1));
+    assert(pp.decrypt(prod) == m*pt0);
 }
 
 int
