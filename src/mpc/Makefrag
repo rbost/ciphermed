@@ -1,5 +1,5 @@
 OBJDIRS     += mpc
-MPCSRC  := millionaire.cc 
+MPCSRC  := millionaire.cc svm_classifier.cc
 
 all:    $(OBJDIR)/libmpc.so
 $(OBJDIR)/libmpc.so: $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC)) $(OBJDIR)/libcrypto.so

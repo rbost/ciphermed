@@ -1,3 +1,5 @@
+#pragma once
+
 #include <NTL/ZZ.h>
 #include <vector>
 #include <list>
