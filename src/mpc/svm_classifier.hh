@@ -1,6 +1,7 @@
 #include <NTL/ZZ.h>
 #include <vector>
 #include <array>
+#include <utility>
 #include <mpc/millionaire.hh>
 #include <crypto/paillier.hh>
 
@@ -26,7 +27,7 @@ class SimpleClassifier_Server {
 public:
     SimpleClassifier_Server(const std::vector<long> v);
     
-    NTL::ZZ randomizedDotProduct(std::vector<NTL::ZZ> &vec, const std::vector<NTL::ZZ> &pk_paillier,size_t *i_query);
+    std::vector<std::pair<size_t,NTL::ZZ> > randomizedDotProduct(std::vector<NTL::ZZ> &vec, size_t nQueries, const std::vector<NTL::ZZ> &pk_paillier);
 
     std::vector< std::pair<NTL::ZZ,NTL::ZZ> > compareRandomness(const std::vector< std::array<std::pair<NTL::ZZ,NTL::ZZ>,2> > &T,const std::vector<NTL::ZZ> &mil_pubparam, size_t i_query);
     

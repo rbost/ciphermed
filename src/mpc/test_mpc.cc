@@ -27,34 +27,50 @@ static void test_millionaire()
 	assert( b == (x > y));
 }
 
-void test_simple_svm()
+static void test_simple_svm()
 {
     SimpleClassifier_Client client;
 
     unsigned int nbits = 256;
-    unsigned int m_size = 20;
+    unsigned int m_size = 5;
+    size_t nQueries = 5;
 
     srand(time(NULL));
     vector<long> model(m_size);
     vector<ZZ> test(m_size);
     
     // we don't need a good quality of randomness for testing -> use rand()
-    for (size_t i = 0; i < model.size(); i++) {
+    for (size_t i = 0; i < m_size; i++) {
         model[i] = rand();
         test[i] = to_ZZ(rand());
     }
 
     SimpleClassifier_Server server(model);    
-    
+    cout << "Start encryption ... " << flush;
     vector<ZZ> enc = client.encryptVector(test);
+    cout << " done"<<endl;
     
-    size_t index;
-    ZZ randomized_result = server.randomizedDotProduct(enc,client.paillierPubKey(),&index);
-    vector<array <pair<ZZ,ZZ>,2> >tmp_mil1 = client.decryptAndStartMillionaire(randomized_result);
+    cout << "Computing randomized dot products ... " << flush;
+    vector<pair<size_t,ZZ> > randomized_results = server.randomizedDotProduct(enc, nQueries, client.paillierPubKey());
+    cout << " done"<<endl;
+
+    size_t posCount = 0, negCount = 0;
+    for (size_t i = 0; i < nQueries; i++) {
+        size_t index = get<0>(randomized_results[i]);
+        ZZ rand_val = get<1>(randomized_results[i]);
         
-    vector< pair<ZZ,ZZ> >tmp_mil2 = server.compareRandomness(tmp_mil1,client.millionairePubParam(),index);
-    
-    bool mpc_sign = client.compareResult(tmp_mil2);
+        cout << "Starting millionaires' protocol " << i << endl;
+        vector<array <pair<ZZ,ZZ>,2> >tmp_mil1 = client.decryptAndStartMillionaire(rand_val);
+        
+        cout << "Server's turn" <<endl;
+        vector< pair<ZZ,ZZ> >tmp_mil2 = server.compareRandomness(tmp_mil1,client.millionairePubParam(),index);
+        
+        cout << "Client's final round"<<endl;
+        bool mpc_sign = client.compareResult(tmp_mil2);
+        cout << "Protocol completed" << endl;
+        
+        mpc_sign ? posCount++ : negCount++;
+    }
     
     ZZ v;
     
@@ -62,14 +78,18 @@ void test_simple_svm()
         v += model[i]*test[i];
     }
     
-    assert(sign == (v > 0));
+    cout << posCount << " positive results\n";
+    cout << negCount << " negative results\n";
+    cout << "Real result is " << ((v>0)? "positive" : "negative") << endl;
+    
+    assert((posCount >= negCount) == (v > 0));
 }
 
 int main(int ac, char **av)
 {            
     SetSeed(to_ZZ(time(NULL)));
 
-	test_millionaire();
+//	test_millionaire();
 	test_simple_svm();
 
 	return 0;

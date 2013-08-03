@@ -38,30 +38,37 @@ SimpleClassifier_Server::SimpleClassifier_Server(const std::vector<long> v)
 {
 }
 
-ZZ SimpleClassifier_Server::randomizedDotProduct(vector<ZZ> &vec, const vector<ZZ> &pk_paillier, size_t *i_query)
+vector<pair<size_t,ZZ> > SimpleClassifier_Server::randomizedDotProduct(vector<ZZ> &vec, size_t nQueries, const vector<ZZ> &pk_paillier)
 {
     assert(vec.size() == m_length_);
     ZZ n = pk_paillier[0];
     Paillier p(pk_paillier);
     
-    ZZ val = p.encrypt(to_ZZ(0));
-
-    for (size_t i = 0; i < m_length_; i++) {
-        val = p.add(val,  p.constMult(model_[i],vec[i]));
+    vector<pair<size_t,ZZ> >values(nQueries);
+    for (size_t i = 0; i < nQueries; i++) {
+        
+        ZZ val = p.encrypt(to_ZZ(0));
+        size_t i_query;
+        
+        for (size_t i = 0; i < m_length_; i++) {
+            val = p.add(val,  p.constMult(model_[i],vec[i]));
+        }
+        
+        ZZ rnd = RandomBnd(n);
+        val = p.add(val, p.encrypt(rnd));
+        
+        // NOT THREAD SAFE
+        // add a lock here to allow concurrent queries
+        // {
+        randomness_.push_back(rnd);
+        i_query = queries_count_;
+        queries_count_++;
+        // }
+        
+        values[i] = make_pair(i_query,val);
     }
-    
-    ZZ rnd = RandomBnd(n);
-    val = p.add(val, p.encrypt(rnd));
-    
-    // NOT THREAD SAFE
-    // add a lock here to allow concurrent queries
-    // {
-    randomness_.push_back(rnd);
-    *i_query = queries_count_;
-    queries_count_++;
-    // }
-    
-    return val;
+
+    return values;
 }
 
 vector< pair<ZZ,ZZ> > SimpleClassifier_Server::compareRandomness(const vector< array<pair<ZZ,ZZ>,2> > &T,const std::vector<NTL::ZZ> &mil_pubparam, size_t i_query)
