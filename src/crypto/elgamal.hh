@@ -11,6 +11,7 @@ public:
     std::vector<NTL::ZZ> pubkey() const { return { p, g, h }; }
     
     std::pair<NTL::ZZ,NTL::ZZ> encrypt(const NTL::ZZ &plaintext);
+    std::pair<NTL::ZZ,NTL::ZZ> encrypt1();
     std::pair<NTL::ZZ,NTL::ZZ> randEncrypt();
     std::pair<NTL::ZZ,NTL::ZZ> mult(const std::pair<NTL::ZZ,NTL::ZZ> &c0, const std::pair<NTL::ZZ,NTL::ZZ> &c1) const;
 	std::pair<NTL::ZZ,NTL::ZZ> scalarize(const std::pair<NTL::ZZ,NTL::ZZ> &c) const;

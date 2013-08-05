@@ -48,7 +48,7 @@ vector< pair<ZZ,ZZ> > Millionaire_Bob::encryptRound(const vector< array<pair<ZZ,
 {        
 	vector< pair<ZZ,ZZ> >C(nbits);  
 	   
-	pair<ZZ,ZZ> buffer = eg_.encrypt(to_ZZ(1));
+	pair<ZZ,ZZ> buffer = eg_.encrypt1();
 	
 	for(unsigned int i = 0; i < nbits; i++){ 
 		long b = bit(y,nbits-1-i);

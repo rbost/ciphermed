@@ -59,6 +59,24 @@ pair<ZZ,ZZ> ElGamal::randEncrypt()
 	return encrypt(RandomLen_ZZ(qbits));
 }
 
+pair<ZZ,ZZ> ElGamal::encrypt1()
+{
+    auto i = rqueue.begin();
+    if (i != rqueue.end()) {
+        pair<ZZ,ZZ> rn = *i;
+        rqueue.pop_front();
+        
+        return rn;
+    } else {
+        ZZ r = RandomLen_ZZ(qbits) % (q-1) + 1;
+        
+        ZZ c1 = PowerMod(g,r,p);
+        ZZ c2 = PowerMod(h,r,p);
+        
+        return pair<ZZ,ZZ>(c1,c2);
+    }
+}
+
 pair<ZZ,ZZ> ElGamal::mult(const pair<ZZ,ZZ> &c0, const pair<ZZ,ZZ> &c1) const
 {
     ZZ m1 = MulMod(get<0>(c0),get<0>(c1),p);
