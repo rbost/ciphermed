@@ -55,8 +55,9 @@ pair<ZZ,ZZ> ElGamal::encrypt(const ZZ &plaintext)
 }
 
 pair<ZZ,ZZ> ElGamal::randEncrypt()
-{                           
-	return encrypt(RandomLen_ZZ(qbits));
+{
+    ZZ rnd = RandomBnd(q-1) + 1; // 0 is not in the message space. 
+	return encrypt(rnd);
 }
 
 pair<ZZ,ZZ> ElGamal::encrypt1()
