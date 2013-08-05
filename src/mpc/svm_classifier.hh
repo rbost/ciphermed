@@ -2,6 +2,9 @@
 #include <vector>
 #include <array>
 #include <utility>
+#include <pthread.h>
+
+
 #include <mpc/millionaire.hh>
 #include <crypto/paillier.hh>
 
@@ -26,6 +29,7 @@ protected:
 class SimpleClassifier_Server {
 public:
     SimpleClassifier_Server(const std::vector<long> v);
+    ~SimpleClassifier_Server();
     
     std::vector<std::pair<size_t,NTL::ZZ> > randomizedDotProduct(std::vector<NTL::ZZ> &vec, size_t nQueries, const std::vector<NTL::ZZ> &pk_paillier);
 
@@ -36,5 +40,6 @@ protected:
     const size_t m_length_;
     size_t queries_count_;
     std::vector<NTL::ZZ> randomness_;
+    pthread_mutex_t mutex_queries_;
 };
 

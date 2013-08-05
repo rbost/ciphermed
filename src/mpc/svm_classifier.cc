@@ -36,6 +36,12 @@ bool SimpleClassifier_Client::compareResult(const vector< pair<ZZ,ZZ> > &c) cons
 SimpleClassifier_Server::SimpleClassifier_Server(const std::vector<long> v)
 : model_(v), m_length_(v.size()), queries_count_(0), randomness_(0)
 {
+    pthread_mutex_init(&mutex_queries_, NULL);
+}
+
+SimpleClassifier_Server::~SimpleClassifier_Server()
+{
+    pthread_mutex_destroy(&mutex_queries_);
 }
 
 vector<pair<size_t,ZZ> > SimpleClassifier_Server::randomizedDotProduct(vector<ZZ> &vec, size_t nQueries, const vector<ZZ> &pk_paillier)
@@ -57,13 +63,13 @@ vector<pair<size_t,ZZ> > SimpleClassifier_Server::randomizedDotProduct(vector<ZZ
         ZZ rnd = RandomBnd(n);
         val = p.add(val, p.encrypt(rnd));
         
-        // NOT THREAD SAFE
-        // add a lock here to allow concurrent queries
-        // {
+        pthread_mutex_lock(&mutex_queries_);
+        
         randomness_.push_back(rnd);
         i_query = queries_count_;
         queries_count_++;
-        // }
+        
+        pthread_mutex_unlock(&mutex_queries_);
         
         values[i] = make_pair(i_query,val);
     }
