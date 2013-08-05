@@ -35,6 +35,10 @@ bool Millionaire_Alice::decryptRound(const vector< pair<ZZ,ZZ> > &c) const
 	return false;
 }             
 
+void Millionaire_Alice::prepareRandomness(size_t nmax)
+{
+    eg_.rand_gen(nmax,nmax);
+}
 
 
 Millionaire_Bob::Millionaire_Bob(const vector<ZZ> &pp)
@@ -66,3 +70,9 @@ vector< pair<ZZ,ZZ> > Millionaire_Bob::encryptRound(const vector< array<pair<ZZ,
 
 	return C;
 }
+
+void Millionaire_Bob::prepareRandomness(size_t nmax)
+{
+    eg_.rand_gen(nmax,nmax);
+}
+

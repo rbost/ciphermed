@@ -22,7 +22,8 @@ public:
 	      
 	std::vector< std::array<std::pair<NTL::ZZ,NTL::ZZ>,2> > genTable(unsigned int nbits, const NTL::ZZ &x);
 	bool decryptRound(const std::vector< std::pair<NTL::ZZ,NTL::ZZ> > &c) const;
-	
+	void prepareRandomness(size_t nmax = 1000);
+    
 protected:
 	ElGamal_priv eg_;
 
@@ -33,7 +34,8 @@ public:
 	Millionaire_Bob(const std::vector<NTL::ZZ> &pp);
 
 	std::vector< std::pair<NTL::ZZ,NTL::ZZ> > encryptRound(const std::vector< std::array<std::pair<NTL::ZZ,NTL::ZZ>,2> > &T,unsigned int nbits, const NTL::ZZ &y);
-	
+    void prepareRandomness(size_t nmax = 1000);
+
 protected:
 	ElGamal eg_;
 	
