@@ -30,7 +30,7 @@ test_elgamal()
     assert(pp.decrypt(ct0) == pt0);
     assert(pp.decrypt(ct1) == pt1);
     assert(pp.decrypt(prod) == (pt0 * pt1));
-    assert(pp.decrypt(scal) == pt0);
+    assert(pp.decrypt(scal) == to_ZZ(1));
 }
 
 static void
@@ -40,11 +40,12 @@ test_paillier()
     Paillier_priv pp(sk);
 
     auto pk = pp.pubkey();
+    ZZ n = pk[0];
     Paillier p(pk);
 
-    ZZ pt0 = RandomLen_ZZ(256);
-    ZZ pt1 = RandomLen_ZZ(256);
-    ZZ m = RandomLen_ZZ(256);
+    ZZ pt0 = RandomBnd(n);
+    ZZ pt1 = RandomBnd(n);
+    ZZ m = RandomBnd(n);
 
     ZZ ct0 = p.encrypt(pt0);
     ZZ ct1 = p.encrypt(pt1);
@@ -53,8 +54,8 @@ test_paillier()
     
     assert(pp.decrypt(ct0) == pt0);
     assert(pp.decrypt(ct1) == pt1);
-    assert(pp.decrypt(sum) == (pt0 + pt1));
-    assert(pp.decrypt(prod) == m*pt0);
+    assert(pp.decrypt(sum) == AddMod(pt0, pt1,n));
+    assert(pp.decrypt(prod) == MulMod(m,pt0,n));
 }
 
 int

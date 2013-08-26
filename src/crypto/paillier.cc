@@ -159,5 +159,8 @@ Paillier_priv::decrypt(const ZZ &ciphertext) const
     CRT(m, pq, mp, p);
     CRT(m, pq, mq, q);
 
+    if (m < 0)
+        return AddMod(m,pq,pq);
+    
     return m;
 }
