@@ -31,8 +31,7 @@ static void test_simple_svm()
 {
     SimpleClassifier_Client client;
 
-    unsigned int nbits = 256;
-    unsigned int m_size = 5;
+    unsigned int m_size = 10;
     size_t nQueries = 5;
 
     srand(time(NULL));
@@ -41,18 +40,29 @@ static void test_simple_svm()
     
     // we don't need a good quality of randomness for testing -> use rand()
     for (size_t i = 0; i < m_size; i++) {
-        model[i] = rand();
+        model[i] = ((i % 2)? 1 : -1)*rand();
         test[i] = to_ZZ(rand());
     }
+    
+    ZZ v;
+    
+    for (size_t i = 0; i < model.size(); i++) {
+        v += model[i]*test[i];
+    }
+    
+    cout << "\n\nv = " << v << "\n\n";
 
-    SimpleClassifier_Server server(model);    
+    SimpleClassifier_Server server(model);
     cout << "Start encryption ... " << flush;
     vector<ZZ> enc = client.encryptVector(test);
     cout << " done"<<endl;
     
-    cout << "Computing randomized dot products ... " << flush;
-    vector<pair<size_t,ZZ> > randomized_results = server.randomizedDotProduct(enc, nQueries, client.paillierPubKey());
-    cout << " done"<<endl;
+    cout << "Computing randomized dot products ... " << endl;
+    
+//    vector<pair<size_t,ZZ> > randomized_results = server.randomizedDotProduct(enc, nQueries, client.paillierPubKey());
+    vector<pair<size_t,ZZ> > randomized_results = server.randomizedDotProduct_smallError(enc, nQueries, client.paillierPubKey(),to_ZZ(0));
+
+    cout << "... done\n"<<endl;
 
     size_t posCount = 0, negCount = 0;
     for (size_t i = 0; i < nQueries; i++) {
@@ -67,15 +77,9 @@ static void test_simple_svm()
         
         cout << "Client's final round"<<endl;
         bool mpc_sign = client.compareResult(tmp_mil2);
-        cout << "Protocol completed" << endl;
+        cout << "Protocol completed \n" << endl;
         
         mpc_sign ? posCount++ : negCount++;
-    }
-    
-    ZZ v;
-    
-    for (size_t i = 0; i < model.size(); i++) {
-        v += model[i]*test[i];
     }
     
     cout << posCount << " positive results\n";

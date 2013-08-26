@@ -32,6 +32,7 @@ public:
     ~SimpleClassifier_Server();
     
     std::vector<std::pair<size_t,NTL::ZZ> > randomizedDotProduct(std::vector<NTL::ZZ> &vec, size_t nQueries, const std::vector<NTL::ZZ> &pk_paillier);
+    std::vector<std::pair<size_t,NTL::ZZ> > randomizedDotProduct_smallError(std::vector<NTL::ZZ> &vec, size_t nQueries, const std::vector<NTL::ZZ> &pk_paillier, const NTL::ZZ &errorBound);
 
     std::vector< std::pair<NTL::ZZ,NTL::ZZ> > compareRandomness(const std::vector< std::array<std::pair<NTL::ZZ,NTL::ZZ>,2> > &T,const std::vector<NTL::ZZ> &mil_pubparam, size_t i_query);
     

@@ -24,7 +24,7 @@ vector<ZZ> SimpleClassifier_Client::encryptVector(const vector<ZZ> &vec)
 vector<array <pair<ZZ,ZZ>,2> > SimpleClassifier_Client::decryptAndStartMillionaire(const ZZ &c)
 {
     ZZ v = paillier_.decrypt(c);
-    return millionaire_.genTable(NumBits(c),v);
+    return millionaire_.genTable(NumBits(v),v);
 }
 
 bool SimpleClassifier_Client::compareResult(const vector< pair<ZZ,ZZ> > &c) const
@@ -76,7 +76,64 @@ vector<pair<size_t,ZZ> > SimpleClassifier_Server::randomizedDotProduct(vector<ZZ
         
         values[i] = make_pair(i_query,val);
     }
+    
+    return values;
+}
 
+vector<pair<size_t,ZZ> > SimpleClassifier_Server::randomizedDotProduct_smallError(vector<ZZ> &vec, size_t nQueries, const vector<ZZ> &pk_paillier, const ZZ &errorBound)
+{
+    assert(vec.size() == m_length_);
+    
+    ZZ n = pk_paillier[0];
+    Paillier p(pk_paillier);
+    
+    vector<pair<size_t,ZZ> >values(nQueries);
+    ZZ result = p.encrypt(to_ZZ(0));
+    
+    for (size_t i = 0; i < m_length_; i++) {
+        result = p.add(result,  p.constMult(model_[i],vec[i]));
+    }
+    
+    ZZ L;
+    
+    if (errorBound < 0) {
+        L = -errorBound;
+    }else if(errorBound > 0){
+        L = errorBound;
+    }else{
+        // if the given error bound is 0, compute the L_2 norm of the model and set L to be 2^(100)*norm
+        
+        ZZ B;
+        
+        for (size_t i = 0; i < m_length_; i++) {
+            B += model_[i]*model_[i];
+        }
+        
+        L = B << 100;
+        
+        cout << "B = " << B;
+        cout << "\nL = " << L << endl;
+    }
+    
+    for (size_t i = 0; i < nQueries; i++) {
+        
+        size_t i_query;
+        
+        ZZ val;
+        ZZ rnd = RandomBnd(L);
+        val = p.add(result, p.encrypt(rnd));
+        
+        pthread_mutex_lock(&mutex_queries_);
+        
+        randomness_.push_back(rnd);
+        i_query = queries_count_;
+        queries_count_++;
+        
+        pthread_mutex_unlock(&mutex_queries_);
+        
+        values[i] = make_pair(i_query,val);
+    }
+    
     return values;
 }
 
