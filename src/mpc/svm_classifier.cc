@@ -47,21 +47,24 @@ SimpleClassifier_Server::~SimpleClassifier_Server()
 vector<pair<size_t,ZZ> > SimpleClassifier_Server::randomizedDotProduct(vector<ZZ> &vec, size_t nQueries, const vector<ZZ> &pk_paillier)
 {
     assert(vec.size() == m_length_);
+
     ZZ n = pk_paillier[0];
     Paillier p(pk_paillier);
     
     vector<pair<size_t,ZZ> >values(nQueries);
+    ZZ result = p.encrypt(to_ZZ(0));
+    
+    for (size_t i = 0; i < m_length_; i++) {
+        result = p.add(result,  p.constMult(model_[i],vec[i]));
+    }
+    
     for (size_t i = 0; i < nQueries; i++) {
         
-        ZZ val = p.encrypt(to_ZZ(0));
         size_t i_query;
         
-        for (size_t i = 0; i < m_length_; i++) {
-            val = p.add(val,  p.constMult(model_[i],vec[i]));
-        }
-        
+        ZZ val;
         ZZ rnd = RandomBnd(n);
-        val = p.add(val, p.encrypt(rnd));
+        val = p.add(result, p.encrypt(rnd));
         
         pthread_mutex_lock(&mutex_queries_);
         
