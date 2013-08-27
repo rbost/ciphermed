@@ -27,12 +27,9 @@ static void test_millionaire()
 	assert( b == (x > y));
 }
 
-static void test_simple_svm()
+static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10, size_t nQueries = 5)
 {
     SimpleClassifier_Client client;
-
-    unsigned int m_size = 10;
-    size_t nQueries = 5;
 
     srand(time(NULL));
     vector<long> model(m_size);
@@ -59,8 +56,13 @@ static void test_simple_svm()
     
     cout << "Computing randomized dot products ... " << endl;
     
-//    vector<pair<size_t,ZZ> > randomized_results = server.randomizedDotProduct(enc, nQueries, client.paillierPubKey());
-    vector<pair<size_t,ZZ> > randomized_results = server.randomizedDotProduct_smallError(enc, nQueries, client.paillierPubKey(),to_ZZ(0));
+    vector<pair<size_t,ZZ> > randomized_results;
+    if (useSmallError) {
+        cout << "Use small error" << endl;
+        randomized_results = server.randomizedDotProduct_smallError(enc, nQueries, client.paillierPubKey(),to_ZZ(0));
+    }else{
+        randomized_results = server.randomizedDotProduct(enc, nQueries, client.paillierPubKey());
+    }
 
     cout << "... done\n"<<endl;
 
