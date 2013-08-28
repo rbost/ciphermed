@@ -212,7 +212,9 @@ can express the decision function as a product of dot products:
 \end{equation*}
 
       
-\paragraph{Proposed solution:}
+\subsubsection{First solution} % (fold)
+\label{ssub:bayes_solution_1}
+
 Very briefly, here is a solution we have (it has a few rough ends to improve, but it works): It uses the SIMD operations which can actually save us $c$ times computation and storage!
 
 Consider the data at the server in a table with $k$ columns (corresponding to classes -- possible outcomes of the decision) and $N$ rows, the size of domain of feature values. 
@@ -226,7 +228,45 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
  First, the server chooses a random permutation $P$, and permutes the values in the SIMD slots, using SIMD permutations.
  
  Then, the client and the server will run an oblivious sorting network in a non-traditional way. At a very high level, the server will compute encryptions of $\fheenc(p(x, i_1) - p(x, j_1) | p(x, i_2) - p(x, j_2) | \dots )$ using SIMD operations for various stages of the oblivious sorting. Then, the client and the server will run the same protocol we have for the SVM classifier so that the client determines if each difference is positive or negative.  The client does not tell the server the outcome of the differences (based on our previous protocol), but can nevertheless compute which was the maximum entry based on these differences. Say $r$-th entry was the maximum. The client tells $r$ to the server, who answers with the unpermuted $r$, $P^{-1}(r)$, which contains the result of the classification.
-  
+   
+% subsubsection bayes_solution_1 (end)
+
+\subsubsection{Second solution} % (fold)
+\label{ssub:bayes_solution_2}
+	Here is an other solution that uses FHE (and can use SIMD operations too).
+	
+	The server's input are the $kN$ values $\{p(x_j|c_i)\}_{i,j}$ and the $k$ values $\{p(c_i)\}$; the client's input is a subset of feature values.
+	
+	\begin{enumerate}
+		\item Setup: the server generates a key pair for the encryption scheme and publishes the public key. The server encrypts all the input values with this key and publishes them.
+		
+		\item Using the homomorphic properties of the scheme, the client computes the encryption of the $p(x,c_i)$'s.
+		
+		\item At this point, the client needs to get the index of the maximum value (the argmax). To do so, the client will run a protocol similar to the one described by Kaghazgaran and Sadeghyan (cf. related work).\\
+		The client picks a random value $R$ and adds it to each of the computed values. The client chooses a random permutation $\pi$ over $\{1,...,k\}$ and sends the permuted encryptions to the server.
+		
+		\item The server decrypts them, compute the argmax and return the result $\tilde{i_0}$ to the client.
+		
+		\item The client get the argmax $i_0 = \pi^{-1}(\tilde{i_0})$  
+	\end{enumerate}
+	
+	We can notice here that, if instead of encrypting $p(x_j|c_i)$, we encrypt $\log p(x_j|c_i)$, we replace all the multiplications we need to compute $p(x,c_i)$'s by additions. Thus, we don't really need an FHE scheme, a linearly homomorphic scheme (as Paillier) is sufficient. 
+	
+	The small size of FHE plaintexts can cause some issues when adding the random noise $R$: the actual maximum can ``overflow'' and thus become the minimum ...
+	
+	$O(kN)$ communication complexity; $(N+1)k$ encryptions and $k$ decryptions done by the server; $k(n+1)$ homomorphic operations done on the cyphertexts by the client.
+	
+	  
+% subsubsection bayes_solution_2 (end)
+          
+\subsubsection{Problems to solve} % (fold)
+\label{ssub:problems_bayes}
+\paragraph{Working with floating point numbers:} We need to find a ``good'' representation of floats for the probabilities, that supports encryption and operations. As the encryption schemes we are using are using integer plaintexts, we have to represent floats as integers. 
+
+The precision of the floats is also an important point as the plaintext space of FHE schemes is small compared to more usual schemes. This is why using logs of probabilities is interesting: we can work with much higher precision. 
+
+% subsubsection problems_bayes (end)
+
 \section{Related Work} % (fold)
 \label{sec:related_work}
         
@@ -277,7 +317,9 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 	
 	\item [An Efficient Solution to The Millionaires’ Problem Based on Homomorphic Encryption](\emph{Lin, Tzeng})
 	\\ \href{http://eprint.iacr.org/2005/043.pdf}{Link}
-	
+	                
+	\item [Secure Two Party Comparison over Encrypted Data](\emph{Kaghazgaran, Sadeghyan})
+	\\ \href{http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6141405&tag=1}{Link}
 \end{description}
 
 
