@@ -189,6 +189,14 @@ However, repeating the experiment, leaks some informations about $r$: $\mathbb{E
 
 \rbnote{We should also have this issue when we repeat the previous protocol.}
 
+\subsubsection{Bounding the noise} % (fold)
+\label{ssub:bounding_the_noise}
+	
+	In order to avoid overflows when adding noise, one can bound it: if $\mathcal{D}$ is bounded by $B$, we choose $L > 0$ s.t. $L + B \leq q/2$, pick $\varepsilon'$ in $[-L,L]$ and set $\varepsilon = q/2 + \varepsilon'$. Thus, $r + \varepsilon$ does not leak information about $r$ unless $|r + \varepsilon'| < L$, which happens with probability at most $\frac{B}{L}$ (we can choose $L >> B$ to make this probability negligible).
+	
+	This approach is interesting if we can set $L$ to be a lot smaller than $q$: instead of comparing $\log q$ bits using the millionaires' protocol, we can compare only $\log L$ bits.  
+	
+% subsubsection bounding_the_noise (end)
 
 \subsection{Na\"ive Bayes solution}
 
