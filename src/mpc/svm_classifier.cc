@@ -120,7 +120,7 @@ vector<pair<size_t,ZZ> > SimpleClassifier_Server::randomizedDotProduct_smallErro
         size_t i_query;
         
         ZZ val;
-        ZZ rnd = RandomBnd(L);
+        ZZ rnd = RandomBnd(2*L) - L + n/2;
         val = p.add(result, p.encrypt(rnd));
         
         pthread_mutex_lock(&mutex_queries_);
