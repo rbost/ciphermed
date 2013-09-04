@@ -203,6 +203,8 @@ However, repeating the experiment, leaks some informations about $r$: $\mathbb{E
 %For na\"ive Bayes, we need to convert the table of values into a matrix so we can FHE multiply it to the input $x$. TODO: we need to figure out how to compute the maximum of $k$ values over FHE, likely using the idea above which computes $\max$ of $q/2$ and $\res$.
 %
 \newcommand{\NB}{Na\"ive Bayes}
+      
+For a presentation of the \NB{} classifier, \emph{cf.} \href{http://www.cs.cmu.edu/~tom/mlbook/NBayesLogReg.pdf}{this} ML textbook. For an emphasize on the text classification, see \href{http://nlp.stanford.edu/IR-book/html/htmledition/naive-bayes-text-classification-1.html}{this document}.
 
 We now consider categorial \NB{}. Suppose we have $k$ classes and $n$ features.
 Then recall that a \NB{} classifier is parameterized by $\theta_{\mathcal{C}} =
@@ -337,7 +339,7 @@ The precision of the floats is also an important point as the plaintext space of
 	\item [State-of-the-art in Privacy Preserving Data Mining](\emph{Verykios, Bertino,Nai Fovino, Parasiliti Provenza, Saygin, Theodoridis})
 	\\ \href{http://www.sigmod.org/publications/sigmod-record/0403/B1.bertion-sigmod-record2.pdf}{Link}
 	
-	\item [An Efficient Solution to The Millionaires’ Problem Based on Homomorphic Encryption](\emph{Lin, Tzeng})
+	\item [An Efficient Solution to The Millionaires' Problem Based on Homomorphic Encryption](\emph{Lin, Tzeng})
 	\\ \href{http://eprint.iacr.org/2005/043.pdf}{Link}
 	                
 	\item [Secure Two Party Comparison over Encrypted Data](\emph{Kaghazgaran, Sadeghyan})
