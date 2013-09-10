@@ -264,7 +264,7 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 		% 		\item The client get the argmax $i_0 = \pi^{-1}(\tilde{i_0})$  
 	\end{enumerate}
 	
-	\paragraph{Comparing encrypted data}
+	\paragraph{Comparing encrypted data - first solution}
 	Suppose Bob has the secret key for an encryption scheme that supports homomorphic addition (FHE, Paillier, ...) and Alice has the encryption of two values $a$ and $b$ ($E(a), E(b)$). Alice wants to know if $a > b$, neither Alice or Bob should learn the value of $a$ or $b$.
 	\begin{itemize}
 		\item Alice picks a random $r$ and compute $C = E(a).E(b)^{-1}.E(r)$ and sends $C$ to Bob
@@ -273,13 +273,15 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 		
 		\item Alice and Bob initiate a regular millionaire's to compare $r$ and $c$ in a way that only Alice learns the result (the protocol presented by Lin \& Tzeng - cf. Related Work - satisfies the requirements). 
 	\end{itemize} 
-	
+	      	
 	We can notice here that, if instead of encrypting $p(x_j|c_i)$, we encrypt $\log p(x_j|c_i)$, we replace all the multiplications we need to compute $p(x,c_i)$'s by additions. Thus, we don't really need an FHE scheme, a linearly homomorphic scheme (as Paillier) is sufficient. 
 	
 	The small size of FHE plaintexts can cause some issues when adding the random noise $R$: the actual maximum can ``overflow'' and thus become the minimum ...
 	
 	$O(kN)$ communication complexity; $(N+1)k$ encryptions and $k$ decryptions done by the server; $k(n+1)$ homomorphic operations done on the cyphertexts by the client.
-	
+	   
+	\paragraph{Comparing encrypted data - second solution}
+	Use Veugen's result (\emph{cf.} Related Work) but modify it so that Alice (the client) gets the un-encrypted result. 
 	  
 % subsubsection bayes_solution_2 (end)
           
