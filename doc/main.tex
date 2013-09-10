@@ -312,10 +312,10 @@ The precision of the floats is also an important point as the plaintext space of
 	\end{itemize}
 	      
 	\paragraph{Security for Alice}
- 		We build a simulator that outputs an encryption $c''$ of a random element. As we suppose $\mathsf{E_2}$ to be semantically secure, Bob's real view and output (the pair $(c'',\tilde{c})$) is indistinguishable from the simulated view.
+ 		We build a simulator that produces an encryption $c''$ of a random element. As we suppose $\mathsf{E_2}$ to be semantically secure, Bob's real view and output (the tuple $(pk_1,pk_2,c,c'',\tilde{c})$) is indistinguishable from the simulated view.
 
 	\paragraph{Security for Bob}
-		The simulator sends a random encrypted element $c'$ to Alice which is statistically indistinguishable from the real $c'$ (as both encrypt a value coming from the same uniform distribution over the message space $M$). Thus, as $\mathsf{E_2}$ is semantically secure, the pair $(c',\tilde{c})$  generated in the ideal setting is indistinguishable from the real setting.  
+		The simulator sends a random encrypted element $c'$ to Alice which is statistically indistinguishable from the real $c'$ (as both encrypt a value coming from the same uniform distribution over the message space $M$). Thus, as $\mathsf{E_2}$ is semantically secure, the tuple $(sk_1,sk_2,c',\tilde{c})$  generated in the ideal setting is indistinguishable from the real setting.  
 
 % subsection changing_encryption_scheme (end)
 
