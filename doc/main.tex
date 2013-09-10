@@ -290,6 +290,35 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 The precision of the floats is also an important point as the plaintext space of FHE schemes is small compared to more usual schemes. This is why using logs of probabilities is interesting: we can work with much higher precision. 
 
 % subsubsection problems_bayes (end)
+        
+\section{Useful protocols} % (fold)
+\label{sec:useful_protocols}
+
+\subsection{Changing the encryption scheme} % (fold)
+\label{sub:changing_encryption_scheme}
+	Suppose we have two additively homomorphic encryption schemes $\mathsf{E_1}$ and $\mathsf{E_2}$ with the same message space $M$ and two parties Alice and Bob. Alice has the secret keys $sk_1$ and $sk_2$ for both schemes and Bob has a value encrypted with $\mathsf{E_1}$ with the public keys $pk_1$ and $pk_2$. We propose a protocol that enable Bob to get an encryption of its value under $\mathsf{E_2}$ without revealing anything to Alice. In the following, $*$ represents the homomorphic operation over cyphertexts. 
+	
+	\begin{itemize}
+		\item Alice's input: $(sk_1,sk_2)$; Bob's input: $(pk_1,pk_2,c)$ where $c$ is a cyphertext of $\mathsf{E_1}$ under public key $pk_1$.
+		   
+		\item Bob picks $r \leftarrow M$ uniformly at random, sets $c' = c * \mathsf{E_1.Enc}(r)$ and sends $c'$ to Alice.
+		
+		\item Alice decrypts $c'$, re-encrypts the result with the new encryption scheme and sends the new cyphertext $c'' = \mathsf{E_2.Enc}(\mathsf{E_1.Dec}(c'))$ to Bob.
+		
+		\item Bob outputs $\tilde{c} = c'' * \mathsf{E_2.Enc}(r)$  
+		
+	\end{itemize}
+	      
+	\paragraph{Security for Alice}
+ 		We build a simulator that outputs an encryption $c''$ of a random element. As we suppose $\mathsf{E_2}$ to be semantically secure, Bob's real view and output (the pair $(c'',\tilde{c})$) is indistinguishable from the simulated view.
+
+	\paragraph{Security for Bob}
+		The simulator sends a random encrypted element $c'$ to Alice which is statistically indistinguishable from the real $c'$ (as both encrypt a value coming from the same uniform distribution over the message space $M$). Thus, as $\mathsf{E_2}$ is semantically secure, the pair $(c',\tilde{c})$  generated in the ideal setting is indistinguishable from the real setting.  
+
+% subsection changing_encryption_scheme (end)
+
+% section useful_protocols (end)
+
 
 \section{Related Work} % (fold)
 \label{sec:related_work}
