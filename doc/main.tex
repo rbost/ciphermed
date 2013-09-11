@@ -33,8 +33,8 @@ We realized that using FHE for running the machine learning algorithm is not tha
 Using FHE here makes sense because we are going to use it for security benefits rather than performance benefits.
 
 
-\subsection{Our solution for hyperplane decision surfaces}
-\label{sub:hyperplane_decision}      
+\section{Our solution for hyperplane decision surfaces}
+\label{sec:hyperplane_decision}      
 
 \newcommand{\res}{\mathsf{res}}
 
@@ -60,6 +60,9 @@ Let $\res = \langle x,
 w \rangle$.
 
 The challenge is deciding if $\res > 0$. Simply giving the client $\enc(\res)$ leaks $\res$ to the client, which is more information about the model than the final decision.
+                            
+\subsection{First solution for comparison} % (fold)
+\label{sub:first_solution_for_comparison}
 
 Instead, the idea is for the server to choose a random $\epsilon \in \bbZ_q$ where $q$ is the space of the plaintext in FHE. The server computes $\enc(\epsilon + \res)$ and the client is able to decrypt this ciphertext and obtain $\epsilon + \res \mod q$, which information-theoretically leaks nothing about $\res$.
 
@@ -135,14 +138,16 @@ require $q \geq 7$ above, this is ok.
 
 %if r < q/2 :
 %if e < q/2 : correct result always
-%if e > q/2: correct result sometimes
+%if e > q/2: correct result sometimes  
+
+% subsection first_solution_for_comparison (end)
 
 \subsection{Another solution for rerandomization and comparison}
            
 \subsubsection{Description} 
-We propose an other protocol for the hyperplane decision surfaces. The idea is very similar to the one propose in section~\ref{sub:hyperplane_decision}.
+We propose an other protocol for the hyperplane decision surfaces. The idea is very similar to the one propose in section~\ref{sub:first_solution_for_comparison}.
 
-The server and the client do the same computations as in~\ref{sub:hyperplane_decision} so the server gets an encrypted version of $r$ under the client secret key. The client wants to know the sign of $v$ and we have to ensure server's security \emph{i.e.} the client can only learn the sign of $r$.
+The server and the client do the same computations as in~\ref{sec:hyperplane_decision} so the server gets an encrypted version of $r$ under the client secret key. The client wants to know the sign of $v$ and we have to ensure server's security \emph{i.e.} the client can only learn the sign of $r$.
 
 \begin{itemize}
 	\item The server choose $\varepsilon \getsr \bbZ_q$ and sends the encryption of $r + \varepsilon \mod q$ to the client who decrypts it.
@@ -202,7 +207,7 @@ However, repeating the experiment, leaks some informations about $r$: $\mathbb{E
 	
 % subsubsection bounding_the_noise (end)
 
-\subsection{Na\"ive Bayes solution}
+\section{Na\"ive Bayes}
 
 %For na\"ive Bayes, we need to convert the table of values into a matrix so we can FHE multiply it to the input $x$. TODO: we need to figure out how to compute the maximum of $k$ values over FHE, likely using the idea above which computes $\max$ of $q/2$ and $\res$.
 %
@@ -226,8 +231,8 @@ can express the decision function as a product of dot products:
 \end{equation*}
 
       
-\subsubsection{First solution} % (fold)
-\label{ssub:bayes_solution_1}
+\subsection{First solution} % (fold)
+\label{sub:bayes_solution_1}
 
 Very briefly, here is a solution we have (it has a few rough ends to improve, but it works): It uses the SIMD operations which can actually save us $c$ times computation and storage!
 
@@ -243,10 +248,10 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
  
  Then, the client and the server will run an oblivious sorting network in a non-traditional way. At a very high level, the server will compute encryptions of $\fheenc(p(x, i_1) - p(x, j_1) | p(x, i_2) - p(x, j_2) | \dots )$ using SIMD operations for various stages of the oblivious sorting. Then, the client and the server will run the same protocol we have for the SVM classifier so that the client determines if each difference is positive or negative.  The client does not tell the server the outcome of the differences (based on our previous protocol), but can nevertheless compute which was the maximum entry based on these differences. Say $r$-th entry was the maximum. The client tells $r$ to the server, who answers with the unpermuted $r$, $P^{-1}(r)$, which contains the result of the classification.
    
-% subsubsection bayes_solution_1 (end)
+% subsection bayes_solution_1 (end)
 
-\subsubsection{Second solution} % (fold)
-\label{ssub:bayes_solution_2}
+\subsection{Second solution} % (fold)
+\label{sub:bayes_solution_2}
 	Here is an other solution that uses FHE (and can use SIMD operations too).
 	
 	The server's input are the $kN$ values $\{p(x_j|c_i)\}_{i,j}$ and the $k$ values $\{p(c_i)\}$; the client's input is a subset of feature values.
@@ -287,15 +292,15 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 	\paragraph{Comparing encrypted data - second solution}
 	Use Veugen's result (\emph{cf.} Related Work) but modify it so that Alice (the client) gets the un-encrypted result. 
 	  
-% subsubsection bayes_solution_2 (end)
+% subsection bayes_solution_2 (end)
           
-\subsubsection{Problems to solve} % (fold)
-\label{ssub:problems_bayes}
+\subsection{Problems to solve} % (fold)
+\label{sub:problems_bayes}
 \paragraph{Working with floating point numbers:} We need to find a ``good'' representation of floats for the probabilities, that supports encryption and operations. As the encryption schemes we are using are using integer plaintexts, we have to represent floats as integers. 
 
 The precision of the floats is also an important point as the plaintext space of FHE schemes is small compared to more usual schemes. This is why using logs of probabilities is interesting: we can work with much higher precision. 
 
-% subsubsection problems_bayes (end)
+% subsection problems_bayes (end)
         
 \section{Useful protocols} % (fold)
 \label{sec:useful_protocols}
