@@ -301,7 +301,63 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 The precision of the floats is also an important point as the plaintext space of FHE schemes is small compared to more usual schemes. This is why using logs of probabilities is interesting: we can work with much higher precision. 
 
 % subsection problems_bayes (end)
-        
+
+\section{Decision trees} % (fold)
+\label{sec:decision_trees}
+
+\subsection{Principle} % (fold)
+\label{sub:decision_tree_principle}
+ 
+Some classifiers are based on decision trees. We can see those as binary trees whose leaves are the categories of the classifier and nodes are associated to a boolean variable (typically a comparison between a feature - e.g. the age of a patient - and a threshold). For example, in the figure~\ref{fig:decision_tree}, if the variable $b_1$ is true and $b_2$ is false, the associated category is category 2.   
+\begin{figure}[h]
+ \centering
+	\includegraphics[scale=0.7]{decision_tree.pdf}
+	\caption{A decision tree}
+	 \label{fig:decision_tree}
+\end{figure}
+
+The idea is that the tree is known by the server but has to remain private while the boolean variables are unknown to the server, as well as the associated category.
+
+Let us consider the function $f$ that takes as input the booleans $b_i$ maps them to the category in the decision tree. It is really easy to construct $f$ as multivariate polynomial in the $b_i$s whose degree is the depth of the decision tree (we can construct this polynomial recursively). For example, in the example of figure~\ref{fig:decision_tree}, we have:
+\[
+	f(b_1,b_2,b_3) = b_1(b_2.1 + (1-b_2).2) + (1-b_1)(b_3.3 + (1-b_3).4)
+\]          
+
+We use FHE to evaluate the polynomial over the encrypted $b_i$.
+% subsection decision_tree_principle (end)
+
+\subsection{Protocol} % (fold)
+\label{sub:decision_tree_protocol}
+
+\subsubsection{Using general FHE} % (fold)
+\label{ssub:using_general_fhe}
+	In this section, we consider an FHE scheme that is able to compute functions over integers (not only bits).
+	
+	As input, the server takes the polynomial $f$ corresponding to its decision tree, the public of the FHE scheme, and the encryption of each $b_i$ under this scheme. The server simply evaluates $f$ over these encrypted values using the the FHE scheme's evaluation function. It obtain the encryption of the category's index and sends it to the client (who has the secret key for the scheme).
+	
+	Security follows from the semantic security of the scheme. 
+% subsubsection using_general_fhe (end)                       
+
+\subsubsection{Using FHE over $\F_2$} % (fold)
+\label{ssub:using_fhe_over_f_2}
+We do not have to assume that we have access to a FHE scheme that can compute over integers: we can compute the result bit by bit using multiple polynomials similar to $f$. E.g. for the previous example, the polynomials over $\F_2$ are 
+\begin{align*}
+	f_0(b_1,b_2,b_3) &= b_1(b_2.0 + (1-b_2).1) + (1-b_1)(b_3.0 + (1-b_3).1) \\
+	f_1(b_1,b_2,b_3) &= b_1(b_2.0 + (1-b_2).0) + (1-b_1)(b_3.1 + (1-b_3).1) \\
+\end{align*} 
+
+In this case, we can even use an additional trick: if the scheme supports SIMD slots (as in~\cite{GHS12}), we can evaluate the polynomial
+	\[
+		\tilde{f}(b_1,b_2,b_3,c_1,c_2,c_3,c_4) =  b_1(b_2.c_1 + (1-b_2).c_2) + (1-b_1)(b_3.c_3 + (1-b_3).c_4)
+	\]
+for each bit of the result in parallel. The resulting cyphertext will contain the bits of the result, one bit per slot.      
+
+% subsubsection using_fhe_over_f_2 (end)
+
+% subsection decision_tree_protocol (end)
+
+% section decision_trees (end)                                 
+
 \section{Useful protocols} % (fold)
 \label{sec:useful_protocols}
 
@@ -334,7 +390,7 @@ For the proofs of security, we show that whatever a party can compute from its v
 \label{sub:comparing_encrypted_data}
 	This is a modification of Veugen's work in \cite{Veugen}. 
 	
-	For the naive Bayes classifier (see \ref{ssub:bayes_solution_2}), we want a protocol that obliviously compares encrypted data. Protocol 1 (Client-server comparison) in~\cite{Veugen} is almost what we are looking for, except that A (the party who has the encrypted data without the decryption key) gets an encrypted version of the comparison result. Thus we slightly modify the protocol so that A gets the result in the clear.
+	For the naive Bayes classifier (see \ref{sub:bayes_solution_2}), we want a protocol that obliviously compares encrypted data. Protocol 1 (Client-server comparison) in~\cite{Veugen} is almost what we are looking for, except that A (the party who has the encrypted data without the decryption key) gets an encrypted version of the comparison result. Thus we slightly modify the protocol so that A gets the result in the clear.
 	
 	In the modified protocol, B no longer has the secret key for the QR (GGM) cryptosystem, A does. So A and B run the LSIC protocol (as defined in~\cite{Veugen}) so that B gets the encrypted bit $[t']$ (encrypting $(d < c)$). Then, we reverse the roles of A and B: 
 	\begin{itemize}
