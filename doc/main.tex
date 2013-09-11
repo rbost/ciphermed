@@ -6,6 +6,10 @@
 
 \newcommand{\mysection}[1]{\vspace{3mm}\noindent\textbf{#1} \\}
 \DeclareMathOperator*{\argmax}{\mathsf{argmax}}
+ 
+\usepackage{stmaryrd}
+\newcommand{\llb}{\llbracket}    
+\newcommand{\rrb}{\rrbracket}    
 
 \title{Notes}
 
@@ -296,6 +300,8 @@ The precision of the floats is also an important point as the plaintext space of
 \section{Useful protocols} % (fold)
 \label{sec:useful_protocols}
 
+For the proofs of security, we show that whatever a party can compute from its view of the protocol can be computed from its input and its output (see Definition 7.2.1 in \cite{Goldreich2}).                                
+
 \subsection{Changing the encryption scheme} % (fold)
 \label{sub:changing_encryption_scheme}
 	Suppose we have two additively homomorphic encryption schemes $\mathsf{E_1}$ and $\mathsf{E_2}$ with the same message space $M$ and two parties Alice and Bob. Alice has the secret keys $sk_1$ and $sk_2$ for both schemes and Bob has a value encrypted with $\mathsf{E_1}$ with the public keys $pk_1$ and $pk_2$. We propose a protocol that enable Bob to get an encryption of its value under $\mathsf{E_2}$ without revealing anything to Alice. In the following, $*$ represents the homomorphic operation over cyphertexts. 
@@ -311,13 +317,35 @@ The precision of the floats is also an important point as the plaintext space of
 		
 	\end{itemize}
 	      
-	\paragraph{Security for Alice}
- 		We build a simulator that produces an encryption $c''$ of a random element. As we suppose $\mathsf{E_2}$ to be semantically secure, Bob's real view and output (the tuple $(pk_1,pk_2,c,c'',\tilde{c})$) is indistinguishable from the simulated view.
+	\paragraph{Security for Alice} Alice's view is $V_A = (sk_1,sk_2,c')$.\\
+	The simulator $S_A$ sends a random encrypted element $c'$ to Alice which is statistically indistinguishable from the real $c'$ (as both are encrypting a value coming from the same uniform distribution over the message space $M$). Thus the tuple $(sk_1,sk_2,c',\tilde{c})$  generated in the ideal setting is indistinguishable from the real setting.
 
-	\paragraph{Security for Bob}
-		The simulator sends a random encrypted element $c'$ to Alice which is statistically indistinguishable from the real $c'$ (as both encrypt a value coming from the same uniform distribution over the message space $M$). Thus, as $\mathsf{E_2}$ is semantically secure, the tuple $(sk_1,sk_2,c',\tilde{c})$  generated in the ideal setting is indistinguishable from the real setting.  
+	\paragraph{Security for Bob} Bob's view is $(pk_1,pk_2,c,c'')$.\\   
+	We build a simulator $S_B$ (whose inputs are $pk_1$, $pk_2$ and $c$) that produces an encryption $c''$ of a random element. As we suppose $\mathsf{E_2}$ to be semantically secure, Bob's real view and output (the tuple $(pk_1,pk_2,c,c'',\tilde{c})$) is indistinguishable from the simulated view and output.   
 
 % subsection changing_encryption_scheme (end)
+
+\subsection{Comparing encrypted data} % (fold)
+\label{sub:comparing_encrypted_data}
+	This is a modification of Veugen's work in \cite{Veugen}. 
+	
+	For the naive Bayes classifier (see \ref{ssub:bayes_solution_2}), we want a protocol that obliviously compares encrypted data. Protocol 1 (Client-server comparison) in~\cite{Veugen} is almost what we are looking for, except that A (the party who has the encrypted data without the decryption key) gets an encrypted version of the comparison result. Thus we slightly modify the protocol so that A gets the result in the clear.
+	
+	In the modified protocol, B no longer has the secret key for the QR (GGM) cryptosystem, A does. So A and B run the LSIC protocol (as defined in~\cite{Veugen}) so that B gets the encrypted bit $[t']$ (encrypting $(d < c)$). Then, we reverse the roles of A and B: 
+	\begin{itemize}
+		\item A encrypts $r_{l+1}$ and sends $[r_{l+1}]$ to B
+		\item B encrypts $z_{l+1}$, computes $[t] \leftarrow [t'].[z_{l+1}].[r_{l+1}]$ and sends $[t]$ to A
+		\item A decrypts and outputs $t$
+	\end{itemize}
+	
+	We prove the security of this protocol in the hybrid model where the encrypted bit $[t']$ is ideally computed.
+	
+	\paragraph{Security for A} A's view is $V_A = (\llb a\rrb,\llb b\rrb,sk_{QR},pk_P,[t])$ where $sk_{QR}$ is the secret key for the QR cryptosystem and $pk_P$ is the public key for Paillier's cryptosystem.\\
+	Given $(\llb a\rrb,\llb b\rrb,sk_{QR},pk_P, a \leq b)$, the simulator $S_A$ computes an encryption of the bit $a \leq b$ under QR. The ideal and real executions are the same, then indistinguishable.
+	
+	\paragraph{Security for B} B's view is $V_B = (pk_{QR}, sk_{P}, \llb z \rrb, [t'], [r_{l+1}])$.\\
+	Given $(pk_{QR}, sk_{P})$ as input, the simulator $S_B$ picks a random $\tilde{z} \leftarrow \Z_N$ and generates a Paillier encryption $\llb \tilde{z} \rrb$. $z$ and $\tilde{z}$ are generated according to the same distribution (uniform over $\Z_N$) so $\llb z \rrb$ and $\llb \tilde{z} \rrb$ also are. Finally, $S_B$ encrypts two random bits under QR, $[\tilde{t}']$ and $[\tilde{r}_{l+1}]$. $(pk_{QR}, sk_{P}, \llb z \rrb, [t'], [r_{l+1}])$ is computationally indistinguishable from $(pk_{QR}, sk_{P}, \llb \tilde{z} \rrb, [\tilde{t}'], [\tilde{r}_{l+1}])$ because QR is semantically secure. 
+% subsection comparing_encrypted_data (end)
 
 % section useful_protocols (end)
 
@@ -381,7 +409,7 @@ The precision of the floats is also an important point as the plaintext space of
 	\\ \href{http://www.win.tue.nl/~berry/papers/pkc07intcomp.pdf}{Link}   
 	
 	                                                                                             
-	\item [Comparing Encrypted Data](\emph{Veugen})
+	\item [Comparing Encrypted Data](\emph{Veugen}) \cite{Veugen}
  	Millionaire's protocol for encrypted inputs (does not entirely fulfill the requirements we need for the second solution of the Bayes classifier, but may be modified to do so).   
 	\\ \href{http://msp.ewi.tudelft.nl/sites/default/files/Comparing%20encrypted%20data.pdf}{Link}
 \end{description}
