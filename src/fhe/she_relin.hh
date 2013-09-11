@@ -22,7 +22,7 @@ public:
     static const unsigned int LogQ           = Parameters::LogQ;
     static const unsigned int LogT           = Parameters::LogT;
     static const unsigned int Sigma          = Parameters::Sigma;
-    static const constexpr double SigmaPrime = Parameters::SigmaPrime;
+    static constexpr double SigmaPrime = Parameters::SigmaPrime;
     static const unsigned int LogD           = Parameters::LogD;
     static const unsigned int LogMsgBase     = Parameters::LogMsgBase;
 
@@ -221,7 +221,7 @@ struct default_she_relin_parameters {
     static const unsigned int LogQ           = 128;
     static const unsigned int LogT           = 15;
     static const unsigned int Sigma          = 16;
-    static constexpr const double SigmaPrime = 1e79;
+    static constexpr double SigmaPrime = 1e79;
     static const unsigned int LogD           = 12;
     static const unsigned int LogMsgBase     = 2;
 };
