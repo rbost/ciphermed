@@ -4,12 +4,16 @@
 using namespace std;
 using namespace NTL;
 
+Millionaire_Alice::Millionaire_Alice(const vector<ZZ> &elgamal_sk)
+: eg_(elgamal_sk)
+{
+    
+}
 
 Millionaire_Alice::Millionaire_Alice()
 : eg_(ElGamal_priv::keygen())
 {                  
-//	assert( n >= NumBits(x))
-	// eg_ = ElGamal_priv(ElGamal_priv::keygen());
+
 }
 
 vector< array <pair<ZZ,ZZ>,2> > Millionaire_Alice::genTable(unsigned int nbits, const NTL::ZZ &x)

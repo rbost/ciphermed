@@ -16,8 +16,9 @@
 
 class Millionaire_Alice{         
 public:
+	Millionaire_Alice(const std::vector<NTL::ZZ> &elgamal_sk);
 	Millionaire_Alice();
-	    
+	   
 	std::vector<NTL::ZZ> pubparams() const { return eg_.pubkey(); };
 	      
 	std::vector< std::array<std::pair<NTL::ZZ,NTL::ZZ>,2> > genTable(unsigned int nbits, const NTL::ZZ &x);
