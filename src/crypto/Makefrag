@@ -1,5 +1,5 @@
 OBJDIRS     += crypto
-CRYPTO2SRC  := elgamal.cc paillier.cc 
+CRYPTO2SRC  := elgamal.cc paillier.cc gm.cc 
 
 all:    $(OBJDIR)/libcrypto.so
 $(OBJDIR)/libcrypto.so: $(patsubst %.cc,$(OBJDIR)/crypto/%.o,$(CRYPTO2SRC))
