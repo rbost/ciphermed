@@ -360,6 +360,10 @@ In this case, we can even use an additional trick: if the scheme supports SIMD s
 for each bit of the result in parallel. The resulting cyphertext will contain the bits of the result, one bit per slot.      
 This avoids the need to use FHE as many times as there are bits in the description of categories.
 
+\subsection{Decreasing FHE depth}
+
+Currently, the depth of the FHE we need is the number of levels of the tree. 
+To each path down the tree, we can apply the log multiplication strategy (construct a tree out of the nodes in this path -- basically, there will be a tree on every path in  the decision tree). This will only require a log(levels) depth of FHE but we need to perform more independent multiplications because we cannot leverage the structure of the decision tree any more. 
 % subsubsection using_fhe_over_f_2 (end)
 
 % subsection decision_tree_protocol (end)
