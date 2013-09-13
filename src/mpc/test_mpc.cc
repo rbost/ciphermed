@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <vector>
 #include <mpc/millionaire.hh>
+#include <mpc/lsic.hh>
+#include <crypto/gm.hh>
 #include <mpc/svm_classifier.hh>
 #include <NTL/ZZ.h>
 
@@ -91,12 +93,38 @@ static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10,
     assert((posCount >= negCount) == (v > 0));
 }
 
+static void test_lsic(unsigned int nbits = 256)
+{
+	ZZ a = RandomLen_ZZ(nbits);
+    ZZ b = RandomLen_ZZ(nbits);
+
+    LSIC_B party_b(b, nbits);
+    LSIC_A party_a(a, nbits, party_b.pubparams());
+    
+    LSIC_Packet_A a_packet;
+    LSIC_Packet_B b_packet = party_b.setupRound();
+    
+    bool state;
+    
+    state = party_a.answerRound(b_packet,&a_packet);
+    while (!state) {
+        b_packet = party_b.answerRound(a_packet);
+        state = party_a.answerRound(b_packet, &a_packet);
+    }
+    
+    bool result = party_b.gm().decrypt(party_a.output());
+    
+    assert( result == (a > b));
+
+}
+
 int main(int ac, char **av)
 {            
     SetSeed(to_ZZ(time(NULL)));
 
 //	test_millionaire();
-	test_simple_svm();
+//	test_simple_svm();
+    test_lsic();
 
 	return 0;
 }
