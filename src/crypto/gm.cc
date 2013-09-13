@@ -96,7 +96,7 @@ bool GM_priv::decrypt(const ZZ &ciphertext) const
     ZZ cp = ciphertext % p;
     ZZ cq = ciphertext % q;
     
-    return ( PowerMod(cp,pMinOneBy2,p) == to_ZZ(1))&&( PowerMod(cq,pMinOneBy2,q) == to_ZZ(1));
+    return ( PowerMod(cp,pMinOneBy2,p) != to_ZZ(1))&&( PowerMod(cq,pMinOneBy2,q) != to_ZZ(1));
 }
 
 
@@ -115,8 +115,8 @@ vector<ZZ> GM_priv::keygen(unsigned int nbits)
         y = RandomBnd(N);
         rp = PowerMod(y%p,pMinOneBy2,p);
         rq = PowerMod(y%q,pMinOneBy2,q);
-    } while (rp == to_ZZ(p-1) && rq == to_ZZ(q-1));
-    
+    } while (rp != to_ZZ(p-1) && rq != to_ZZ(q-1));
+
     return {N,y,p,q};
 }
 

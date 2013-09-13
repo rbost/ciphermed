@@ -75,14 +75,15 @@ test_gm()
     auto pk = pp.pubkey();
     GM p(pk);
     
-    bool b0 = (bool)RandomBits_long(1);
-    bool b1 = (bool)RandomBits_long(1);
+    bool b0 = true; //(bool)RandomBits_long(1);
+    bool b1 = false; //(bool)RandomBits_long(1);
     
     ZZ ct0 = p.encrypt(b0);
     ZZ ct1 = p.encrypt(b1);
     ZZ XOR = p.XOR(ct0, ct1);
     ZZ rerand = p.reRand(ct0);
     
+    assert(pp.decrypt(pk[1]) == true);
     assert(pp.decrypt(ct0) == b0);
     assert(pp.decrypt(ct1) == b1);
     assert(pp.decrypt(XOR) == (b0 xor b1));
@@ -95,8 +96,8 @@ int
 main(int ac, char **av)
 {
     SetSeed(to_ZZ(time(NULL)));
-    test_elgamal();
-	test_paillier();
+//    test_elgamal();
+//	test_paillier();
 	test_gm();
     
     return 0;
