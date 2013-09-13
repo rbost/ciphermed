@@ -345,7 +345,9 @@ We use FHE to evaluate the polynomial over the encrypted $b_i$.
 
 \subsubsection{Using FHE over $\F_2$} % (fold)
 \label{ssub:using_fhe_over_f_2}
-We do not have to assume that we have access to a FHE scheme that can compute over integers: we can compute the result bit by bit using multiple polynomials similar to $f$. E.g. for the previous example, the polynomials over $\F_2$ are 
+We do not have to assume that we have access to a FHE scheme that can compute over integers: we can compute the result bit by bit using multiple polynomials similar to $f$. 
+That is, consider the binary representation of each category. We want to compute the resulting category $c_0$ for a classification. WE compute each bit of $c_0$  using one function $f$. (This is as before, but assuming there are only two categories possible: $0$ and $1$). 
+E.g. for the previous example, the polynomials over $\F_2$ are 
 \begin{align*}
 	f_0(b_1,b_2,b_3) &= b_1(b_2.0 + (1-b_2).1) + (1-b_1)(b_3.0 + (1-b_3).1) \\
 	f_1(b_1,b_2,b_3) &= b_1(b_2.0 + (1-b_2).0) + (1-b_1)(b_3.1 + (1-b_3).1) \\
@@ -356,6 +358,7 @@ In this case, we can even use an additional trick: if the scheme supports SIMD s
 		\tilde{f}(b_1,b_2,b_3,c_1,c_2,c_3,c_4) =  b_1(b_2.c_1 + (1-b_2).c_2) + (1-b_1)(b_3.c_3 + (1-b_3).c_4)
 	\]
 for each bit of the result in parallel. The resulting cyphertext will contain the bits of the result, one bit per slot.      
+This avoids the need to use FHE as many times as there are bits in the description of categories.
 
 % subsubsection using_fhe_over_f_2 (end)
 
