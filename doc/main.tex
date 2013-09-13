@@ -64,7 +64,7 @@ The challenge is deciding if $\res > 0$. Simply giving the client $\enc(\res)$ l
 \subsection{First solution for comparison} % (fold)
 \label{sub:first_solution_for_comparison}
 
-Instead, the idea is for the server to choose a random $\epsilon \in \bbZ_q$ where $q$ is the space of the plaintext in FHE. The server computes $\enc(\epsilon + \res)$ and the client is able to decrypt this ciphertext and obtain $\epsilon + \res \mod q$, which information-theoretically leaks nothing about $\res$.
+Instead, the idea is for the server to choose a random $\epsilon \in \bbZ_q$ where $q$ is the space of the plaintext in FHE. The server computes $\enc(\epsilon + \res)$ and the client is able to decrypt this ciphertext and obtain $\epsilon + \res \mod q$, which information-theoretically leaks nothing about $\res$ (on one interaction only).
 
 Now, ideally we would like the client to compare $\epsilon + \res$ to $\epsilon + q/2$, because $\res > q/2$ indicates a negative $\res$ (that wrapped around). We can use Yao's comparison protocol (the millionaires problem -- a simple one interaction protocol) to decide the result of this comparison without leaking any private information. The challenge though is that the client has $\epsilon + \res \mod q$, and $\mod q$ affects correctness.
 
@@ -81,6 +81,9 @@ The idea is to use a new experiment that has a chance of outputting the correct 
 \item Run Yao's protocol, where the client's input is $\eps + \res \mod q$ and the server's input is $v$.
 \end{enumerate}
 
+This protocol still leaks something across multiple interactions because the client learns the number of correct or incorrect guesses and this number is correlated with the underlying $v$. 
+
+\rnote{Stephen, this analysis needs some revising based on our comments below}
 We now analyze this protocol to show that the probability of success is greater
 than half. Let $r \in \bbZ_q$, and $\epsilon \in \bbZ_q$ be drawn uniformly at
 random. We also assume that all $r \in \bbZ_q$ are equally likely.
@@ -127,9 +130,7 @@ require $q \geq 7$ above, this is ok.
 
 \rnote{as a small nit for style, I (and cryptographers) find this notation more clear : $\Pr[\eps \gets \bbZ_q: (r+\eps) \mod q < v]$ because it is clearer where the randomness comes from and what is the order of steps in the experiment.}
 
-\rnote{based on this probability bound, would be good to estimate how many repetitions we need, for example, using Hoeffding's inequality -- see end of Wikipedia page -- or other inequality you prefer }
-
-\rbnote{Hoeffding's inequality requires the random variables to be independent, which is -- I think -- not the case here: remember that the random variable that we consider is the variable that is zero if the guess is correct, and one is incorrect. We could try to draw from the proof of Goldreich-Levin theorem for this point.}
+\rnote{based on this probability bound, would be good to estimate how many repetitions we need,using some probability bound }
 
 %if r > q/2
  %if e > q/2 : correct result always
@@ -143,6 +144,8 @@ require $q \geq 7$ above, this is ok.
 % subsection first_solution_for_comparison (end)
 
 \subsection{Another solution for rerandomization and comparison}
+           
+           To prevent the leakage in the protocol above, the idea is to have only one Yao comparison, and to increase the correctness of this comparison. For this, we require that the plaintext space is much larger than the space of possible values of $v$. 
            
 \subsubsection{Description} 
 We propose an other protocol for the hyperplane decision surfaces. The idea is very similar to the one propose in section~\ref{sub:first_solution_for_comparison}.
@@ -176,6 +179,7 @@ In particular, if $\mathcal{D}$ is bounded by $B$ ($\Pr[ r \gets \mathcal{D} : |
 \] 
     
 \subsubsection{Repeating the experiment}
+\rnote{why are we repeating the experiment? This leaks. We should just have it once and v is from a space that is much smaller compared to r}
 
 We want to repeat the previous protocol $k$ times in order to decrease the probability of a wrong guess: we run the protocol $k$ times and take as an output the majority of outputs. 
 
@@ -257,7 +261,8 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 	The server's input are the $kN$ values $\{p(x_j|c_i)\}_{i,j}$ and the $k$ values $\{p(c_i)\}$; the client's input is a subset of feature values.
 	
 	\begin{enumerate}
-		\item Setup: the server generates a key pair for the encryption scheme and publishes the public key. The server encrypts all the input values with this key and publishes them.
+		\item Setup: the server generates a key pair for the encryption scheme and publishes the public key. The server encrypts all the input values with this key and publishes them. [Since this table can be large in some cases, instead of having the client download all
+		the table, we can use a PIR technique].
 		
 		\item Using the homomorphic properties of the scheme, the client computes the encryption of the $p(x,c_i)$'s.
 		
