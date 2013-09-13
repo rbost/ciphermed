@@ -5,6 +5,7 @@
 #include <crypto/gm.hh>
 #include <mpc/svm_classifier.hh>
 #include <NTL/ZZ.h>
+#include <util/util.hh>
 
 #include<iostream>
 
@@ -14,7 +15,9 @@ using namespace NTL;
 
 static void test_millionaire()
 {                     
-	unsigned int nbits = 256;
+    cout << "Test Millionaire ..." << flush;
+    ScopedTimer timer("Millionaire");
+    unsigned int nbits = 256;
 	
 	Millionaire_Alice alice;
 	Millionaire_Bob bob(alice.pubparams());
@@ -27,10 +30,14 @@ static void test_millionaire()
 	bool b = alice.decryptRound(C);
 	
 	assert( b == (x > y));
+    cout << " passed" << endl;
 }
 
 static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10, size_t nQueries = 5)
 {
+    cout << "Test SVM classifier ..." << flush;
+    ScopedTimer timer("SVM classifier");
+    
     SimpleClassifier_Client client;
 
     srand(time(NULL));
@@ -91,12 +98,15 @@ static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10,
     cout << "Real result is " << ((v>0)? "positive" : "negative") << endl;
     
     assert((posCount >= negCount) == (v > 0));
+    cout << " passed" << endl;
 }
 
 static void test_lsic(unsigned int nbits = 256)
 {
     cout << "Test LSIC ..." << flush;
-	ZZ a = RandomLen_ZZ(nbits);
+    ScopedTimer timer("LSIC");
+
+    ZZ a = RandomLen_ZZ(nbits);
     ZZ b = RandomLen_ZZ(nbits);
 
     LSIC_B party_b(b, nbits);
@@ -125,9 +135,11 @@ int main(int ac, char **av)
 {            
     SetSeed(to_ZZ(time(NULL)));
 
-//	test_millionaire();
-//	test_simple_svm();
+    
+	test_millionaire();
     test_lsic();
+
+    //	test_simple_svm();
 
 	return 0;
 }
