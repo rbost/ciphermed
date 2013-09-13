@@ -95,6 +95,7 @@ static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10,
 
 static void test_lsic(unsigned int nbits = 256)
 {
+    cout << "Test LSIC ..." << flush;
 	ZZ a = RandomLen_ZZ(nbits);
     ZZ b = RandomLen_ZZ(nbits);
 
@@ -107,6 +108,7 @@ static void test_lsic(unsigned int nbits = 256)
     bool state;
     
     state = party_a.answerRound(b_packet,&a_packet);
+
     while (!state) {
         b_packet = party_b.answerRound(a_packet);
         state = party_a.answerRound(b_packet, &a_packet);
@@ -114,8 +116,9 @@ static void test_lsic(unsigned int nbits = 256)
     
     bool result = party_b.gm().decrypt(party_a.output());
     
-    assert( result == (a > b));
-
+    assert( result == (a < b));
+    
+    cout << " passed" << endl;
 }
 
 int main(int ac, char **av)

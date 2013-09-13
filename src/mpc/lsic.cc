@@ -106,8 +106,7 @@ bool LSIC_A::answerRound(const LSIC_Packet_B &pack, LSIC_Packet_A *outputPacket)
         lastRound_(pack);
         return true;
     }else{
-        updateStep_(pack);
-        *outputPacket = LSIC_Packet_A(i_,blindingStep_());
+        *outputPacket = regularRound_(pack);
         return false;
     }
 }
