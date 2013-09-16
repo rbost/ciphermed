@@ -267,7 +267,7 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 		\item Using the homomorphic properties of the scheme, the client computes the encryption of the $p(x,c_i)$'s.
 		
 		\item At this point, the client needs to get the index of the maximum value (the argmax). 
-		To do so, it has to do $k$ oblivious comparisons of encrypted values such that only the client learns the result. This will ensure complete privacy of the inputs of both the client and the server and the output (the category with maximum probability) for the client.     
+		To do so, it has to do some oblivious comparisons of encrypted values such that only the client learns the result. This will ensure complete privacy of the inputs of both the client and the server and the output (the category with maximum probability) for the client. We also need to ensure that the client only gets the index of the resulting category. Thus, the client cannot get the order of the category (order given by the category likelihood). More generally, the client must not learn any partial information about the order.
 		
 		% To do so, the client will run a protocol similar to the one described by Kaghazgaran and Sadeghyan (cf. related work).\\
 		% 		The client picks a random value $R$ and adds it to each of the computed values. The client chooses a random permutation $\pi$ over $\{1,...,k\}$ and sends the permuted encryptions to the server.
@@ -278,14 +278,18 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 		% 		\item The client get the argmax $i_0 = \pi^{-1}(\tilde{i_0})$  
 	\end{enumerate}
 	
+	To fulfill these requirements, it is the server that has to know the result of the comparisons. And because we do not want to leak any information to the client, the comparisons have to be exactly the same ones independently from the encrypted probabilities. We can show that, in this case, the server has to know each of the $\frac{k(k-1)}{2}$ comparisons possible.     
+	                                          
+	So, the essential element here is a protocol that compares encrypted data. To ensure the client's privacy (for the result), the client randomly permutes the values to be compared. When the server computes the argmax, it computes the argmax of the permutation, hiding the result. When receiving the server's result, the client just has to invert the permutation. 
+	
 	\paragraph{Comparing encrypted data - first solution}
-	Suppose Bob has the secret key for an encryption scheme that supports homomorphic addition (FHE, Paillier, ...) and Alice has the encryption of two values $a$ and $b$ ($E(a), E(b)$). Alice wants to know if $a > b$, neither Alice or Bob should learn the value of $a$ or $b$.
+	Suppose Bob has the secret key for an encryption scheme that supports homomorphic addition (FHE, Paillier, ...) and Alice has the encryption of two values $a$ and $b$ ($E(a), E(b)$). Bob wants to know if $a > b$, neither Alice or Bob should learn the value of $a$ or $b$.
 	\begin{itemize}
 		\item Alice picks a random $r$ and compute $C = E(a).E(b)^{-1}.E(r)$ and sends $C$ to Bob
 		
 		\item Bob decrypts $C$: $c = D(C)$.
 		
-		\item Alice and Bob initiate a regular millionaire's to compare $r$ and $c$ in a way that only Alice learns the result (the protocol presented by Lin \& Tzeng - cf. Related Work - satisfies the requirements). 
+		\item Alice and Bob initiate a regular millionaire's to compare $r$ and $c$ in a way that only Bob learns the result (the protocol presented by Lin \& Tzeng - cf. Related Work - satisfies the requirements). 
 	\end{itemize} 
 	      	
 	We can notice here that, if instead of encrypting $p(x_j|c_i)$, we encrypt $\log p(x_j|c_i)$, we replace all the multiplications we need to compute $p(x,c_i)$'s by additions. Thus, we don't really need an FHE scheme, a linearly homomorphic scheme (as Paillier) is sufficient. 
@@ -295,7 +299,7 @@ For each $x_i$, the client sends a vector of $N$ selectors. The $x_i$-th selecto
 	$O(kN)$ communication complexity; $(N+1)k$ encryptions and $k$ decryptions done by the server; $k(n+1)$ homomorphic operations done on the cyphertexts by the client.
 	   
 	\paragraph{Comparing encrypted data - second solution}
-	Use Veugen's result (\emph{cf.} Related Work) but modify it so that Alice (the client) gets the un-encrypted result. 
+	We can use Veugen's result (\emph{cf.} Related Work) but modify it so that B (the server) gets the un-encrypted result. To do so, we simply send the encrypted bit $[t]$ to B who decrypts it.  
 	  
 % subsection bayes_solution_2 (end)
           
