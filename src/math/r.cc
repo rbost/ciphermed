@@ -3,6 +3,7 @@
 
 #include <math/matrix.hh>
 #include <math/mpz_class.hh>
+#include <math/math_util.hh>
 #include <util/util.hh>
 
 using namespace std;
@@ -103,6 +104,25 @@ main(int ac, char **av)
         assert_s(mpz_class_nearest_div(-10, 6) == -2, "nearest(-10/6)");
     }
 
+    // test the CRT
+    {
+        
+        vector<mpz_class> v_c = {2,3};
+        vector<mpz_class> m_c = {5,7};
+
+        mpz_class x = mpz_class_crt(v_c,m_c);
+                
+        assert(x % 5 == 2);
+        assert(x % 7 == 3);
+    }
+    
+    // test modular inversion
+    {
+        mpz_class a(93), b(100);
+        mpz_class c = mpz_class_invert(a,b);
+        assert(a*c %b == 1);
+    }
+    
     // test poly's
 
     poly a = make_poly({1, 8});

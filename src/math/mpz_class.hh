@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <gmpxx.h>
 
 namespace {
@@ -73,6 +74,43 @@ inline mpz_class mpz_class_powm_ui(const mpz_class &base, unsigned long int exp,
 inline void mpz_class_powm_ui(mpz_class &rop, const mpz_class &base, unsigned long int exp, const mpz_class &mod)
 {
     mpz_powm_ui(rop.get_mpz_t(),base.get_mpz_t(),exp,mod.get_mpz_t());
+}
+
+inline mpz_class mpz_class_pow_ui(const mpz_class &base, unsigned long int exp)
+{
+    mpz_class rop;
+    mpz_pow_ui(rop.get_mpz_t(),base.get_mpz_t(),exp);
+    return rop;
+}
+
+inline void mpz_class_pow_ui(mpz_class &rop, const mpz_class &base, unsigned long int exp)
+{
+    mpz_pow_ui(rop.get_mpz_t(),base.get_mpz_t(),exp);
+}
+
+inline mpz_class mpz_class_ui_pow_ui(unsigned long int base, unsigned long int exp)
+{
+    mpz_class rop;
+    mpz_ui_pow_ui(rop.get_mpz_t(),base,exp);
+    return rop;
+}
+
+inline void mpz_class_ui_pow_ui(mpz_class &rop, unsigned long int base, unsigned long int exp)
+{
+    mpz_ui_pow_ui(rop.get_mpz_t(),base,exp);
+}
+
+inline mpz_class mpz_class_invert (const mpz_class &op1, const mpz_class &op2)
+{
+    mpz_class rop;
+    assert(mpz_invert(rop.get_mpz_t(),op1.get_mpz_t(),op2.get_mpz_t()) != 0);
+    
+    return rop;
+}
+
+inline int mpz_class_invert (mpz_class &rop, const mpz_class &op1, const mpz_class &op2)
+{
+    return mpz_invert(rop.get_mpz_t(),op1.get_mpz_t(),op2.get_mpz_t());
 }
 
 } // empty namespace

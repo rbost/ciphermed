@@ -1,5 +1,5 @@
 OBJDIRS     += math
-MATHSRC   :=  field.cc matrix.cc poly.cc
+MATHSRC   :=  field.cc matrix.cc poly.cc math_util.cc
 MATHOBJ   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC))
 
 all:    $(OBJDIR)/libfhemath.so
