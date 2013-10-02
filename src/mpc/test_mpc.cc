@@ -34,6 +34,7 @@ static void test_millionaire()
     cout << " passed" << endl;
 }
 
+/*
 static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10, size_t nQueries = 5)
 {
     cout << "Test SVM classifier ..." << flush;
@@ -101,6 +102,7 @@ static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10,
     assert((posCount >= negCount) == (v > 0));
     cout << " passed" << endl;
 }
+*/
 
 static void test_lsic(unsigned int nbits = 256)
 {
@@ -142,8 +144,8 @@ int main(int ac, char **av)
     SetSeed(to_ZZ(time(NULL)));
 
     
-	test_millionaire();
-    test_lsic();
+//	test_millionaire();
+    test_lsic(2048);
 
     //	test_simple_svm();
 
