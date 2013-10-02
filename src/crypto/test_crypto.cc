@@ -43,26 +43,32 @@ static void
 test_paillier()
 {
     cout << "Test Paillier ..." << flush;
-    auto sk = Paillier_priv::keygen();
-    Paillier_priv pp(sk);
+   
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+
+    auto sk = Paillier_priv::keygen(randstate);
+    Paillier_priv pp(sk,randstate);
     
     auto pk = pp.pubkey();
-    ZZ n = pk[0];
-    Paillier p(pk);
+    mpz_class n = pk[0];
+    Paillier p(pk,randstate);
     
-    ZZ pt0 = RandomBnd(n);
-    ZZ pt1 = RandomBnd(n);
-    ZZ m = RandomBnd(n);
+    mpz_class pt0, pt1,m;
+    mpz_urandomm(pt0.get_mpz_t(),randstate,n.get_mpz_t());
+    mpz_urandomm(pt1.get_mpz_t(),randstate,n.get_mpz_t());
+    mpz_urandomm(m.get_mpz_t(),randstate,n.get_mpz_t());
     
-    ZZ ct0 = p.encrypt(pt0);
-    ZZ ct1 = p.encrypt(pt1);
-    ZZ sum = p.add(ct0, ct1);
-    ZZ prod = p.constMult(m,ct0);
+    mpz_class ct0 = p.encrypt(pt0);
+    mpz_class ct1 = p.encrypt(pt1);
+    mpz_class sum = p.add(ct0, ct1);
+    mpz_class prod = p.constMult(m,ct0);
     
     assert(pp.decrypt(ct0) == pt0);
     assert(pp.decrypt(ct1) == pt1);
-    assert(pp.decrypt(sum) == AddMod(pt0, pt1,n));
-    assert(pp.decrypt(prod) == MulMod(m,pt0,n));
+    assert(pp.decrypt(sum) == (pt0+pt1)%n);
+    assert(pp.decrypt(prod) == (m*pt0)%n);
 
     cout << " passed" << endl;
 }
@@ -104,7 +110,7 @@ main(int ac, char **av)
 {
     SetSeed(to_ZZ(time(NULL)));
 //    test_elgamal();
-//	test_paillier();
+	test_paillier();
 	test_gm();
     
     return 0;
