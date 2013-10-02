@@ -6,6 +6,7 @@
 #include <mpc/svm_classifier.hh>
 #include <NTL/ZZ.h>
 #include <util/util.hh>
+#include <math/util_gmp_rand.h>
 
 #include<iostream>
 
@@ -106,11 +107,16 @@ static void test_lsic(unsigned int nbits = 256)
     cout << "Test LSIC ..." << flush;
     ScopedTimer timer("LSIC");
 
-    ZZ a = RandomLen_ZZ(nbits);
-    ZZ b = RandomLen_ZZ(nbits);
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
 
-    LSIC_B party_b(b, nbits);
-    LSIC_A party_a(a, nbits, party_b.pubparams());
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
+    mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
+
+    LSIC_B party_b(b, nbits, randstate);
+    LSIC_A party_a(a, nbits, party_b.pubparams(), randstate);
     
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet = party_b.setupRound();

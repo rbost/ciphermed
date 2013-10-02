@@ -17,23 +17,23 @@
 
 struct LSIC_Packet_A {
     size_t index;
-    NTL::ZZ tau;
+    mpz_class tau;
     
     LSIC_Packet_A();
-    LSIC_Packet_A(size_t i, const NTL::ZZ &c);
+    LSIC_Packet_A(size_t i, const mpz_class &c);
 };
 
 struct LSIC_Packet_B {
     size_t index;
-    NTL::ZZ tb;
-    NTL::ZZ bi;
+    mpz_class tb;
+    mpz_class bi;
     
-    LSIC_Packet_B(size_t i, const NTL::ZZ &c1, const NTL::ZZ &c2);
+    LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2);
 };
 
 class LSIC_A{
 public:
-    LSIC_A(const NTL::ZZ &x,const size_t &l,const std::vector<NTL::ZZ> &gm_pk);
+    LSIC_A(const mpz_class &x,const size_t &l,const std::vector<mpz_class> &gm_pk, gmp_randstate_t state);
 
     /* Runs the right round according to the current state.
      * Returns true if the last round has been ran. 
@@ -47,17 +47,17 @@ public:
     /* Returns the output of the protocol if the last round has been ran.
      *  An assert will fail otherwise
      */
-    NTL::ZZ output() const;
+    mpz_class output() const;
     
 protected:
-    NTL::ZZ a_;
+    mpz_class a_;
     size_t bit_length_; // bit length of the numbers to compare
 	GM gm_;
     
     /* internal state */
     bool c_; // the fair coin 'c' in the paper
     size_t i_;
-    NTL::ZZ t_;
+    mpz_class t_;
     
     /* private functions */
     
@@ -70,18 +70,18 @@ protected:
     void lastRound_(const LSIC_Packet_B &pack);
     
     /* Lines 10 to 17 in the paper */
-    NTL::ZZ blindingStep_();
+    mpz_class blindingStep_();
     /* Lines 27 to 35 in the paper */
     void updateStep_(const LSIC_Packet_B &pack);
 };
 
 class LSIC_B{
 public:
-    LSIC_B(const NTL::ZZ &y,const size_t l, const std::vector<NTL::ZZ> &gm_sk);
-    LSIC_B(const NTL::ZZ &y,const size_t l, unsigned int key_size = 1024);
+    LSIC_B(const mpz_class &y,const size_t l, const std::vector<mpz_class> &gm_sk, gmp_randstate_t state);
+    LSIC_B(const mpz_class &y,const size_t l, gmp_randstate_t state, unsigned int key_size = 1024);
     
-	std::vector<NTL::ZZ> privparams() const { return gm_.privkey(); };
-	std::vector<NTL::ZZ> pubparams() const { return gm_.pubkey(); };
+	std::vector<mpz_class> privparams() const { return gm_.privkey(); };
+	std::vector<mpz_class> pubparams() const { return gm_.pubkey(); };
     GM_priv gm() const { return gm_; };
     
     size_t bitLength() const { return bit_length_; }
@@ -92,7 +92,7 @@ public:
     LSIC_Packet_B answerRound(const LSIC_Packet_A &pack);
     
 protected:
-    NTL::ZZ b_;
+    mpz_class b_;
     size_t bit_length_; // bit length of the numbers to compare
     GM_priv gm_;
 };
