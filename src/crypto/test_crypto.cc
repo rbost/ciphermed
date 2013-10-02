@@ -4,6 +4,8 @@
 #include <crypto/paillier.hh>
 #include <crypto/gm.hh>
 #include <NTL/ZZ.h>
+#include <gmpxx.h>
+#include <math/util_gmp_rand.h>
 
 #include<iostream>
 
@@ -69,19 +71,24 @@ static void
 test_gm()
 {
     cout << "Test GM ..." << flush;
-    auto sk = GM_priv::keygen();
-    GM_priv pp(sk);
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+
+    auto sk = GM_priv::keygen(randstate);
+    GM_priv pp(sk,randstate);
     
     auto pk = pp.pubkey();
-    GM p(pk);
+    GM p(pk,randstate);
     
     bool b0 = true; //(bool)RandomBits_long(1);
     bool b1 = false; //(bool)RandomBits_long(1);
     
-    ZZ ct0 = p.encrypt(b0);
-    ZZ ct1 = p.encrypt(b1);
-    ZZ XOR = p.XOR(ct0, ct1);
-    ZZ rerand = p.reRand(ct0);
+    mpz_class ct0 = p.encrypt(b0);
+    mpz_class ct1 = p.encrypt(b1);
+    mpz_class XOR = p.XOR(ct0, ct1);
+    mpz_class rerand = p.reRand(ct0);
     
     assert(pp.decrypt(pk[1]) == true);
     assert(pp.decrypt(ct0) == b0);

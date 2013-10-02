@@ -38,6 +38,42 @@ mpz_class_mod(const mpz_class &p, const mpz_class &q)
     mpz_mod(r.get_mpz_t(), p.get_mpz_t(), q.get_mpz_t());
     return r;
 }
+    
+inline mpz_class mpz_class_gcd(const mpz_class &p, const mpz_class &q)
+{
+    mpz_class d;
+    mpz_gcd (d.get_mpz_t(), p.get_mpz_t(), q.get_mpz_t());
+    return d;
+}
+
+inline void mpz_class_gcd(mpz_class &d, const mpz_class &p, const mpz_class &q)
+{
+    mpz_gcd (d.get_mpz_t(), p.get_mpz_t(), q.get_mpz_t());
+}
+    
+inline mpz_class mpz_class_powm(const mpz_class &base, const mpz_class &exp, const mpz_class &mod)
+{
+    mpz_class rop;
+    mpz_powm(rop.get_mpz_t(),base.get_mpz_t(),exp.get_mpz_t(),mod.get_mpz_t());
+    return rop;
+}
+
+inline void mpz_class_powm(mpz_class &rop, const mpz_class &base, const mpz_class &exp, const mpz_class &mod)
+{
+    mpz_powm(rop.get_mpz_t(),base.get_mpz_t(),exp.get_mpz_t(),mod.get_mpz_t());
+}
+
+inline mpz_class mpz_class_powm_ui(const mpz_class &base, unsigned long int exp, const mpz_class &mod)
+{
+    mpz_class rop;
+    mpz_powm_ui(rop.get_mpz_t(),base.get_mpz_t(),exp,mod.get_mpz_t());
+    return rop;
+}
+
+inline void mpz_class_powm_ui(mpz_class &rop, const mpz_class &base, unsigned long int exp, const mpz_class &mod)
+{
+    mpz_powm_ui(rop.get_mpz_t(),base.get_mpz_t(),exp,mod.get_mpz_t());
+}
 
 } // empty namespace
 
