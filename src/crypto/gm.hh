@@ -1,6 +1,5 @@
 #pragma once
 
-#include <NTL/ZZ.h>
 #include <math/mpz_class.hh>
 
 #include <vector>

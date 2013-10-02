@@ -5,7 +5,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace NTL;
 
 GM::GM(const vector<mpz_class> &pk, gmp_randstate_t state) : N(pk[0]), y(pk[1])
 {
