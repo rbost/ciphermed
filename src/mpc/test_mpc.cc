@@ -2,6 +2,7 @@
 #include <vector>
 #include <mpc/millionaire.hh>
 #include <mpc/lsic.hh>
+#include <mpc/enc_comparison.hh>
 #include <crypto/gm.hh>
 #include <mpc/svm_classifier.hh>
 #include <NTL/ZZ.h>
@@ -106,8 +107,12 @@ static void test_simple_svm(bool useSmallError = true, unsigned int m_size = 10,
 
 static void test_lsic(unsigned int nbits = 256)
 {
-    cout << "Test LSIC ..." << flush;
+    cout << "Test LSIC ..." << endl;
     ScopedTimer timer("LSIC");
+    
+    ScopedTimer *t;
+    t = new ScopedTimer("LSIC init");
+
 
     gmp_randstate_t randstate;
     gmp_randinit_default(randstate);
@@ -120,6 +125,9 @@ static void test_lsic(unsigned int nbits = 256)
     LSIC_B party_b(b, nbits, randstate);
     LSIC_A party_a(a, nbits, party_b.pubparams(), randstate);
     
+    delete t;
+    
+    t = new ScopedTimer("LSIC execution");
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet = party_b.setupRound();
     
@@ -134,9 +142,64 @@ static void test_lsic(unsigned int nbits = 256)
     
     bool result = party_b.gm().decrypt(party_a.output());
     
+    delete t;
+    
     assert( result == (a < b));
     
-    cout << " passed" << endl;
+    cout << "Test LSIC passed" << endl;
+}
+
+static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
+{
+    cout << "Test comparison over encrypted data ..." << endl;
+    ScopedTimer timer("Enc. Compare");
+    
+    ScopedTimer *t;
+    t = new ScopedTimer("Protocol init");
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_p = Paillier_priv::keygen(randstate);
+    Paillier_priv paillier(sk_p,randstate);
+    
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
+    mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
+        
+    EncCompare_Owner client(paillier.encrypt(a),paillier.encrypt(b), nbits, paillier.pubkey(), randstate);
+    auto pk_gm = client.lsic().gm().pubkey();
+    EncCompare_Helper server(nbits,sk_p,pk_gm,randstate);
+    
+    delete t;
+    
+    mpz_class c_z(client.setup(lambda));
+    server.setup(c_z);
+    
+    t = new ScopedTimer("Internal LSIC");
+    LSIC_Packet_A a_packet;
+    LSIC_Packet_B b_packet = client.lsic().setupRound();
+    
+    bool state;
+    
+    state = server.lsic().answerRound(b_packet,&a_packet);
+    
+    while (!state) {
+        b_packet = client.lsic().answerRound(a_packet);
+        state = server.lsic().answerRound(b_packet, &a_packet);
+    }
+    
+    delete t;
+    
+    mpz_class c_r_l_1(client.get_c_r_l_1());
+    mpz_class c_t(server.concludeProtocol(c_r_l_1));
+    
+    bool result = client.decryptResult(c_t);
+    
+    assert( result == (a <= b));
+    
+    cout << "Test passed" << endl;
 }
 
 int main(int ac, char **av)
@@ -145,7 +208,11 @@ int main(int ac, char **av)
 
     
 //	test_millionaire();
-    test_lsic(2048);
+    test_lsic(256);
+    
+    cout << "\n\n";
+    
+    test_enc_compare(256,100);
 
     //	test_simple_svm();
 

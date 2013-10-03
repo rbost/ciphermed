@@ -35,6 +35,9 @@ class LSIC_A{
 public:
     LSIC_A(const mpz_class &x,const size_t &l,const std::vector<mpz_class> &gm_pk, gmp_randstate_t state);
 
+    void set_value(const mpz_class &x);
+    GM gm() const { return gm_; };
+
     /* Runs the right round according to the current state.
      * Returns true if the last round has been ran. 
      * In this case, you can get the output by calling output()
@@ -82,6 +85,8 @@ public:
     
 	std::vector<mpz_class> privparams() const { return gm_.privkey(); };
 	std::vector<mpz_class> pubparams() const { return gm_.pubkey(); };
+    
+    void set_value(const mpz_class &x);
     GM_priv gm() const { return gm_; };
     
     size_t bitLength() const { return bit_length_; }
@@ -95,4 +100,5 @@ protected:
     mpz_class b_;
     size_t bit_length_; // bit length of the numbers to compare
     GM_priv gm_;
+    bool protocol_started_;
 };

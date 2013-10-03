@@ -32,6 +32,13 @@ LSIC_A::LSIC_A(const mpz_class &x,const size_t &l,const vector<mpz_class> &gm_pk
 {
 }
 
+void LSIC_A::set_value(const mpz_class &x)
+{
+    // we must not be able to reset a after the protocol started
+    assert(i_ == 0);
+    a_ = x;
+}
+
 mpz_class LSIC_A::blindingStep_()
 {
     c_ = (bool)RandomLen_long(1);
@@ -120,17 +127,26 @@ mpz_class LSIC_A::output() const
 /* LSIC_B */
 
 LSIC_B::LSIC_B(const mpz_class &y,const size_t l,const vector<mpz_class> &gm_sk, gmp_randstate_t state)
-: b_(y), bit_length_(l), gm_(gm_sk,state)
+: b_(y), bit_length_(l), gm_(gm_sk,state), protocol_started_(false)
 {
 }
 
 LSIC_B::LSIC_B(const mpz_class &y,const size_t l, gmp_randstate_t state, unsigned int key_size)
-: b_(y), bit_length_(l), gm_(GM_priv::keygen(state,key_size),state)
+: b_(y), bit_length_(l), gm_(GM_priv::keygen(state,key_size),state), protocol_started_(false)
 {
 }
 
+void LSIC_B::set_value(const mpz_class &x)
+{
+    // we must not be able to reset b after the protocol started
+    assert(!protocol_started_);
+    b_ = x;
+}
+
+
 LSIC_Packet_B LSIC_B::setupRound()
 {
+    protocol_started_ = true;
     return LSIC_Packet_B(0,0,gm_.encrypt((bool)mpz_tstbit(b_.get_mpz_t(),0)));
 }
 

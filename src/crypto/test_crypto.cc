@@ -48,7 +48,7 @@ test_paillier()
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
 
-    auto sk = Paillier_priv::keygen(randstate);
+    auto sk = Paillier_priv::keygen(randstate,600);
     Paillier_priv pp(sk,randstate);
     
     auto pk = pp.pubkey();
@@ -64,10 +64,17 @@ test_paillier()
     mpz_class ct1 = p.encrypt(pt1);
     mpz_class sum = p.add(ct0, ct1);
     mpz_class prod = p.constMult(m,ct0);
+//    mpz_class diff = p.constMult(-1, ct0);
+    mpz_class diff = p.sub(ct0, ct1);
     
     assert(pp.decrypt(ct0) == pt0);
     assert(pp.decrypt(ct1) == pt1);
     assert(pp.decrypt(sum) == (pt0+pt1)%n);
+    mpz_class d = pt0 - pt1;
+    if (d < 0) {
+        d += n;
+    }
+    assert( pp.decrypt(diff) == d);
     assert(pp.decrypt(prod) == (m*pt0)%n);
 
     cout << " passed" << endl;

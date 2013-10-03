@@ -58,6 +58,12 @@ Paillier::add(const mpz_class &c0, const mpz_class &c1) const
 }
 
 mpz_class
+Paillier::sub(const mpz_class &c0, const mpz_class &c1) const
+{
+    return add(c0,constMult(-1,c1));
+}
+
+mpz_class
 Paillier::constMult(const mpz_class &m, const mpz_class &c) const
 {
     return mpz_class_powm(c, m, n2);

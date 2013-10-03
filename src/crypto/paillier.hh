@@ -12,6 +12,7 @@ class Paillier {
 
     mpz_class encrypt(const mpz_class &plaintext);
     mpz_class add(const mpz_class &c0, const mpz_class &c1) const;
+    mpz_class sub(const mpz_class &c0, const mpz_class &c1) const;
     mpz_class constMult(const mpz_class &m, const mpz_class &c) const;
     mpz_class constMult(long m, const mpz_class &c) const;
     mpz_class constMult(const mpz_class &c, long m) const { return constMult(m,c); };
