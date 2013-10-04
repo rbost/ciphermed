@@ -27,18 +27,18 @@ mpz_class EncCompare_Owner::setup(unsigned int lambda)
     x = paillier_.add(b_,paillier_.encrypt(two_l_));
     x = paillier_.sub(x,a_);
     
-    mpz_urandomb(r.get_mpz_t(), randstate_, lambda+bit_length_+1);
+    mpz_urandomb(r.get_mpz_t(), randstate_, lambda+bit_length_);
     z = paillier_.add(x,paillier_.encrypt(r));
 
     c = r % two_l_;
     lsic_.set_value(c);
     
-    bool r_l_1 = (bool)mpz_tstbit(r.get_mpz_t(),bit_length_);
-    c_r_l_1_ = lsic_.gm().encrypt(r_l_1);
+    bool r_l = (bool)mpz_tstbit(r.get_mpz_t(),bit_length_);
+    c_r_l_ = lsic_.gm().encrypt(r_l);
 
     
 //    cout << "l = " << bit_length_ << endl;
-//    cout << "Owner setup: \nr = " << r << "\t" << r.get_str(2) << "\nr_l_1 = " << r_l_1 << "\nc = " << c << endl;
+//    cout << "Owner setup: \nr = " << r << "\t" << r.get_str(2) << "\nr_l = " << r_l << "\nc = " << c << endl;
 //    cout << "2^l = " << two_l_ << endl;
     return z;
 }
@@ -69,18 +69,18 @@ void EncCompare_Helper::setup(const mpz_class &c_z)
     mpz_class d = z % two_l_;
     lsic_.set_value(d);
     
-    bool z_l_1 = (bool)mpz_tstbit(z.get_mpz_t(),bit_length_);
-    c_z_l_1_ = lsic_.gm().encrypt(z_l_1);
+    bool z_l = (bool)mpz_tstbit(z.get_mpz_t(),bit_length_);
+    c_z_l_ = lsic_.gm().encrypt(z_l);
     
-//    cout << "Helper setup: \nz = " << z << "\t" << z.get_str(2)<< "\nz_l_1 = " << z_l_1 << "\nd = " << d << endl;
+//    cout << "Helper setup: \nz = " << z << "\t" << z.get_str(2)<< "\nz_l = " << z_l << "\nd = " << d << endl;
 
 }
 
-mpz_class EncCompare_Helper::concludeProtocol(const mpz_class &c_r_l_1)
+mpz_class EncCompare_Helper::concludeProtocol(const mpz_class &c_r_l)
 {
     mpz_class c_t_prime = lsic_.output();
-    mpz_class c_t = lsic_.gm().XOR(c_t_prime,c_r_l_1);
-    c_t = lsic_.gm().XOR(c_t,c_z_l_1_);
+    mpz_class c_t = lsic_.gm().XOR(c_t_prime,c_r_l);
+    c_t = lsic_.gm().XOR(c_t,c_z_l_);
 
     return c_t;
 }

@@ -21,7 +21,7 @@ public:
 
     Paillier paillier() const { return paillier_; }
     LSIC_B& lsic() { return lsic_; };
-    mpz_class get_c_r_l_1() const { return c_r_l_1_; };
+    mpz_class get_c_r_l() const { return c_r_l_; };
     
 protected:
     mpz_class a_,b_;
@@ -31,7 +31,7 @@ protected:
     gmp_randstate_t randstate_;
     
     /* intermediate values */
-    mpz_class c_r_l_1_;
+    mpz_class c_r_l_;
 
     /* cached values */
     mpz_class two_l_;
@@ -43,7 +43,7 @@ public:
     EncCompare_Helper(const size_t &l, const std::vector<mpz_class> &pk_gm, gmp_randstate_t state, unsigned int key_size = 1024);
 
     void setup(const mpz_class &c_z);
-    mpz_class concludeProtocol(const mpz_class &c_r_l_1_);
+    mpz_class concludeProtocol(const mpz_class &c_r_l_);
 
     Paillier_priv paillier() const { return paillier_; }
     LSIC_A& lsic() { return lsic_; };
@@ -55,7 +55,7 @@ protected:
     gmp_randstate_t randstate_;
     
     /* intermediate values */
-    mpz_class c_z_l_1_;
+    mpz_class c_z_l_;
     
     /* cached values */
     mpz_class two_l_;
