@@ -57,6 +57,7 @@ include crypto/Makefrag
 include mpc/Makefrag
 include fhe/Makefrag
 include shaifhe/Makefrag
+include tree/Makefrag
 
 $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
 	@mkdir -p $(@D)
