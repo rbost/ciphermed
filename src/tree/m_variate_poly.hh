@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <iostream>
 
@@ -9,7 +11,7 @@ class Term {
     vector<size_t> variables_;
     
 public:
-    Term(const T &c = 0) : coeff_(c) {}
+    Term(const T &c = 0) : coeff_(c), variables_(0) {}
     Term(const T &c, const vector<size_t> vars)
     : coeff_(c), variables_(vars) {}
     
@@ -58,6 +60,11 @@ public:
         return multiplyBy(c);
     }
     
+    Term<T> operator-() const
+    {
+        return Term<T>(-coeff_,variables_);
+    }
+    
     void operator*=(const Term<T> &right)
     {
         scaleBy(right);
@@ -70,7 +77,8 @@ public:
 };
 
 template <typename T>
-Term<T> operator*(const T &c, const Term<T> &t) {
+Term<T> operator*(const T &c, const Term<T> &t)
+{
     return t.multiplyBy(c);
 }
 
@@ -94,7 +102,9 @@ class Multivariate_poly {
     vector<Term <T> > terms_;
     
 public:
-    Multivariate_poly(const vector<Term <T> > t) : terms_(t) {}
+    Multivariate_poly() : terms_(0) {}
+    Multivariate_poly(const vector<Term <T> > &t) : terms_(t) {}
+    Multivariate_poly(const Term <T> &t) : terms_({t}) {}
     
     const vector< Term <T> >& terms() const { return terms_; }
     
@@ -127,29 +137,68 @@ public:
         }
     }
     
+    void operator*=(const Multivariate_poly<T> &p)
+    {
+        terms_ = (*this * p).terms();
+    }
 };
 
 template <typename T>
-Multivariate_poly<T> operator+(const Term<T> &t1, const Term<T> &t2) {
+Multivariate_poly<T> operator+(const Term<T> &t1, const Term<T> &t2)
+{
     return Multivariate_poly<T>({t1,t2});
 }
 
 template <typename T>
-Multivariate_poly<T> operator+(const Term<T> &t1, const Multivariate_poly<T> &p2) {
+Multivariate_poly<T> operator+(const Term<T> &t1, const Multivariate_poly<T> &p2)
+{
     vector< Term<T> >terms(p2.terms());
     terms.insert(terms.begin(),t1);
     return Multivariate_poly<T>(terms);
 }
 
 template <typename T>
-Multivariate_poly<T> operator+(const Multivariate_poly<T> &p1, const Term<T> &t2) {
+Multivariate_poly<T> operator+(const Multivariate_poly<T> &p1, const Term<T> &t2)
+{
     vector< Term<T> >terms(p1.terms());
     terms.insert(terms.end(),t2);
     return Multivariate_poly<T>(terms);
 }
 
 template <typename T>
-Multivariate_poly<T> operator*(const Multivariate_poly<T> &p1, const Term<T> &t2) {
+Multivariate_poly<T> operator+(const Multivariate_poly<T> &p1, const Multivariate_poly<T> &p2)
+{
+    vector< Term<T> >terms(p1.terms());
+    terms.reserve(p1.terms().size() + p2.terms().size());
+    
+//    terms.insert(terms.end(),p1.terms().begin(),p1.terms().end());
+    terms.insert(terms.end(),p2.terms().begin(),p2.terms().end());
+    
+    return Multivariate_poly<T>(terms);
+}
+
+template <typename T>
+Multivariate_poly<T> operator-(const Multivariate_poly<T> &p)
+{
+    vector< Term<T> > terms(p.terms().size());
+    
+    for(size_t i = 0; i < p.terms().size(); i ++)
+    {
+        terms[i] = -(p.terms())[i];
+    }
+    
+    return Multivariate_poly<T>(terms);
+}
+
+template <typename T>
+Multivariate_poly<T> operator-(const Multivariate_poly<T> &p1, const Multivariate_poly<T> &p2)
+{
+    return p1 + (-p2);
+}
+
+template <typename T>
+Multivariate_poly<T> operator*(const Multivariate_poly<T> &p1, const Term<T> &t2)
+{
 
     vector< Term<T> > terms(p1.terms().size());
 
@@ -162,15 +211,17 @@ Multivariate_poly<T> operator*(const Multivariate_poly<T> &p1, const Term<T> &t2
 }
 
 template <typename T>
-Multivariate_poly<T> operator*(const Term<T> &t1, const Multivariate_poly<T> &p2) {
+Multivariate_poly<T> operator*(const Term<T> &t1, const Multivariate_poly<T> &p2)
+{
     return operator*(p2,t1);
 }
 
 template <typename T>
-Multivariate_poly<T> operator*(const Multivariate_poly<T> &p1, const Multivariate_poly<T> &p2) {
+Multivariate_poly<T> operator*(const Multivariate_poly<T> &p1, const Multivariate_poly<T> &p2)
+{
     
     if(p2.terms().size() == 0){
-        return Multivariate_poly<T>({});
+        return Multivariate_poly<T>();
     }
     
     Multivariate_poly<T> p = p1*(p2.terms())[0];

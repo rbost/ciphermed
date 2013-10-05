@@ -16,6 +16,8 @@ static void test_tree()
     assert(t->decision({true}) == 1);
     assert(t->decision({false}) == 2);
 
+    cout << t->to_polynomial() << endl;
+
     delete t;
     
     t = new Node<int>(0, new Node<int>(1, new Leaf<int>(1), new Leaf<int>(2)), new Leaf<int>(3));
@@ -36,21 +38,29 @@ static void test_poly()
     Term<int> t = t1*t2;
 
     vector<int> vals = {1,1};
-    cout << t1 << " eval " << t1.eval(vals) << endl;
-    cout << t2 << " eval " << t2.eval(vals) << endl;
-    cout << t << " eval " << t.eval(vals) << endl;
+    
+//    cout << t1 << " eval " << t1.eval(vals) << endl;
+//    cout << t2 << " eval " << t2.eval(vals) << endl;
+//    cout << t << " eval " << t.eval(vals) << endl;
     
     Multivariate_poly<int> p = t1*(t1 + t2 + t);
-    cout << p << endl;
+//    cout << p << endl;
     
-    cout << "Eval : " << p.eval(vals) << endl;
+//    cout << "Eval : " << p.eval(vals) << endl;
+    
+    Term<int> x(1,{0});
+    Term<int> one(1);
+    p = x + one;
+    p *= p;
+    cout << p << endl;
+
 }
 
 int
 main(int ac, char **av)
 {
     test_tree();
-    test_poly();
+//    test_poly();
     
     return 0;
 }

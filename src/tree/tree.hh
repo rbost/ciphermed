@@ -1,6 +1,9 @@
+#pragma once
+
 #include <cstddef>
 #include <vector>
 
+#include <tree/m_variate_poly.hh>
 
 using namespace std;
 
@@ -9,6 +12,7 @@ template <typename T> class Tree
 public:
     virtual inline bool isLeaf() const = 0;
     virtual const T& decision(const vector<bool> &b_table) const = 0;
+    virtual Multivariate_poly<T> to_polynomial() const = 0;
 };
 
 template <typename T> class Leaf : public Tree<T>
@@ -21,6 +25,11 @@ public:
     inline const T& value() const { return value_; }
     inline bool isLeaf() const { return true; }
     inline const T& decision(const vector<bool> &b_table) const { return value_; }
+    
+    Multivariate_poly<T> to_polynomial() const
+    {
+        return Multivariate_poly<T>(Term<T>(value_));
+    }
 };
 
 
@@ -53,4 +62,14 @@ public:
             return right_->decision(b_table);
         }
     }
+    
+    Multivariate_poly<T> to_polynomial() const
+    {
+        Multivariate_poly<T> p_l = left_->to_polynomial();
+        Multivariate_poly<T> p_r = right_->to_polynomial();
+        
+        Term<T> b (1,{index_});
+        return p_r + b*(p_l -p_r);
+    }
+
 };
