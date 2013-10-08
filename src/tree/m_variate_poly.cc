@@ -17,17 +17,15 @@ Ctxt evalTerm_FHE(const Term< vector<long> > &term, const vector<Ctxt> &vals, co
     Ctxt c = vals[term.variables()[0]];
     
     for (size_t i = 1; i < term.variables().size(); i++) {
-        //        v *= vals[term.variables()[i]];
-        c.multiplyBy(vals[term.variables()[i]]);
+//        c.multiplyBy(vals[term.variables()[i]]);
+        c*= vals[term.variables()[i]];
     }
     
     ZZX coeffPoly;
     ea.encode(coeffPoly,term.coefficient());
     
     c.multByConstant(coeffPoly);
-    
-    //    v*= term.coefficient();
-    
+        
     return c;
 }
 
