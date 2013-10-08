@@ -20,10 +20,9 @@ long bitDecomp_inv(const vector<long> &bits)
 {
     long x = 0;
     size_t n = bits.size();
-    for (size_t i = 0; i < n ; i++) {
+    for (size_t i = 1; i <= n ; i++) {
         x <<= 1;
         x += bits[n-i];
     }
-    
     return x;
 }
