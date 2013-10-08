@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <tree/m_variate_poly.hh>
+#include <tree/util.hh>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ public:
     virtual inline bool isLeaf() const = 0;
     virtual const T& decision(const vector<bool> &b_table) const = 0;
     virtual Multivariate_poly<T> to_polynomial() const = 0;
+    virtual Multivariate_poly< vector<long> > to_polynomial_with_slots(size_t n) const = 0;
 };
 
 template <typename T> class Leaf : public Tree<T>
@@ -30,6 +32,12 @@ public:
     {
         return Multivariate_poly<T>(Term<T>(value_));
     }
+
+    Multivariate_poly< vector<long> > to_polynomial_with_slots(size_t n) const
+    {
+        return Multivariate_poly<vector<long>>(Term<vector<long> >(bitDecomp(value_,n)));
+    }
+
 };
 
 
@@ -72,4 +80,13 @@ public:
         return p_r + b*(p_l -p_r);
     }
 
+    Multivariate_poly< vector<long> > to_polynomial_with_slots(size_t n) const
+    {
+        Multivariate_poly< vector<long> > p_l = left_->to_polynomial_with_slots(n);
+        Multivariate_poly< vector<long> > p_r = right_->to_polynomial_with_slots(n);
+        
+        Term<vector<long> > b (vector<long>(n,1),{index_});
+        return p_r + b*(p_l -p_r);
+
+    }
 };

@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <iostream>
+#include <NTL/ZZX.h>
+#include <EncryptedArray.h>
 
 using namespace std;
 
@@ -11,22 +13,13 @@ class Term {
     vector<size_t> variables_;
     
 public:
-    Term(const T &c = 0) : coeff_(c), variables_(0) {}
+    Term() : coeff_(0),variables_(0) {};
+    Term(const T &c) : coeff_(c), variables_(0) {}
     Term(const T &c, const vector<size_t> vars)
     : coeff_(c), variables_(vars) {}
     
     const T& coefficient () const { return coeff_; }
     const vector<size_t>& variables () const { return variables_; }
-    
-    T eval(const vector<T> &vals) const
-    {
-        T v = coeff_;
-        for (size_t i = 0; i < variables_.size(); i++) {
-            v *= vals[variables_[i]];
-        }
-        
-        return v;
-    }
     
     Term<T> multiplyBy(const T &v) const
     {
@@ -97,6 +90,45 @@ template <typename T> inline ostream& operator<<(ostream &out, const Term<T> & t
     return out;
 }
 
+template <typename T, typename U = T, typename V = U> V evalTerm(const Term<T> &term, const vector<U> &vals)
+{
+    if (term.variables().size() == 0) {
+        return term.coefficient();
+    }
+    V v = vals[term.variables()[0]];
+    
+    
+    for (size_t i = 1; i < term.variables().size(); i++) {
+        v *= vals[term.variables()[i]];
+    }
+    
+    v*= term.coefficient();
+    
+    return v;
+}
+
+template <typename T, typename U = T, typename V = U>
+vector<V> evalTerm(const Term< vector<T> > &term, const vector<U> &vals)
+{
+    if (term.variables().size() == 0) {
+        return vector<V>(term.coefficient());
+    }
+    V v = vals[term.variables()[0]];
+    
+    
+    for (size_t i = 1; i < term.variables().size(); i++) {
+        v *= vals[term.variables()[i]];
+    }
+        
+    vector<V> res(term.coefficient().size());
+    for (size_t j = 0; j < term.coefficient().size(); j++) {
+        res[j] = term.coefficient()[j] * v;
+    }
+
+    return res;
+
+}
+
 template <typename T>
 class Multivariate_poly {
     vector<Term <T> > terms_;
@@ -107,18 +139,7 @@ public:
     Multivariate_poly(const Term <T> &t) : terms_({t}) {}
     
     const vector< Term <T> >& terms() const { return terms_; }
-    
-    T eval(const vector<T> &vals) const
-    {
-        T v = 0;
         
-        for (size_t i = 0; i < terms_.size(); i++) {
-            v += terms_[i].eval(vals);
-        }
-        
-        return v;
-    }
-    
     void operator+=(const Term<T> &t)
     {
         terms_.insert(terms_.end(),t);
@@ -171,7 +192,6 @@ Multivariate_poly<T> operator+(const Multivariate_poly<T> &p1, const Multivariat
     vector< Term<T> >terms(p1.terms());
     terms.reserve(p1.terms().size() + p2.terms().size());
     
-//    terms.insert(terms.end(),p1.terms().begin(),p1.terms().end());
     terms.insert(terms.end(),p2.terms().begin(),p2.terms().end());
     
     return Multivariate_poly<T>(terms);
@@ -234,7 +254,7 @@ Multivariate_poly<T> operator*(const Multivariate_poly<T> &p1, const Multivariat
 
 template <typename T> inline ostream& operator<<(ostream &out, const Multivariate_poly<T> & p)
 {
-    if(p.terms().size() == 0) out << "Empty";
+    if(p.terms().size() == 0) out << "0";
     
     for(size_t i = 0; i < p.terms().size(); i++)
     {
@@ -246,6 +266,20 @@ template <typename T> inline ostream& operator<<(ostream &out, const Multivariat
     return out;
 }
 
+template <typename T, typename U = T, typename V = U> V evalPoly(const Multivariate_poly<T> &p, const vector<U> &vals)
+{
+    V v = 0;
+    
+    for (size_t i = 0; i < p.terms().size(); i++) {
+        v += evalTerm<T,U,V>((p.terms())[i],vals);
+    }
+    
+    return v;
+}
 
 
-
+/*
+ * Instantiation for polynomial evaluated with FHE
+ */
+Ctxt evalTerm_FHE(const Term< vector<long> > &term, const vector<Ctxt> &vals, const EncryptedArray &ea);
+Ctxt evalPoly_FHE(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea);
