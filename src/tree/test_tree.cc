@@ -249,24 +249,36 @@ static void test_selector()
 
     EncryptedArray ea(context, G);
 
-    Tree<int> *t;
-    t = new Node<int>(0, new Node<int>(1, new Leaf<int>(1), new Leaf<int>(2)), new Leaf<int>(3));
-
-    Multivariate_poly< vector<long> > selector = t->to_polynomial_with_slots(ea.size());
-        
-    PlaintextArray b0(ea), b1(ea), res(ea);
-    b0.encode(0);
-    b1.encode(0);
+    Tree<long> *t;
+//    t = new Node<int>(0, new Node<int>(1, new Leaf<int>(1), new Leaf<int>(2)), new Leaf<int>(3));
+    t = balancedBinaryTree(4);
     
-    Ctxt c_b0(publicKey),c_b1(publicKey);
+    Multivariate_poly< vector<long> > selector = t->to_polynomial_with_slots(ea.size());
+    
+    cerr << t->to_polynomial() << endl;
+    
+    PlaintextArray b0(ea), b1(ea), b2(ea), b3(ea);
+    b0.encode(0);
+    b1.encode(1);
+    b2.encode(1);
+//    b3.encode(0);
+    
+    Ctxt c_b0(publicKey),c_b1(publicKey),c_b2(publicKey),c_b3(publicKey);
     ea.encrypt(c_b0,publicKey,b0);
     ea.encrypt(c_b1,publicKey,b1);
+    ea.encrypt(c_b2,publicKey,b2);
+    ea.encrypt(c_b3,publicKey,b3);
     
-    Ctxt c_r = evalPoly_FHE(selector, {c_b0,c_b1},ea);
+    Ctxt c_r = evalPoly_FHE(selector, {c_b0,c_b1,c_b2},ea);
     
-    ea.decrypt(c_r, secretKey, res);
-    res.print(cerr);
-    cerr << endl;
+    vector<long> res_bits;
+    ea.decrypt(c_r, secretKey, res_bits);
+//    res.print(cerr);
+    
+//    cerr << res_bits << endl;
+
+    long res = bitDecomp_inv(res_bits);
+    cerr << "result=" << res << endl;
 
 }
 

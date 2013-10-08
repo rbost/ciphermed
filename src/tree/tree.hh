@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <queue>
 
 #include <tree/m_variate_poly.hh>
 #include <tree/util.hh>
@@ -90,3 +91,6 @@ public:
 
     }
 };
+
+Tree<long>* balancedBinaryTree(size_t n_leaves);
+Tree<long>* balancedBinaryTree_aux(size_t n_leaves, size_t index, queue<size_t> &v_indices);
