@@ -49,7 +49,7 @@ Ctxt evalPoly_FHE(const Multivariate_poly< vector<long> > &poly, const vector<Ct
     Ctxt c = evalTerm_FHE(poly.terms()[0], vals,ea);
     
     for (size_t i = 1; i < s; i++) {
-        c.addCtxt(evalTerm_FHE(poly.terms()[0], vals,ea));
+        c.addCtxt(evalTerm_FHE(poly.terms()[i], vals,ea));
     }
 
     return c;

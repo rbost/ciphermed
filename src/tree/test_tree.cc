@@ -249,16 +249,20 @@ static void test_selector()
 
     EncryptedArray ea(context, G);
 
-    Tree<int> *t = new Node<int>(0, new Leaf<int>(0), new Leaf<int>(1));
+    Tree<int> *t;
+    t = new Node<int>(0, new Node<int>(1, new Leaf<int>(1), new Leaf<int>(2)), new Leaf<int>(3));
+
     Multivariate_poly< vector<long> > selector = t->to_polynomial_with_slots(ea.size());
+        
+    PlaintextArray b0(ea), b1(ea), res(ea);
+    b0.encode(0);
+    b1.encode(0);
     
-    PlaintextArray b(ea), res(ea);
-    b.replicate(1);
+    Ctxt c_b0(publicKey),c_b1(publicKey);
+    ea.encrypt(c_b0,publicKey,b0);
+    ea.encrypt(c_b1,publicKey,b1);
     
-    Ctxt c_b(publicKey);
-    ea.encrypt(c_b,publicKey,b);
-    
-    Ctxt c_r = evalPoly_FHE(selector, {c_b},ea);
+    Ctxt c_r = evalPoly_FHE(selector, {c_b0,c_b1},ea);
     
     ea.decrypt(c_r, secretKey, res);
     res.print(cerr);
