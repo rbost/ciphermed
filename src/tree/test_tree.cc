@@ -222,7 +222,7 @@ static void fun_with_fhe()
 
 }
 
-static void test_selector(size_t n_levels = 3)
+static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
 {
     ScopedTimer *timer;
     
@@ -230,7 +230,8 @@ static void test_selector(size_t n_levels = 3)
     long r = 1;
     long d = 1;
     long c = 2;
-    long L = 6;
+//    long L = 6;
+    long L = 2*n_levels;
     long w = 64;
     long s = 1;
     long k = 80;
@@ -252,6 +253,8 @@ static void test_selector(size_t n_levels = 3)
         G = context.alMod.getFactorsOverZZ()[0];
     else
         G = makeIrredPoly(p, d);
+
+    addSome1DMatrices(secretKey); // compute key-switching matrices that we need
 
     EncryptedArray ea(context, G);
     delete timer;
@@ -288,7 +291,7 @@ static void test_selector(size_t n_levels = 3)
     delete timer;
 
     timer = new ScopedTimer("Eval polynomial");
-    Ctxt c_r = evalPoly_FHE(selector, c_b,ea);
+    Ctxt c_r = evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
     delete timer;
 
     vector<long> res_bits;
@@ -311,7 +314,7 @@ main(int ac, char **av)
 //    test_tree();
 //    test_poly();
 //    fun_with_fhe();
-    test_selector();
+    test_selector(5,false);
     
     return 0;
 }

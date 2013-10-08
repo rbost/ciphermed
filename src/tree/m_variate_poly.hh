@@ -277,9 +277,11 @@ template <typename T, typename U = T, typename V = U> V evalPoly(const Multivari
     return v;
 }
 
-
 /*
  * Instantiation for polynomial evaluated with FHE
  */
-Ctxt evalTerm_FHE(const Term< vector<long> > &term, const vector<Ctxt> &vals, const EncryptedArray &ea);
-Ctxt evalPoly_FHE(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea);
+Ctxt evalTerm_FHE(const Term< vector<long> > &term, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit = true);
+Ctxt evalPoly_FHE(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit = true);
+
+
+Ctxt shallowMultiplication(const vector<Ctxt> &terms, const EncryptedArray &ea);
