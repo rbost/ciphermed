@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cassert>
+#include <cstdlib>
 
 #include <tree/tree.hh>
 #include <tree/m_variate_poly.hh>
@@ -8,6 +9,8 @@
 #include <FHE.h>
 #include <EncryptedArray.h>
 #include <NTL/lzz_pXFactoring.h>
+
+#include <util/util.hh>
 
 using namespace std;
 //std::vector<long> bitDecomp(long x, size_t n);
@@ -219,20 +222,23 @@ static void fun_with_fhe()
 
 }
 
-static void test_selector()
+static void test_selector(size_t n_levels = 3)
 {
+    ScopedTimer *timer;
+    
     long p = 2;
     long r = 1;
     long d = 1;
     long c = 2;
-    long L = 5;
+    long L = 6;
     long w = 64;
     long s = 1;
     long k = 80;
     long chosen_m = 0; // XXX: check?
     
-    long m = FindM(k, L, c, p, d, s, chosen_m, true);
+    timer = new ScopedTimer("Setup SHE scheme");
     
+    long m = FindM(k, L, c, p, d, s, chosen_m, true);
     
     FHEcontext context(m, p, r);
     buildModChain(context, L, c);
@@ -248,43 +254,60 @@ static void test_selector()
         G = makeIrredPoly(p, d);
 
     EncryptedArray ea(context, G);
+    delete timer;
 
     Tree<long> *t;
 //    t = new Node<int>(0, new Node<int>(1, new Leaf<int>(1), new Leaf<int>(2)), new Leaf<int>(3));
-    t = balancedBinaryTree(4);
+//    t = balancedBinaryTree(4);
+    
+    timer = new ScopedTimer("Build tree & polynomial");
+
+    t = binaryRepTree(n_levels);
     
     Multivariate_poly< vector<long> > selector = t->to_polynomial_with_slots(ea.size());
+
+    delete t;
+
+//    cerr << t->to_polynomial() << endl;
     
-    cerr << t->to_polynomial() << endl;
+
+    long query = rand() % ((1<<n_levels) - 1);
+    vector<long> bits_query = bitDecomp(query, n_levels);
+
+    timer = new ScopedTimer("Encode query");
+
+    vector<PlaintextArray> b(n_levels,PlaintextArray(ea));
+    vector<Ctxt> c_b(n_levels,Ctxt(publicKey));
+
     
-    PlaintextArray b0(ea), b1(ea), b2(ea), b3(ea);
-    b0.encode(0);
-    b1.encode(1);
-    b2.encode(1);
-//    b3.encode(0);
+    for (size_t i = 0; i < n_levels; i++) {
+        b[i].encode(bits_query[i]);
+        ea.encrypt(c_b[i],publicKey,b[i]);
+    }
     
-    Ctxt c_b0(publicKey),c_b1(publicKey),c_b2(publicKey),c_b3(publicKey);
-    ea.encrypt(c_b0,publicKey,b0);
-    ea.encrypt(c_b1,publicKey,b1);
-    ea.encrypt(c_b2,publicKey,b2);
-    ea.encrypt(c_b3,publicKey,b3);
-    
-    Ctxt c_r = evalPoly_FHE(selector, {c_b0,c_b1,c_b2},ea);
-    
+    delete timer;
+
+    timer = new ScopedTimer("Eval polynomial");
+    Ctxt c_r = evalPoly_FHE(selector, c_b,ea);
+    delete timer;
+
     vector<long> res_bits;
-    ea.decrypt(c_r, secretKey, res_bits);
-//    res.print(cerr);
     
-//    cerr << res_bits << endl;
+    timer = new ScopedTimer("Decrypt result");
+    ea.decrypt(c_r, secretKey, res_bits);
+    delete timer;
 
     long res = bitDecomp_inv(res_bits);
+    cerr << "query=" << query << endl;
     cerr << "result=" << res << endl;
 
+    assert(query == res);
 }
 
 int
 main(int ac, char **av)
 {
+    srand(time(NULL));
 //    test_tree();
 //    test_poly();
 //    fun_with_fhe();

@@ -94,3 +94,4 @@ public:
 
 Tree<long>* balancedBinaryTree(size_t n_leaves);
 Tree<long>* balancedBinaryTree_aux(size_t n_leaves, size_t index, queue<size_t> &v_indices);
+Tree<long>* binaryRepTree(size_t level, size_t index_offset = 0);
