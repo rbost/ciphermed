@@ -5,6 +5,8 @@
 #include <NTL/ZZX.h>
 #include <EncryptedArray.h>
 
+#include <algorithm>
+
 using namespace std;
 
 template <typename T>
@@ -21,6 +23,8 @@ public:
     const T& coefficient () const { return coeff_; }
     const vector<size_t>& variables () const { return variables_; }
     size_t degree() const { return variables_.size(); }
+    
+    void sortVariables() { sort(variables_.begin(),variables_.end()); }
     
     Term<T> multiplyBy(const T &v) const
     {
@@ -67,6 +71,18 @@ public:
     void operator*=(const T &c)
     {
         scaleBy(c);
+    }
+    
+    void printVariables(ostream &out) const
+    {
+        out << "[";
+        for(size_t i = 0; i < variables_.size(); i++)
+        {
+            if(i>0) out << ", ";
+            
+            out << (variables_)[i];
+        }
+        out << "]";
     }
 };
 
@@ -150,6 +166,36 @@ public:
         }
         return d;
     }
+    
+    void sortTermsVariables()
+    {
+        for (size_t i = 0; i < terms_.size(); i++) {
+            terms_[i].sortVariables();
+        }        
+    }
+    
+    void printTermsVariables(ostream &out) const
+    {
+        for (size_t i = 0; i < terms_.size(); i++) {
+            terms_[i].printVariables(out);
+            out <<"\n";
+        }
+    }
+
+    void regroupTerms()
+    {
+        sortTermsVariables();
+        
+        vector < Term<T> > buffer = terms_;
+        vector < Term<T> > newTerms;
+        
+        while (buffer.size() > 0) {
+            Term<T> regroupedTerm = regroupTermWithVariables(buffer[0].variables(),buffer);
+            newTerms.push_back(regroupedTerm);
+        }
+        terms_ = newTerms;
+    }
+    
     void operator+=(const Term<T> &t)
     {
         terms_.insert(terms_.end(),t);

@@ -275,11 +275,11 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     
     Multivariate_poly< vector<long> > selector = t->to_polynomial_with_slots(ea.size());
 
-    delete t;
+    delete timer;
 
-    cerr << "selector: " << selector.termsCount() << " terms, degree " << selector.degree() << endl;
-//    cerr << t->to_polynomial() << endl;
+//    selector.printTermsVariables(cerr);
     
+//    cerr << endl;
 
     long query = rand() % ((1<<n_levels) - 1);
     vector<long> bits_query = bitDecomp(query, n_levels);
@@ -296,15 +296,36 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     }
     
     delete timer;
+    
+    cerr << endl;
 
-    timer = new ScopedTimer("Eval polynomial");
+    cerr << "selector: " << selector.termsCount() << " terms, degree " << selector.degree() << endl;
+    
+    timer = new ScopedTimer("Eval polynomial - not regrouped");
+    evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
+    delete timer;
+    
+    cerr << endl;
+    
+    timer = new ScopedTimer("Regroup terms");
+    
+    selector.regroupTerms();
+    cerr << endl;
+
+    delete timer;
+    cerr << "selector regrouped: " << selector.termsCount() << " terms, degree " << selector.degree() << endl;
+
+    timer = new ScopedTimer("Eval polynomial - regrouped");
+//    Ctxt c_r = evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
     Ctxt c_r = evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
     delete timer;
+    
+    cerr << endl;
 
     cerr << "Level of final cyphertext: " << c_r.getLevel() << endl;
     vector<long> res_bits;
     
-    timer = new ScopedTimer("Decrypt result");
+    timer = new ScopedTimer("Decrypt");
     ea.decrypt(c_r, secretKey, res_bits);
     delete timer;
 
