@@ -287,11 +287,41 @@ template <typename T, typename U = T, typename V = U> V evalPoly(const Multivari
     return v;
 }
 
+template <typename T> Term<T> regroupTermWithVariables(const vector<size_t> &vars, vector< Term<T> > &terms)
+{
+    T coeff;
+    
+    bool term_found = false;
+    
+    vector< Term<T> >newTerms;
+    
+    for (size_t i = 0; i < terms.size(); i++) {
+        if ((terms[i]).variables() != vars) {
+            newTerms.push_back((terms[i]));
+        }else{
+            if (!term_found) {
+                term_found = true;
+                
+                coeff = (terms[i]).coefficient();
+            }else{
+                coeff = coeff + (terms[i]).coefficient();
+            }
+        }
+    }
+    
+    Term<T> regroupedTerm(coeff,vars);
+    terms = newTerms;
+    
+    return regroupedTerm;
+}
+
+
 /*
  * Instantiation for polynomial evaluated with FHE
  */
 Ctxt evalTerm_FHE(const Term< vector<long> > &term, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit = true);
 Ctxt evalPoly_FHE(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit = true);
+Ctxt evalPoly_FHE_timing(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit);
 
 
 Ctxt shallowMultiplication(const vector<Ctxt> &terms, const EncryptedArray &ea);
