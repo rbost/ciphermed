@@ -20,6 +20,7 @@ public:
     
     const T& coefficient () const { return coeff_; }
     const vector<size_t>& variables () const { return variables_; }
+    size_t degree() const { return variables_.size(); }
     
     Term<T> multiplyBy(const T &v) const
     {
@@ -139,7 +140,16 @@ public:
     Multivariate_poly(const Term <T> &t) : terms_({t}) {}
     
     const vector< Term <T> >& terms() const { return terms_; }
-        
+    
+    size_t termsCount() const { return terms_.size(); }
+    size_t degree() const
+    {
+        size_t d = 0;
+        for (size_t i = 0; i < terms_.size(); i++) {
+            d = max<size_t>(d,terms_[i].degree());
+        }
+        return d;
+    }
     void operator+=(const Term<T> &t)
     {
         terms_.insert(terms_.end(),t);

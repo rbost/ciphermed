@@ -231,7 +231,12 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     long d = 1;
     long c = 2;
 //    long L = 6;
-    long L = 2*n_levels;
+    long L;
+    
+    if(useShallowCircuit) L = 2*log(n_levels)+1; // this seems to work with the shallow multiplication
+    else L = n_levels; // this seems to work with the deep multiplication
+    
+    
     long w = 64;
     long s = 1;
     long k = 80;
@@ -246,6 +251,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     FHESecKey secretKey(context);
     const FHEPubKey& publicKey = secretKey;
     secretKey.GenSecKey(w); // A Hamming-weight-w secret key
+    cerr << "Chosen level=" << L << endl;
     
     ZZX G;
     
@@ -271,6 +277,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
 
     delete t;
 
+    cerr << "selector: " << selector.termsCount() << " terms, degree " << selector.degree() << endl;
 //    cerr << t->to_polynomial() << endl;
     
 
@@ -294,6 +301,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     Ctxt c_r = evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
     delete timer;
 
+    cerr << "Level of final cyphertext: " << c_r.getLevel() << endl;
     vector<long> res_bits;
     
     timer = new ScopedTimer("Decrypt result");
@@ -314,7 +322,7 @@ main(int ac, char **av)
 //    test_tree();
 //    test_poly();
 //    fun_with_fhe();
-    test_selector(5,false);
+    test_selector(5,true);
     
     return 0;
 }
