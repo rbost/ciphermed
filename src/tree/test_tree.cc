@@ -5,6 +5,7 @@
 #include <tree/tree.hh>
 #include <tree/m_variate_poly.hh>
 #include <tree/util.hh>
+#include <tree/util_poly.hh>
 
 #include <FHE.h>
 #include <EncryptedArray.h>
@@ -42,9 +43,10 @@ static void test_tree()
 static void test_poly()
 {
     Term<int> t1(2,{0});
-    Term<int> t2(3,{1});
+    Term<int> t2(3,{0});
     Term<int> t = t1*t2;
 
+    cout << "Lex Compare: " << compareVars(t1,t2) << endl;
     vector<int> vals = {1,1};
     
     cout << t1 << " eval " << evalTerm(t1,vals) << endl;
@@ -233,7 +235,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
 //    long L = 6;
     long L;
     
-    if(useShallowCircuit) L = 2*log(n_levels)+1; // this seems to work with the shallow multiplication
+    if(useShallowCircuit) L = 2;//= 2*log(n_levels)+1; // this seems to work with the shallow multiplication
     else L = n_levels; // this seems to work with the deep multiplication
     
     
@@ -300,16 +302,17 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     cerr << endl;
 
     cerr << "selector: " << selector.termsCount() << " terms, degree " << selector.degree() << endl;
-    
-    timer = new ScopedTimer("Eval polynomial - not regrouped");
-    evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
-    delete timer;
-    
-    cerr << endl;
+//
+//    timer = new ScopedTimer("Eval polynomial - not regrouped");
+//    evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
+//    delete timer;
+//    
+//    cerr << endl;
     
     timer = new ScopedTimer("Regroup terms");
     
-    selector.regroupTerms();
+//    selector.regroupTerms();
+    selector = mergeRegroup(selector);
     cerr << endl;
 
     delete timer;
@@ -343,7 +346,7 @@ main(int ac, char **av)
 //    test_tree();
 //    test_poly();
 //    fun_with_fhe();
-    test_selector(5,true);
+    test_selector(10,true);
     
     return 0;
 }

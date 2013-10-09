@@ -1,5 +1,5 @@
 OBJDIRS += tree
-TREESRC  := tree.cc m_variate_poly.cc util.cc
+TREESRC  := tree.cc m_variate_poly.cc util_poly.cc util.cc
 
 all:    $(OBJDIR)/libtree.so
 $(OBJDIR)/libtree.so: $(patsubst %.cc,$(OBJDIR)/tree/%.o,$(TREESRC)) $(OBJDIR)/libcrypto.so

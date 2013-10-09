@@ -157,7 +157,7 @@ public:
     
     const vector< Term <T> >& terms() const { return terms_; }
     
-    size_t termsCount() const { return terms_.size(); }
+    inline size_t termsCount() const { return terms_.size(); }
     size_t degree() const
     {
         size_t d = 0;
@@ -188,12 +188,15 @@ public:
         
         vector < Term<T> > buffer = terms_;
         vector < Term<T> > newTerms;
-        
+        size_t n_pass = 0; // stores the number of times we test terms variables
         while (buffer.size() > 0) {
+            n_pass+=buffer.size();
             Term<T> regroupedTerm = regroupTermWithVariables(buffer[0].variables(),buffer);
             newTerms.push_back(regroupedTerm);
         }
         terms_ = newTerms;
+        
+        cout << "Number of passes to regroup: " << n_pass << endl;
     }
     
     void operator+=(const Term<T> &t)
