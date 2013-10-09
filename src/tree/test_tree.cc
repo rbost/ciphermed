@@ -339,14 +339,33 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     assert(query == res);
 }
 
+void usage(char *prog)
+{
+    cerr << "Usage: "<<prog<<" [ optional parameters ]...\n";
+    cerr << "  optional parameters have the form 'attr1=val1 attr2=val2 ...'\n";
+    cerr << "  e.g, 'n=4 s=1 k=80'\n\n";
+    cerr << "  n is the depth of the test tree [default=5]\n";
+    cerr << "  shallow is the flag to turn of/on the shallow circuit for multiplication [default=1]" << endl;
+    exit(0);
+}
+
 int
 main(int ac, char **av)
 {
+    argmap_t argmap;
+    argmap["n"] = "5";
+    argmap["shallow"] = "1";
+
+    if (!parseArgs(ac, av, argmap)) usage(av[0]);
+
+    long n = atoi(argmap["n"]);
+    bool shallow = atoi(argmap["shallow"]);
+   
     srand(time(NULL));
 //    test_tree();
 //    test_poly();
 //    fun_with_fhe();
-    test_selector(10,true);
+    test_selector(n,shallow);
     
     return 0;
 }
