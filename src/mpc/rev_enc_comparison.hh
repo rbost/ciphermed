@@ -65,3 +65,5 @@ protected:
     bool is_protocol_done_;
     bool t_;
 };
+
+void runProtocol(Rev_EncCompare_Owner &owner, Rev_EncCompare_Helper &helper, unsigned int lambda = 100);

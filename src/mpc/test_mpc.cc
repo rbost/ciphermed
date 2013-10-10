@@ -175,28 +175,12 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     
     delete t;
     
-    mpz_class c_z(client.setup(lambda));
-    server.setup(c_z);
-    
-    t = new ScopedTimer("Internal LSIC");
-    LSIC_Packet_A a_packet;
-    LSIC_Packet_B b_packet = client.lsic().setupRound();
-    
-    bool state;
-    
-    state = server.lsic().answerRound(b_packet,&a_packet);
-    
-    while (!state) {
-        b_packet = client.lsic().answerRound(a_packet);
-        state = server.lsic().answerRound(b_packet, &a_packet);
-    }
-    
+    t = new ScopedTimer("Running protocol");
+
+    runProtocol(client,server,lambda);
+
     delete t;
-    
-    mpz_class c_r_l(client.get_c_r_l());
-    mpz_class c_t(server.concludeProtocol(c_r_l));
-    
-    client.decryptResult(c_t);
+
     bool result = client.output();
     
     assert( result == (a <= b));
@@ -231,28 +215,12 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     
     delete t;
     
-    mpz_class c_z(client.setup(lambda));
-    server.setup(c_z);
-    
-    t = new ScopedTimer("Internal LSIC");
-    LSIC_Packet_A a_packet;
-    LSIC_Packet_B b_packet = server.lsic().setupRound();
-    
-    bool state;
-    
-    state = client.lsic().answerRound(b_packet,&a_packet);
-    
-    while (!state) {
-        b_packet = server.lsic().answerRound(a_packet);
-        state = client.lsic().answerRound(b_packet, &a_packet);
-    }
+    t = new ScopedTimer("Running protocol");
+
+    runProtocol(client,server,lambda);
     
     delete t;
     
-    mpz_class c_z_l(server.get_c_z_l());
-    mpz_class c_t(client.concludeProtocol(c_z_l));
-    
-    server.decryptResult(c_t);
     bool result = server.output();
     
     assert( result == (a <= b));
@@ -268,9 +236,10 @@ int main(int ac, char **av)
 //	test_millionaire();
 //    test_lsic(256);
     
-    cout << "\n\n";
+//    cout << "\n\n";
     
-//    test_enc_compare(256,100);
+    test_enc_compare(256,100);
+    cout << "\n\n";
     test_rev_enc_compare(256,100);
     //	test_simple_svm();
 

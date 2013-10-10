@@ -86,3 +86,24 @@ mpz_class EncCompare_Helper::concludeProtocol(const mpz_class &c_r_l)
     return c_t;
 }
 
+void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, unsigned int lambda)
+{
+    mpz_class c_z(owner.setup(lambda));
+    helper.setup(c_z);
+
+    LSIC_Packet_A a_packet;
+    LSIC_Packet_B b_packet = owner.lsic().setupRound();
+    
+    bool state;
+    
+    state = helper.lsic().answerRound(b_packet,&a_packet);
+    
+    while (!state) {
+        b_packet = owner.lsic().answerRound(a_packet);
+        state = helper.lsic().answerRound(b_packet, &a_packet);
+    }
+    mpz_class c_r_l(owner.get_c_r_l());
+    mpz_class c_t(helper.concludeProtocol(c_r_l));
+    
+    owner.decryptResult(c_t);
+}

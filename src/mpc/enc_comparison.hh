@@ -65,3 +65,5 @@ protected:
     /* cached values */
     mpz_class two_l_;
 };
+
+void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, unsigned int lambda = 100);
