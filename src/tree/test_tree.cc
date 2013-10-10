@@ -109,16 +109,6 @@ operator<<(ostream &o, const configuration &cfg)
 
 static void fun_with_fhe()
 {
-//    long p = 2;
-//    long r = 16;
-//    long d = 1; // XXX: check?
-//    long c = 2;
-//    long L = 10;
-//    long w = 64;
-//    long s = 4; // XXX: check?
-//    long k = 80;
-//    long chosen_m = 0; // XXX: check?
-
     long p = 2;
     long r = 1;
     long d = 1;
@@ -232,9 +222,9 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     long r = 1;
     long d = 1;
     long c = 2;
-//    long L = 6;
+
     long L;
-    
+    /* We have to understand how to choose the number of primes in the moduli chain */
     if(useShallowCircuit) L = 2;//= 2*log(n_levels)+1; // this seems to work with the shallow multiplication
     else L = n_levels; // this seems to work with the deep multiplication
     
@@ -262,15 +252,13 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     else
         G = makeIrredPoly(p, d);
 
-    addSome1DMatrices(secretKey); // compute key-switching matrices that we need
+//    addSome1DMatrices(secretKey); // compute key-switching matrices that we need
 
     EncryptedArray ea(context, G);
     delete timer;
 
     Tree<long> *t;
-//    t = new Node<int>(0, new Node<int>(1, new Leaf<int>(1), new Leaf<int>(2)), new Leaf<int>(3));
-//    t = balancedBinaryTree(4);
-    
+
     timer = new ScopedTimer("Build tree & polynomial");
 
     t = binaryRepTree(n_levels);
@@ -278,10 +266,6 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     Multivariate_poly< vector<long> > selector = t->to_polynomial_with_slots(ea.size());
 
     delete timer;
-
-//    selector.printTermsVariables(cerr);
-    
-//    cerr << endl;
 
     long query = rand() % ((1<<n_levels) - 1);
     vector<long> bits_query = bitDecomp(query, n_levels);
@@ -301,7 +285,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     
     cerr << endl;
 
-    cerr << "selector: " << selector.termsCount() << " terms, degree " << selector.degree() << endl;
+    cerr << "selector: " << selector.termsCount() << " terms, degree " << selector.degree() << ", sum of degrees " << selector.sumOfDegrees() <<endl;
 //
 //    timer = new ScopedTimer("Eval polynomial - not regrouped");
 //    evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
@@ -311,15 +295,13 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     
     timer = new ScopedTimer("Regroup terms");
     
-//    selector.regroupTerms();
     selector = mergeRegroup(selector);
     cerr << endl;
 
     delete timer;
-    cerr << "selector regrouped: " << selector.termsCount() << " terms, degree " << selector.degree() << endl;
+    cerr << "selector regrouped: " << selector.termsCount() << " terms, degree " << selector.degree() << ", sum of degrees " << selector.sumOfDegrees() <<endl;
 
     timer = new ScopedTimer("Eval polynomial - regrouped");
-//    Ctxt c_r = evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
     Ctxt c_r = evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
     delete timer;
     
@@ -362,6 +344,7 @@ main(int ac, char **av)
     bool shallow = atoi(argmap["shallow"]);
    
     srand(time(NULL));
+    
 //    test_tree();
 //    test_poly();
 //    fun_with_fhe();

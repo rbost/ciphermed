@@ -167,6 +167,15 @@ public:
         return d;
     }
     
+    size_t sumOfDegrees() const
+    {
+        size_t d = 0;
+        for (size_t i = 0; i < terms_.size(); i++) {
+            d += terms_[i].degree();
+        }
+        return d;
+    }
+    
     void sortTermsVariables()
     {
         for (size_t i = 0; i < terms_.size(); i++) {
