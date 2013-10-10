@@ -14,6 +14,7 @@ public:
     mpz_class encrypt(const bool &bit);
     mpz_class reRand(const mpz_class &c);
     mpz_class XOR(const mpz_class &c1, const mpz_class &c2);
+    mpz_class neg(const mpz_class &c);
     
     void rand_gen(size_t niter = 100, size_t nmax = 1000);
 

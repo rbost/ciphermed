@@ -80,6 +80,10 @@ mpz_class GM::XOR(const mpz_class &c1, const mpz_class &c2)
 {
     return (c1 * c2)%N;
 }
+mpz_class GM::neg(const mpz_class &c)
+{
+    return (c*y)%N;
+}
 
 GM_priv::GM_priv(const vector<mpz_class> &sk, gmp_randstate_t state) : GM({sk[0],sk[1]},state), p(sk[2]), q(sk[3]), pMinOneBy2((p-1)/2), qMinOneBy2((q-1)/2)
 {

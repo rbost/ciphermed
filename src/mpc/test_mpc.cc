@@ -3,6 +3,7 @@
 #include <mpc/millionaire.hh>
 #include <mpc/lsic.hh>
 #include <mpc/enc_comparison.hh>
+#include <mpc/rev_enc_comparison.hh>
 #include <crypto/gm.hh>
 #include <mpc/svm_classifier.hh>
 #include <NTL/ZZ.h>
@@ -167,7 +168,7 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
-        
+    
     EncCompare_Owner client(paillier.encrypt(a),paillier.encrypt(b), nbits, paillier.pubkey(), randstate);
     auto pk_gm = client.lsic().gm().pubkey();
     EncCompare_Helper server(nbits,sk_p,pk_gm,randstate);
@@ -202,18 +203,73 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     cout << "Test passed" << endl;
 }
 
+static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
+{
+    cout << "Test reverse comparison over encrypted data ..." << endl;
+    ScopedTimer timer("Enc. Compare");
+    
+    ScopedTimer *t;
+    t = new ScopedTimer("Protocol init");
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_p = Paillier_priv::keygen(randstate);
+    Paillier_priv paillier(sk_p,randstate);
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
+    mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
+    
+    Rev_EncCompare_Helper server(nbits,sk_p,sk_gm,randstate);
+    auto pk_gm = server.lsic().gm().pubkey();
+    Rev_EncCompare_Owner client(paillier.encrypt(a),paillier.encrypt(b), nbits, paillier.pubkey(),pk_gm, randstate);
+    
+    delete t;
+    
+    mpz_class c_z(client.setup(lambda));
+    server.setup(c_z);
+    
+    t = new ScopedTimer("Internal LSIC");
+    LSIC_Packet_A a_packet;
+    LSIC_Packet_B b_packet = server.lsic().setupRound();
+    
+    bool state;
+    
+    state = client.lsic().answerRound(b_packet,&a_packet);
+    
+    while (!state) {
+        b_packet = server.lsic().answerRound(a_packet);
+        state = client.lsic().answerRound(b_packet, &a_packet);
+    }
+    
+    delete t;
+    
+    mpz_class c_z_l(server.get_c_z_l());
+    mpz_class c_t(client.concludeProtocol(c_z_l));
+    
+    bool result = server.decryptResult(c_t);
+    
+    assert( result == (a <= b));
+    
+    cout << "Test passed" << endl;
+}
+
 int main(int ac, char **av)
 {            
     SetSeed(to_ZZ(time(NULL)));
 
     
 //	test_millionaire();
-    test_lsic(256);
+//    test_lsic(256);
     
     cout << "\n\n";
     
-    test_enc_compare(256,100);
-
+//    test_enc_compare(256,100);
+    test_rev_enc_compare(256,100);
     //	test_simple_svm();
 
 	return 0;

@@ -1,5 +1,5 @@
 OBJDIRS     += mpc
-MPCSRC  := millionaire.cc lsic.cc svm_classifier.cc enc_comparison.cc
+MPCSRC  := millionaire.cc lsic.cc svm_classifier.cc enc_comparison.cc rev_enc_comparison.cc
 
 all:    $(OBJDIR)/libmpc.so
 $(OBJDIR)/libmpc.so: $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC)) $(OBJDIR)/libcrypto.so
