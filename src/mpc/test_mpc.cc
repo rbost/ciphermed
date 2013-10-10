@@ -4,6 +4,7 @@
 #include <mpc/lsic.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
+#include <mpc/enc_argmax.hh>
 #include <crypto/gm.hh>
 #include <mpc/svm_classifier.hh>
 #include <NTL/ZZ.h>
@@ -219,21 +220,86 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     cout << "Test passed" << endl;
 }
 
+static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigned int lambda = 100)
+{
+    cout << "Test argmax over encrypted data ..." << endl;
+    cout << k << " integers of " << nbits << " bits, " << lambda << " bits of security\n";
+    ScopedTimer timer("Enc. Argmax");
+
+    vector<mpz_class> v(k);
+    
+    ScopedTimer *t;
+    t = new ScopedTimer("Protocol init");
+
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+
+    
+    size_t real_argmax = 0;
+    for (size_t i = 0; i < k; i++) {
+        mpz_urandom_len(v[i].get_mpz_t(), randstate, nbits);
+        if (v[i] > v[real_argmax]) {
+            real_argmax = i;
+        }
+    }
+
+    vector<mpz_class> sk_p = Paillier_priv::keygen(randstate);
+    vector<mpz_class> pk_p = {sk_p[0]*sk_p[1], sk_p[2]};
+    vector<mpz_class> sk_gm = GM_priv::keygen(randstate);
+    vector<mpz_class> pk_gm = {sk_gm[0],sk_gm[1]};
+
+    Paillier_priv paillier(sk_p,randstate);
+
+    for (size_t i = 0; i < k; i++) {
+        v[i] = paillier.encrypt(v[i]);
+    }
+    
+    EncArgmax_Owner client(v,nbits,pk_p,pk_gm,randstate);
+    EncArgmax_Helper server(nbits,k,sk_p,sk_gm,randstate);
+    
+    delete t;
+    
+    t = new ScopedTimer("Running comparisons");
+
+    for (size_t i = 0; i < k; i++) {
+        for (size_t j = 0; j < i; j++) {
+            runProtocol(*(client.comparators()[i][j]), *(server.comparators()[i][j]), lambda);
+        }
+    }
+    
+    delete t;
+    
+    t = new ScopedTimer("Sorting & un-permuting");
+    server.sort();
+    client.unpermuteResult(server.permuted_argmax());
+    delete t;
+    
+    vector<mpz_class>::iterator argmax;
+
+    size_t mpc_argmax = client.output();
+
+    assert(real_argmax == mpc_argmax);
+}
+
 int main(int ac, char **av)
 {            
     SetSeed(to_ZZ(time(NULL)));
-
+    srand(time(NULL));
     
 //	test_millionaire();
 
-    test_lsic(256);
-    cout << "\n\n";
+//    test_lsic(256);
+//    cout << "\n\n";
     
     
-    test_enc_compare(256,100);
-    cout << "\n\n";
-    test_rev_enc_compare(256,100);
+//    test_enc_compare(256,100);
+//    cout << "\n\n";
+//    test_rev_enc_compare(256,100);
     //	test_simple_svm();
 
+//    cout << "\n\n";
+    test_enc_argmax(10,256,100);
+    
 	return 0;
 }

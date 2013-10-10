@@ -43,6 +43,7 @@ public:
 
     void setup(const mpz_class &c_z);
     void decryptResult(const mpz_class &c_t);
+    inline bool protocol_done() { return is_protocol_done_; }
     inline bool output() const { assert(is_protocol_done_);  return t_; }
 
     Paillier_priv paillier() const { return paillier_; }
