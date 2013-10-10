@@ -84,18 +84,8 @@ void runProtocol(Rev_EncCompare_Owner &owner, Rev_EncCompare_Helper &helper, uns
     mpz_class c_z(owner.setup(lambda));
     helper.setup(c_z);
     
-    LSIC_Packet_A a_packet;
-    LSIC_Packet_B b_packet = helper.lsic().setupRound();
+    runProtocol(owner.lsic(),helper.lsic());
     
-    bool state;
-    
-    state = owner.lsic().answerRound(b_packet,&a_packet);
-    
-    while (!state) {
-        b_packet = helper.lsic().answerRound(a_packet);
-        state = owner.lsic().answerRound(b_packet, &a_packet);
-    }
-        
     mpz_class c_z_l(helper.get_c_z_l());
     mpz_class c_t(owner.concludeProtocol(c_z_l));
     

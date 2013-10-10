@@ -102,3 +102,5 @@ protected:
     GM_priv gm_;
     bool protocol_started_;
 };
+
+void runProtocol(LSIC_A &party_a, LSIC_B &party_b);

@@ -129,17 +129,8 @@ static void test_lsic(unsigned int nbits = 256)
     delete t;
     
     t = new ScopedTimer("LSIC execution");
-    LSIC_Packet_A a_packet;
-    LSIC_Packet_B b_packet = party_b.setupRound();
-    
-    bool state;
-    
-    state = party_a.answerRound(b_packet,&a_packet);
 
-    while (!state) {
-        b_packet = party_b.answerRound(a_packet);
-        state = party_a.answerRound(b_packet, &a_packet);
-    }
+    runProtocol(party_a, party_b);
     
     bool result = party_b.gm().decrypt(party_a.output());
     
@@ -234,9 +225,10 @@ int main(int ac, char **av)
 
     
 //	test_millionaire();
-//    test_lsic(256);
+
+    test_lsic(256);
+    cout << "\n\n";
     
-//    cout << "\n\n";
     
     test_enc_compare(256,100);
     cout << "\n\n";
