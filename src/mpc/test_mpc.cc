@@ -196,7 +196,8 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     mpz_class c_r_l(client.get_c_r_l());
     mpz_class c_t(server.concludeProtocol(c_r_l));
     
-    bool result = client.decryptResult(c_t);
+    client.decryptResult(c_t);
+    bool result = client.output();
     
     assert( result == (a <= b));
     
@@ -251,7 +252,8 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     mpz_class c_z_l(server.get_c_z_l());
     mpz_class c_t(client.concludeProtocol(c_z_l));
     
-    bool result = server.decryptResult(c_t);
+    server.decryptResult(c_t);
+    bool result = server.output();
     
     assert( result == (a <= b));
     

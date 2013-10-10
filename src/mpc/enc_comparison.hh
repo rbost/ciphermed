@@ -17,8 +17,9 @@ public:
     EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const std::vector<mpz_class> pk_p, gmp_randstate_t state, unsigned int key_size = 1024);
     
     mpz_class setup(unsigned int lambda);
-    bool decryptResult(const mpz_class &c_t);
-
+    void decryptResult(const mpz_class &c_t);
+    inline bool output() const { assert(is_protocol_done_); return t_; }
+    
     Paillier paillier() const { return paillier_; }
     LSIC_B& lsic() { return lsic_; };
     mpz_class get_c_r_l() const { return c_r_l_; };
@@ -35,6 +36,10 @@ protected:
 
     /* cached values */
     mpz_class two_l_;
+    
+    /* final output */
+    bool is_protocol_done_;
+    bool t_;
 };
 
 class EncCompare_Helper {

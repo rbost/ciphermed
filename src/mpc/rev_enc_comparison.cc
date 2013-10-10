@@ -47,14 +47,14 @@ mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
 }
 
 Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm, gmp_randstate_t state)
-: bit_length_(l), paillier_(sk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0)
+: bit_length_(l), paillier_(sk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_);
 }
 
 Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, gmp_randstate_t state, unsigned int key_size)
-: bit_length_(l), paillier_(Paillier_priv::keygen(state,key_size),state), lsic_(0,bit_length_,GM_priv::keygen(state,key_size),state), two_l_(0)
+: bit_length_(l), paillier_(Paillier_priv::keygen(state,key_size),state), lsic_(0,bit_length_,GM_priv::keygen(state,key_size),state), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_);
@@ -73,9 +73,10 @@ void Rev_EncCompare_Helper::setup(const mpz_class &c_z)
 
 }
 
-bool Rev_EncCompare_Helper::decryptResult(const mpz_class &c_t)
+void Rev_EncCompare_Helper::decryptResult(const mpz_class &c_t)
 {
-    return lsic_.gm().decrypt(c_t);
+    is_protocol_done_ = true;
+    t_ = lsic_.gm().decrypt(c_t);
 }
 
 

@@ -42,7 +42,8 @@ public:
     Rev_EncCompare_Helper(const size_t &l, gmp_randstate_t state, unsigned int key_size = 1024);
 
     void setup(const mpz_class &c_z);
-    bool decryptResult(const mpz_class &c_t);
+    void decryptResult(const mpz_class &c_t);
+    inline bool output() const { assert(is_protocol_done_);  return t_; }
 
     Paillier_priv paillier() const { return paillier_; }
     LSIC_B& lsic() { return lsic_; };
@@ -59,4 +60,8 @@ protected:
     
     /* cached values */
     mpz_class two_l_;
+    
+    /* final output */
+    bool is_protocol_done_;
+    bool t_;
 };

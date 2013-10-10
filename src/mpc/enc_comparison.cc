@@ -7,14 +7,14 @@ using namespace std;
 
 
 EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &sk_gm, gmp_randstate_t state)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_);
 }
 
 EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const vector<mpz_class> pk_p, gmp_randstate_t state, unsigned int key_size)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,state,key_size), two_l_(0)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,state,key_size), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_);
@@ -43,9 +43,10 @@ mpz_class EncCompare_Owner::setup(unsigned int lambda)
     return z;
 }
 
-bool EncCompare_Owner::decryptResult(const mpz_class &c_t)
+void EncCompare_Owner::decryptResult(const mpz_class &c_t)
 {
-    return lsic_.gm().decrypt(c_t);
+    is_protocol_done_ = true;
+    t_ = lsic_.gm().decrypt(c_t);
 }
 
 
