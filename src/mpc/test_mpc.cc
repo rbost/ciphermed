@@ -220,7 +220,7 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     cout << "Test passed" << endl;
 }
 
-static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigned int lambda = 100)
+static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigned int lambda = 100, unsigned int num_threads = 1)
 {
     cout << "Test argmax over encrypted data ..." << endl;
     cout << k << " integers of " << nbits << " bits, " << lambda << " bits of security\n";
@@ -261,18 +261,25 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     delete t;
     
     t = new ScopedTimer("Running comparisons");
+//
+//    for (size_t i = 0; i < k; i++) {
+//        for (size_t j = 0; j < i; j++) {
+//            runProtocol(*(client.comparators()[i][j]), *(server.comparators()[i][j]), lambda);
+//        }
+//    }
+//    
+//    delete t;
+//    
+//    t = new ScopedTimer("Sorting & un-permuting");
+//    server.sort();
+//    client.unpermuteResult(server.permuted_argmax());
 
-    for (size_t i = 0; i < k; i++) {
-        for (size_t j = 0; j < i; j++) {
-            runProtocol(*(client.comparators()[i][j]), *(server.comparators()[i][j]), lambda);
-        }
+    
+    if (num_threads > 1) {
+        runProtocol(client,server,lambda,num_threads);
+    }else{
+        runProtocol(client,server,lambda);
     }
-    
-    delete t;
-    
-    t = new ScopedTimer("Sorting & un-permuting");
-    server.sort();
-    client.unpermuteResult(server.permuted_argmax());
     delete t;
     
     vector<mpz_class>::iterator argmax;
