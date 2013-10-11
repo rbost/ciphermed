@@ -11,6 +11,8 @@
 #include <util/util.hh>
 #include <math/util_gmp_rand.h>
 
+#include <FHE.h>
+
 #include<iostream>
 
 using namespace std;
@@ -289,24 +291,51 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     assert(real_argmax == mpc_argmax);
 }
 
+void usage(char *prog)
+{
+    cerr << "Usage: "<<prog<<" [ optional parameters ]...\n";
+    cerr << "  optional parameters have the form 'attr1=val1 attr2=val2 ...'\n";
+    cerr << "  e.g, 'lambda=100'\n\n";
+    cerr << "  lambda is the parameter for statistical indistinguishability [default=100]\n";
+    cerr << "  l is the number of bits of tested integers [default=256]\n";
+    cerr << "  n is the number of elements in the argmax test [default=10]\n";
+    cerr << "  t is the number of threads used by the protocols (only for argmax test) [default=1]\n";
+    cerr << endl;
+    exit(0);
+}
+
+
 int main(int ac, char **av)
 {            
+    argmap_t argmap;
+    argmap["lambda"] = "100";
+    argmap["l"] = "256";
+    argmap["n"] = "10";
+    argmap["t"] = "1";
+    
+    if (!parseArgs(ac, av, argmap)) usage(av[0]);
+    
+    unsigned int lambda = atoi(argmap["lambda"]);
+    unsigned int l = atoi(argmap["l"]);
+    unsigned int n = atoi(argmap["n"]);
+    unsigned int t = atoi(argmap["t"]);
+
     SetSeed(to_ZZ(time(NULL)));
     srand(time(NULL));
     
 //	test_millionaire();
 
-//    test_lsic(256);
+//    test_lsic(l);
 //    cout << "\n\n";
     
     
-//    test_enc_compare(256,100);
+//    test_enc_compare(l,lambda);
 //    cout << "\n\n";
-//    test_rev_enc_compare(256,100);
+//    test_rev_enc_compare(l,lambda);
     //	test_simple_svm();
 
 //    cout << "\n\n";
-    test_enc_argmax(10,256,100);
+    test_enc_argmax(n,l,lambda,t);
     
 	return 0;
 }
