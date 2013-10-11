@@ -9,6 +9,18 @@
 
 using namespace std;
 
+// These classes define a simple binary tree where leaves are storing
+// a value and nodes an index pointing to a boolean variable.
+// When calling decision() with a vector of booleans as input,
+// the tree outputs the value of the leaf obtained by following
+// the branches with respect to the booleans.
+// We use the following convention: if the variable associated with
+// the node is set to true, go to the left branch, otherwise to the right
+
+
+// We also provide functions to transform such a tree T into a multi variate
+// polynomial P such that P(v) = T.decision(v)
+
 template <typename T> class Tree
 {
 public:

@@ -10,7 +10,7 @@ Rev_EncCompare_Owner::Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class
 : a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,pk_gm,state), two_l_(0)
 {
     gmp_randinit_set(randstate_, state);
-    mpz_setbit(two_l_.get_mpz_t(),bit_length_);
+    mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 
 
@@ -18,12 +18,15 @@ mpz_class Rev_EncCompare_Owner::setup(unsigned int lambda)
 {
     mpz_class x, r, z, c;
     
+    // x = b + 2^l - a
     x = paillier_.add(b_,paillier_.encrypt(two_l_));
     x = paillier_.sub(x,a_);
     
     mpz_urandomb(r.get_mpz_t(), randstate_, lambda+bit_length_);
+    // z = x + r
     z = paillier_.add(x,paillier_.encrypt(r));
 
+    // c = r mod 2^l
     c = r % two_l_;
     lsic_.set_value(c);
     
@@ -40,6 +43,8 @@ mpz_class Rev_EncCompare_Owner::setup(unsigned int lambda)
 mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
 {
     mpz_class c_t_prime = lsic_.gm().neg(lsic_.output());
+    
+    // t = t' + z_l + r_l (over F_2)
     mpz_class c_t = lsic_.gm().XOR(c_t_prime,c_r_l_);
     c_t = lsic_.gm().XOR(c_t,c_z_l);
     
@@ -50,14 +55,14 @@ Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, const std::vector<
 : bit_length_(l), paillier_(sk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
-    mpz_setbit(two_l_.get_mpz_t(),bit_length_);
+    mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 
 Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, gmp_randstate_t state, unsigned int key_size)
 : bit_length_(l), paillier_(Paillier_priv::keygen(state,key_size),state), lsic_(0,bit_length_,GM_priv::keygen(state,key_size),state), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
-    mpz_setbit(two_l_.get_mpz_t(),bit_length_);
+    mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 
 void Rev_EncCompare_Helper::setup(const mpz_class &c_z)

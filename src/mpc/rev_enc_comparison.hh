@@ -10,12 +10,14 @@
 // - the OWNER is the owner of the encrypted data
 // - the HELPER is the party that helps the owner to compare its data and has the secret key of the cyphertext
 
+// - variables prefixed by c_ are GM cyphertexts
+// - variables prefixed by pk_ (resp. sk_) are public (resp. secret) keys: sk_p secret key for Paillier, pk_gm public key for GM
 
 class Rev_EncCompare_Owner {
 public:
     Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const std::vector<mpz_class> pk_p, const std::vector<mpz_class> &pk_gm, gmp_randstate_t state);
     
-    mpz_class setup(unsigned int lambda);
+    mpz_class setup(unsigned int lambda); // lambda is the parameter for statistical security. r <- [0, 2^{l+lambda}[ \cap \Z
     mpz_class concludeProtocol(const mpz_class &c_r_l_);
 
     Paillier paillier() const { return paillier_; }
@@ -30,10 +32,10 @@ protected:
     gmp_randstate_t randstate_;
     
     /* intermediate values */
-    mpz_class c_r_l_;
+    mpz_class c_r_l_; // encryption of the l-th bit of r
 
     /* cached values */
-    mpz_class two_l_;
+    mpz_class two_l_; // 2^l = 1 << bit_length_
 };
 
 class Rev_EncCompare_Helper {
@@ -57,10 +59,10 @@ protected:
     gmp_randstate_t randstate_;
     
     /* intermediate values */
-    mpz_class c_z_l_;
+    mpz_class c_z_l_; // encryption of the l-th bit of r
     
     /* cached values */
-    mpz_class two_l_;
+    mpz_class two_l_; // 2^l = 1 << bit_length_
     
     /* final output */
     bool is_protocol_done_;

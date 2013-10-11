@@ -9,6 +9,18 @@
 
 using namespace std;
 
+// An instance of the Multivariate_poly class represents
+// a multivariate polynomial as a sum of terms of type Term.
+// A term is a leading coefficient and a list of variables
+// represented by their index.
+
+// We provide all the functionnality for adding and multiplying
+// such polynomial as well as for evaluating them on some input.
+// We also give functions to reduce the size of polynomials by
+// regrouping redundant terms in the util_poly.hh file.
+// Finally, we have evaluation function for the SHE scheme
+// provided by the HELib implementation.
+
 template <typename T>
 class Term {
     T coeff_;
@@ -379,7 +391,8 @@ template <typename T> Term<T> regroupTermWithVariables(const vector<size_t> &var
  */
 Ctxt evalTerm_FHE(const Term< vector<long> > &term, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit = true);
 Ctxt evalPoly_FHE(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit = true);
-Ctxt evalPoly_FHE_timing(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit);
+// To get more precise timing on the different steps of the homomorphic evaluation.
+Ctxt evalPoly_FHE_timing(const Multivariate_poly< vector<long> > &poly, const vector<Ctxt> &vals, const EncryptedArray &ea, bool useShallowCircuit = true);
 
-
+// Function to do multiplication of n terms using only log_2 n multiplicative levels.
 Ctxt shallowMultiplication(const vector<Ctxt> &terms, const EncryptedArray &ea);

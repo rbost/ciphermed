@@ -7,6 +7,10 @@
 
 using namespace std;
 
+// We use the following naming convention:
+// - the OWNER is the owner of the encrypted data
+// - the HELPER is the party that helps the owner to compare its data and has the secret key of the cyphertext
+
 class EncArgmax_Owner {
 public:
     EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &pk_gm, gmp_randstate_t state);
@@ -19,10 +23,12 @@ public:
     
     
 protected:
-    map<size_t,size_t> perm_;
+    map<size_t,size_t> perm_; // the permutation used to hide the real order
     vector< vector<Rev_EncCompare_Owner*> >comparators_;
     
-    size_t k_;
+    size_t k_; // number of elements
+    
+    /* final output */
     bool is_protocol_done_;
     size_t i_0_;
 };
@@ -36,19 +42,23 @@ public:
     
     bool canSort() const;
     void sort();
-    size_t permuted_argmax() const;
+    size_t permuted_argmax() const; // returns the argmax using the permuted indices
 
 protected:
     bool compare(size_t i, size_t j) const;
     
     vector< vector<Rev_EncCompare_Helper*> >comparators_;
-    vector<size_t> order_permuted_;
+    vector<size_t> order_permuted_; // order of the elements using permuted indices
     
-    size_t k_;
+    size_t k_; // number of elements
     bool is_sorted_;
 };
 
+// generate a random permutation using rand() <-- BAD !!
 map<size_t,size_t> genRandomPermutation(const size_t &n);
+
 void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda = 100);
+
+// Parallelization
 void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, unsigned int lambda, size_t i_begin, size_t i_end);
 void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda, unsigned int num_threads);

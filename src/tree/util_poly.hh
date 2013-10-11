@@ -4,12 +4,12 @@
 #include <vector>
 using namespace std;
 
+// lexicographic order
 template <typename T> int compareVars(const Term<T> &t1, const Term<T> &t2)
 {
     size_t i = 0;
     while (i < t1.variables().size()) {
         if (i == t2.variables().size() || t1.variables()[i]<t2.variables()[i]) {
-//            cout << i << " ; " << t1.variables()[i] << " ; " << t2.variables()[i] << endl;
             return -1;
         }else if(t1.variables()[i]>t2.variables()[i]){
             return 1;
@@ -23,6 +23,7 @@ template <typename T> int compareVars(const Term<T> &t1, const Term<T> &t2)
     return 0;
 }
 
+// regroup redundant terms using a divide & conquer algorithm very similar to merge sort
 template <typename T> vector<Term <T> > mergeRegroup(const vector<Term <T> > &p)
 {
     if (p.size() < 2) {
