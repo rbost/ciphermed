@@ -174,9 +174,11 @@ void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int 
     }
     if (c_count >0) {
         threads[t] = thread(threadCall, &owner, &helper, lambda, i_begin,k);
+        t++;
     }
-    
-    for (t = 0; t < num_threads; t++) {
+
+    size_t t_max = t;
+    for (t = 0; t < t_max; t++) {
         threads[t].join();
     }
 
