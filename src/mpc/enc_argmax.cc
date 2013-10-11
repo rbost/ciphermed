@@ -1,6 +1,7 @@
 #include <mpc/enc_argmax.hh>
 #include <algorithm>
 #include <thread>
+#include <ctime>
 
 EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &pk_gm, gmp_randstate_t state)
 : k_(a.size()),is_protocol_done_(false)
@@ -146,12 +147,18 @@ void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int 
 
 void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, unsigned int lambda, size_t i_begin, size_t i_end)
 {
+//    struct timespec t0,t1;
+//    clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t0);
+    
     for (size_t i = i_begin; i < i_end; i++) {
         for (size_t j = 0; j < i; j++) {
             runProtocol(*(owner->comparators()[i][j]), *(helper->comparators()[i][j]), lambda);
         }
     }
-
+//    clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t1);
+//    uint64_t t = (((uint64_t)t1.tv_sec) - ((uint64_t)t0.tv_sec) )* 1000000000 + (t1.tv_nsec - t0.tv_nsec);
+//    
+//    cerr << "Thread i_begin=" << i_begin << " took time "<< t/1000000 <<"ms" << endl;
 }
 
 void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda, unsigned int num_threads)
