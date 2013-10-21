@@ -1,0 +1,26 @@
+OBJDIRS     += net
+NETSRC  :=
+CLIENT_SRC := client.cc
+CLIENT_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(CLIENT_SRC))
+SERVER_SRC := server.cc
+SERVER_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(SERVER_SRC))
+ 
+
+L_BOOST_SYSTEM ?= -lboost_system
+
+all:    $(OBJDIR)/libnet.so
+$(OBJDIR)/libnet.so: $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
+	$(CXX) -shared -o $@ $^ $(LDFLAGS) -lgmp -lgmpxx -lcrypto
+
+all:	$(OBJDIR)/net/client
+$(OBJDIR)/net/client: $(CLIENT_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so
+	$(CXX) $< -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) 
+
+
+all:	$(OBJDIR)/net/server
+$(OBJDIR)/net/server: $(SERVER_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libfhemath.so
+	$(CXX) $< -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lfhemath -lfheutil\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) 
+
+# vim: set noexpandtab:
