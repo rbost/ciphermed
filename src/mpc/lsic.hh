@@ -28,6 +28,7 @@ struct LSIC_Packet_B {
     mpz_class tb;
     mpz_class bi;
     
+    LSIC_Packet_B();
     LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2);
 };
 

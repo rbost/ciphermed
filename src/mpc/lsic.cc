@@ -20,6 +20,11 @@ LSIC_Packet_A::LSIC_Packet_A()
 
 /* LSIC_Packet_B */
 
+LSIC_Packet_B::LSIC_Packet_B()
+: index(0), tb(0), bi(0)
+{
+}
+
 LSIC_Packet_B::LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2)
 : index(i), tb(c1), bi(c2)
 {
