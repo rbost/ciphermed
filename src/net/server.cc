@@ -94,7 +94,7 @@ void Server_session::run_session()
                 send_gm_pk();
             }else if(line == START_LSIC) {
                 mpz_class b(20);
-                run_lsic(b,5);
+                run_lsic(b,10);
             }else if(line == DECRYPT_GM) {
                 mpz_class c(5);
                 getline(input_stream,line);

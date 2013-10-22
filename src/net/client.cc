@@ -100,87 +100,14 @@ mpz_class Client::run_lsic(const mpz_class &a, size_t l)
     if (!has_gm_pk()) {
         get_server_pk_gm();
     }
-    
-    LSIC_A lsic(a,l,server_gm_->pubkey(),rand_state_);
-    
-    LSIC_Packet_A a_packet;
-    LSIC_Packet_B b_packet;
-    bool state;
-    
-    
+    // send the start message
     boost::asio::streambuf out_buff;
     std::ostream output_stream(&out_buff);
-    string line;
-    
-    // send the start message
     output_stream << START_LSIC << "\n\r\n";
     boost::asio::write(socket_, out_buff);
-    
-    // first get the setup round
-    
-    boost::asio::read_until(socket_, input_buf_, "\r\n");
-    std::istream input_stream(&input_buf_);
-    
-    // parse the input
-    do {
-        getline(input_stream,line);
-        if (line == "") {
-            continue;
-        }
-        
-        if(line == LSIC_SETUP) {
-            //            cout << "LSIC setup received" << endl;
-            input_stream >> b_packet;
-            
-            state = lsic.answerRound(b_packet,&a_packet);
-            
-            if (state) {
-                return lsic.output();
-            }
-            
-            output_stream << LSIC_PACKET << "\n";
-            output_stream << a_packet;
-            output_stream << "\r\n";
-            boost::asio::write(socket_, out_buff);
-            //            cout << "First packet sent to server" << endl;
-            break;
-        }
-    } while (!input_stream.eof());
-    
-    // response-resquest
-    for (; ; ) {
-        boost::asio::read_until(socket_, input_buf_, "\r\n");
-        std::istream input_stream(&input_buf_);
-        
-        // parse the input
-        do {
-            getline(input_stream,line);
-            //            cout << line;
-            if (line == "") {
-                continue;
-            }
-            
-            if(line == LSIC_PACKET) {
-                input_stream >> b_packet;
-                
-                state = lsic.answerRound(b_packet,&a_packet);
-                
-                if (state) {
-                    output_stream << LSIC_END << "\n";
-                    output_stream << "\r\n";
-                    boost::asio::write(socket_, out_buff);
-                    
-                    return lsic.output();
-                }
-                
-                output_stream << LSIC_PACKET << "\n";
-                output_stream << a_packet;
-                output_stream << "\r\n";
-                boost::asio::write(socket_, out_buff);
-                
-            }
-        } while (!input_stream.eof());
-    }      
+
+    LSIC_A lsic(a,l,server_gm_->pubkey(),rand_state_);
+    return run_lsic_A(lsic);
 }
 
 mpz_class Client::run_lsic_A(LSIC_A &lsic)
@@ -195,42 +122,45 @@ mpz_class Client::run_lsic_A(LSIC_A &lsic)
     std::ostream output_stream(&out_buff);
     string line;
     
-    // send the start message
-//    output_stream << START_LSIC << "\n\r\n";
-//    boost::asio::write(socket_, out_buff);
     
     // first get the setup round
     
     boost::asio::read_until(socket_, input_buf_, "\r\n");
-    std::istream input_stream(&input_buf_);
     
-    // parse the input
-    do {
-        getline(input_stream,line);
-        if (line == "") {
-            continue;
-        }
-        
-        if(line == LSIC_SETUP) {
-            //            cout << "LSIC setup received" << endl;
-            input_stream >> b_packet;
-            
-            state = lsic.answerRound(b_packet,&a_packet);
-            
-            if (state) {
-                return lsic.output();
+    // parse the input - discard all the messages before the setup message
+    bool received_setup = false;
+    while (!received_setup) {
+        std::istream input_stream(&input_buf_);
+
+        while (!input_stream.eof()) {
+            getline(input_stream,line);
+            if (line == "") {
+                continue;
             }
             
-            output_stream << LSIC_PACKET << "\n";
-            output_stream << a_packet;
-            output_stream << "\r\n";
-            boost::asio::write(socket_, out_buff);
-            //            cout << "First packet sent to server" << endl;
-            break;
-        }
-    } while (!input_stream.eof());
+            if(line == LSIC_SETUP) {
+                //            cout << "LSIC setup received" << endl;
+                input_stream >> b_packet;
+                
+                state = lsic.answerRound(b_packet,&a_packet);
+                
+                if (state) {
+                    return lsic.output();
+                }
+                
+                output_stream << LSIC_PACKET << "\n";
+                output_stream << a_packet;
+                output_stream << "\r\n";
+                boost::asio::write(socket_, out_buff);
+                received_setup = true;
+//                cout << "First packet sent to server" << endl;
+                break;
+            }
+        } ;
+        boost::asio::read_until(socket_, input_buf_, "\r\n");
+    }
     
-    // response-resquest
+    // response-request
     for (; ; ) {
         boost::asio::read_until(socket_, input_buf_, "\r\n");
         std::istream input_stream(&input_buf_);
@@ -385,10 +315,10 @@ int main(int argc, char* argv[])
         client.connect(io_service, hostname);
 
         // server has b = 20
-        mpz_class res = client.run_lsic(40,5);
-//        client.test_rev_enc_compare(5);
+        mpz_class res = client.run_lsic(40,10);
         decrypt_gm(client.socket(),res);
 
+//        client.test_rev_enc_compare(5);
         client.disconnect();
     
     }
