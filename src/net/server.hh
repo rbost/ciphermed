@@ -43,9 +43,16 @@ public:
     Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket);
     
     void run_session();
+    
     void send_paillier_pk();
     void send_gm_pk();
+    
     void run_lsic(const mpz_class &b,size_t l);
+    void run_lsic_B(LSIC_B &lsic);
+    
+    bool run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm);
+    bool run_rev_enc_comparison(Rev_EncCompare_Helper &helper);
+
     void decrypt_gm(const mpz_class &c);
     
     unsigned int id() const {return id_;}

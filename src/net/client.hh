@@ -30,8 +30,11 @@ public:
     void get_server_pk_paillier();
     
     mpz_class run_lsic(const mpz_class &a, size_t l);
-    
-    
+    mpz_class run_lsic_A(LSIC_A &lsic);
+    void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
+
+    void test_rev_enc_compare(size_t l);
+
     void disconnect();
 protected:
     tcp::socket socket_;

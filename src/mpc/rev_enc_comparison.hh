@@ -22,7 +22,8 @@ public:
 
     Paillier paillier() const { return paillier_; }
     LSIC_A& lsic() { return lsic_; };
-    mpz_class get_c_r_l() const { return c_r_l_; };
+    mpz_class get_c_r_l() const { return c_r_l_; }
+    bool is_set_up() const { return is_set_up_; }
     
 protected:
     mpz_class a_,b_;
@@ -33,6 +34,7 @@ protected:
     
     /* intermediate values */
     mpz_class c_r_l_; // encryption of the l-th bit of r
+    bool is_set_up_;
 
     /* cached values */
     mpz_class two_l_; // 2^l = 1 << bit_length_
@@ -51,6 +53,7 @@ public:
     Paillier_priv paillier() const { return paillier_; }
     LSIC_B& lsic() { return lsic_; };
     mpz_class get_c_z_l() const { return c_z_l_; };
+    bool is_set_up() const { return is_set_up_; }
 
 protected:
     size_t bit_length_;
@@ -60,6 +63,7 @@ protected:
     
     /* intermediate values */
     mpz_class c_z_l_; // encryption of the l-th bit of r
+    bool is_set_up_;
     
     /* cached values */
     mpz_class two_l_; // 2^l = 1 << bit_length_

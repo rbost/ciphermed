@@ -22,6 +22,6 @@ $(OBJDIR)/net/client: $(CLIENT_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $
 all:	$(OBJDIR)/net/server
 $(OBJDIR)/net/server: $(SERVER_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libfhemath.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lfhemath -lfheutil\
-	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) $(L_BOOST_THREAD)
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)
 
 # vim: set noexpandtab:

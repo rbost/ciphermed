@@ -7,7 +7,7 @@ using namespace std;
 
 
 Rev_EncCompare_Owner::Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &pk_gm, gmp_randstate_t state)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,pk_gm,state), two_l_(0)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,pk_gm,state), is_set_up_(false), two_l_(0)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
@@ -33,7 +33,8 @@ mpz_class Rev_EncCompare_Owner::setup(unsigned int lambda)
     bool r_l = (bool)mpz_tstbit(r.get_mpz_t(),bit_length_);
     c_r_l_ = lsic_.gm().encrypt(r_l);
 
-    
+    is_set_up_ = true;
+
 //    cout << "l = " << bit_length_ << endl;
 //    cout << "Owner setup: \nr = " << r << "\t" << r.get_str(2) << "\nr_l = " << r_l << "\nc = " << c << endl;
 //    cout << "2^l = " << two_l_ << endl;
@@ -52,7 +53,7 @@ mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
 }
 
 Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm, gmp_randstate_t state)
-: bit_length_(l), paillier_(sk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0), is_protocol_done_(false)
+: bit_length_(l), paillier_(sk_p,state), lsic_(0,bit_length_,sk_gm,state),is_set_up_(false), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
@@ -74,6 +75,7 @@ void Rev_EncCompare_Helper::setup(const mpz_class &c_z)
     bool z_l = (bool)mpz_tstbit(z.get_mpz_t(),bit_length_);
     c_z_l_ = lsic_.gm().encrypt(z_l);
     
+    is_set_up_ = true;
 //    cout << "Helper setup: \nz = " << z << "\t" << z.get_str(2)<< "\nz_l = " << z_l << "\nd = " << d << endl;
 
 }

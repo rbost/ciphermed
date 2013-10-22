@@ -7,6 +7,10 @@
 
 #include <crypto/gm.hh>
 #include <mpc/lsic.hh>
+#include <mpc/rev_enc_comparison.hh>
+
+#include <math/util_gmp_rand.h>
+
 #include <net/net_utils.hh>
 
 #include <net/client.hh>
@@ -33,7 +37,10 @@ void Client::connect(boost::asio::io_service& io_service, const string& hostname
 
 void Client::get_server_pk_gm()
 {
-    cout << "Resquest server's pubkey for GM" << endl;
+    if (server_gm_) {
+        return;
+    }
+    cout << "Request server's pubkey for GM" << endl;
     
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
@@ -60,6 +67,9 @@ void Client::get_server_pk_gm()
 
 void Client::get_server_pk_paillier()
 {
+    if (server_paillier_) {
+        return;
+    }
     cout << "Resquest server's pubkey for Paillier" << endl;
 
     boost::asio::streambuf buff;
@@ -103,7 +113,7 @@ mpz_class Client::run_lsic(const mpz_class &a, size_t l)
     string line;
     
     // send the start message
-    output_stream << "START LSIC\n\r\n";
+    output_stream << START_LSIC << "\n\r\n";
     boost::asio::write(socket_, out_buff);
     
     // first get the setup round
@@ -173,7 +183,161 @@ mpz_class Client::run_lsic(const mpz_class &a, size_t l)
     }      
 }
 
+mpz_class Client::run_lsic_A(LSIC_A &lsic)
+{
+    
+    LSIC_Packet_A a_packet;
+    LSIC_Packet_B b_packet;
+    bool state;
+    
+    
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    
+    // send the start message
+//    output_stream << START_LSIC << "\n\r\n";
+//    boost::asio::write(socket_, out_buff);
+    
+    // first get the setup round
+    
+    boost::asio::read_until(socket_, input_buf_, "\r\n");
+    std::istream input_stream(&input_buf_);
+    
+    // parse the input
+    do {
+        getline(input_stream,line);
+        if (line == "") {
+            continue;
+        }
+        
+        if(line == LSIC_SETUP) {
+            //            cout << "LSIC setup received" << endl;
+            input_stream >> b_packet;
+            
+            state = lsic.answerRound(b_packet,&a_packet);
+            
+            if (state) {
+                return lsic.output();
+            }
+            
+            output_stream << LSIC_PACKET << "\n";
+            output_stream << a_packet;
+            output_stream << "\r\n";
+            boost::asio::write(socket_, out_buff);
+            //            cout << "First packet sent to server" << endl;
+            break;
+        }
+    } while (!input_stream.eof());
+    
+    // response-resquest
+    for (; ; ) {
+        boost::asio::read_until(socket_, input_buf_, "\r\n");
+        std::istream input_stream(&input_buf_);
+        
+        // parse the input
+        do {
+            getline(input_stream,line);
+            //            cout << line;
+            if (line == "") {
+                continue;
+            }
+            
+            if(line == LSIC_PACKET) {
+                input_stream >> b_packet;
+                
+                state = lsic.answerRound(b_packet,&a_packet);
+                
+                if (state) {
+                    output_stream << LSIC_END << "\n";
+                    output_stream << "\r\n";
+                    boost::asio::write(socket_, out_buff);
+                    
+                    return lsic.output();
+                }
+                
+                output_stream << LSIC_PACKET << "\n";
+                output_stream << a_packet;
+                output_stream << "\r\n";
+                boost::asio::write(socket_, out_buff);
+                
+            }
+        } while (!input_stream.eof());
+    }
+}
 
+void Client::test_rev_enc_compare(size_t l)
+{
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), rand_state_, l);
+    mpz_urandom_len(b.get_mpz_t(), rand_state_, l);
+    
+    get_server_pk_gm();
+    get_server_pk_paillier();
+    
+    mpz_class c_a, c_b;
+
+    run_rev_enc_compare(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    
+    cout << "\nResult should be " << (a <= b) << endl;
+}
+
+// we suppose that the client already has the server's public key for Paillier
+void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l)
+{
+    assert(has_paillier_pk());
+    assert(has_gm_pk());
+
+    Rev_EncCompare_Owner owner(a,b,l,server_gm_->pubkey(),server_paillier_->pubkey(),rand_state_);
+    
+    mpz_class c_z(owner.setup(lambda_));
+
+    
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    
+    // send the start message
+    output_stream << START_REV_ENC_COMPARE << "\n";
+    output_stream << l << "\n";
+    output_stream << c_z << "\n\r\n";
+    boost::asio::write(socket_, out_buff);
+    
+    // the server does some computation, we just have to run the lsic
+    
+    run_lsic_A(owner.lsic());
+    
+    // wait for the conlude message
+    
+    for (; ; ) {
+        boost::asio::read_until(socket_, input_buf_, "\r\n");
+        std::istream input_stream(&input_buf_);
+        // parse the input
+        do {
+            getline(input_stream,line);
+            //            cout << line;
+            if (line == "") {
+                continue;
+            }
+            
+            if (line == REV_ENC_COMPARE_CONCLUDE) {
+                mpz_class c_z_l;
+                input_stream >> c_z_l;
+                
+                mpz_class c_t = owner.concludeProtocol(c_z_l);
+                
+                // send the last message to the server
+                output_stream << REV_ENC_COMPARE_RESULT << "\n";
+                output_stream << c_t << "\n\r\n";
+                boost::asio::write(socket_, out_buff);
+
+                return;
+            }
+        } while (!input_stream.eof());
+    }    
+
+    
+}
 void Client::disconnect()
 {
     cout << "Disconnect" << endl;
@@ -186,15 +350,15 @@ void Client::disconnect()
 
 
 
-//void decrypt_gm(tcp::socket &socket, mpz_class c)
-//{
-//    boost::asio::streambuf buff;
-//    std::ostream buff_stream(&buff);
-//    
-//    buff_stream << "DECRYPT GM\n"<< c << "\n\r\n";
-//    boost::asio::write(socket, buff);
-//    
-//}
+void decrypt_gm(tcp::socket &socket,const mpz_class &c)
+{
+    boost::asio::streambuf buff;
+    std::ostream buff_stream(&buff);
+    
+    buff_stream << "DECRYPT GM\n"<< c << "\n\r\n";
+    boost::asio::write(socket, buff);
+    
+}
 
 
 
@@ -220,11 +384,13 @@ int main(int argc, char* argv[])
         string hostname(argv[1]);
         client.connect(io_service, hostname);
 
-        mpz_class res = client.run_lsic(15,5);
+        // server has b = 20
+        mpz_class res = client.run_lsic(40,5);
+//        client.test_rev_enc_compare(5);
+        decrypt_gm(client.socket(),res);
 
         client.disconnect();
     
-//        decrypt_gm(client.socket,res);
     }
     catch (std::exception& e)
     {
