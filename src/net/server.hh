@@ -36,13 +36,14 @@ protected:
     
     /* statistical security */
     unsigned int lambda_;
+    unsigned int n_clients_;
 };
 
 class Server_session {
 public:
     Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket);
     
-    void start();
+    void run_session();
     void send_paillier_pk();
     void send_gm_pk();
     void run_lsic(const mpz_class &b,size_t l);

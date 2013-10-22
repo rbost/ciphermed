@@ -7,6 +7,7 @@
 
 #include <crypto/paillier.hh>
 #include <mpc/lsic.hh>
+#include <net/net_utils.hh>
 
 using boost::asio::ip::tcp;
 
@@ -76,43 +77,34 @@ mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector
     
     // first get the setup round
     
-//    for (; ; ) {
-        boost::asio::read_until(socket, in_buff, "\r\n");
-        std::istream input_stream(&in_buff);
+    boost::asio::read_until(socket, in_buff, "\r\n");
+    std::istream input_stream(&in_buff);
 
-        // parse the input
-        do {
-            getline(input_stream,line);
-            if (line == "") {
-                continue;
+    // parse the input
+    do {
+        getline(input_stream,line);
+        if (line == "") {
+            continue;
+        }
+        
+        if(line == "LSIC SETUP") {
+//            cout << "LSIC setup received" << endl;
+            input_stream >> b_packet;
+            
+            state = lsic.answerRound(b_packet,&a_packet);
+            
+            if (state) {
+                return lsic.output();
             }
             
-            if(line == "LSIC SETUP") {
-                cout << "LSIC setup received" << endl;
-                getline(input_stream,line);
-                b_packet.index = atoi(line.c_str());
-                
-                getline(input_stream,line);
-                b_packet.tb.set_str(line,10);
-                getline(input_stream,line);
-                b_packet.bi.set_str(line,10);
-                
-                state = lsic.answerRound(b_packet,&a_packet);
-                
-                if (state) {
-                    return lsic.output();
-                }
-                
-                output_stream << "LSIC PACKET\n";
-                output_stream << a_packet.index << "\n";
-                output_stream << a_packet.tau << "\n";
-                output_stream << "\r\n";
-                boost::asio::write(socket, out_buff);
-                cout << "First packet sent to server" << endl;
-                break;
-            }
-        } while (!input_stream.eof());
-//    }    
+            output_stream << "LSIC PACKET\n";
+            output_stream << a_packet;
+            output_stream << "\r\n";
+            boost::asio::write(socket, out_buff);
+//            cout << "First packet sent to server" << endl;
+            break;
+        }
+    } while (!input_stream.eof());
 
     // response-resquest
     for (; ; ) {
@@ -122,19 +114,13 @@ mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector
         // parse the input
         do {
             getline(input_stream,line);
-            cout << line;
+//            cout << line;
             if (line == "") {
                 continue;
             }
             
             if(line == "LSIC PACKET") {
-                getline(input_stream,line);
-                b_packet.index = atoi(line.c_str());
-                
-                getline(input_stream,line);
-                b_packet.tb.set_str(line,10);
-                getline(input_stream,line);
-                b_packet.bi.set_str(line,10);
+                input_stream >> b_packet;
                 
                 state = lsic.answerRound(b_packet,&a_packet);
                 
@@ -147,8 +133,7 @@ mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector
                 }
 
                 output_stream << "LSIC PACKET\n";
-                output_stream << a_packet.index << "\n";
-                output_stream << a_packet.tau << "\n";
+                output_stream << a_packet;
                 output_stream << "\r\n";
                 boost::asio::write(socket, out_buff);
                 
@@ -234,7 +219,7 @@ int main(int argc, char* argv[])
 //        send_mpz_class(c_v, socket);
 //        cout << v << endl;
         
-        mpz_class c = run_lsic(socket, 25,5,{N,y}, randstate);
+        mpz_class c = run_lsic(socket, 15,5,{N,y}, randstate);
         
 //        GM gm({N,y},randstate);
         decrypt_gm(socket,c);
