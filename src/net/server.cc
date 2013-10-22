@@ -18,7 +18,7 @@ using boost::asio::ip::tcp;
 using namespace std;
 
 Server::Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda)
-: paillier_(Paillier_priv::keygen(state,nbits_p,abits_p),state), gm_(GM_priv::keygen(state,nbits_gm),state), lambda_(lambda)
+: paillier_(Paillier_priv::keygen(state,nbits_p,abits_p),state), gm_(GM_priv::keygen(state,nbits_gm),state), lambda_(lambda), n_clients_(0)
 {
     gmp_randinit_set(rand_state_, state);
 //    cout << "SK GM\np = " << gm_.privkey()[0] << "\nq = " << gm_.privkey()[1] << endl;
@@ -66,7 +66,8 @@ void Server_session::run_session()
     
     // main loop to catch requests
     bool should_exit = false;
-    for (;!should_exit; ) {
+    try {
+            for (;!should_exit; ) {
         
         // wait for a complete request
         boost::asio::read_until(*socket_, input_buf_, "\r\n");
@@ -105,6 +106,11 @@ void Server_session::run_session()
         } while (!input_stream.eof());
     }
     cout << id_ << ": Disconnected" << endl;
+
+        
+    } catch (std::exception& e) {
+        std::cout << "Exception: " << e.what() << std::endl;
+    }
 
     // we are done, delete ourself
     delete this;

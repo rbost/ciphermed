@@ -5,62 +5,94 @@
 
 #include <net/defs.hh>
 
-#include <crypto/paillier.hh>
+#include <crypto/gm.hh>
 #include <mpc/lsic.hh>
 #include <net/net_utils.hh>
+
+#include <net/client.hh>
 
 using boost::asio::ip::tcp;
 
 using namespace std;
 
-
-void send_mpz_class(const mpz_class &v, tcp::socket &socket)
+Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int nbits_gm, unsigned int lambda)
+: socket_(io_service), gm_(GM_priv::keygen(state,nbits_gm),state), server_paillier_(NULL), server_gm_(NULL), lambda_(lambda)
 {
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    
-    buff_stream << v << "\n";
-    
-    boost::asio::write(socket, buff);
+    gmp_randinit_set(rand_state_, state);
 }
 
-void send_pk_paillier_request(tcp::socket &socket)
+
+void Client::connect(boost::asio::io_service& io_service, const string& hostname)
 {
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-        
-    buff_stream << "GET PK PAILLIER\n\r\n";
-    boost::asio::write(socket, buff);
+    tcp::resolver resolver(io_service);
+    tcp::resolver::query query(hostname, "1990");
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+    boost::asio::connect(socket_, endpoint_iterator);
 }
 
-void send_pk_gm_request(tcp::socket &socket)
+
+void Client::get_server_pk_gm()
 {
+    cout << "Resquest server's pubkey for GM" << endl;
+    
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
-    
-    cout << "Send PK request" << endl;
-    
     buff_stream << "GET PK GM\n\r\n";
-    //    buff_stream << "\r\n";
-    boost::asio::write(socket, buff);
+    boost::asio::write(socket_, buff);
+    
+    
+    boost::asio::read_until(socket_, input_buf_, "END GM PK\n");
+    std::istream input_stream(&input_buf_);
+    string line;
+    
+    do {
+        getline(input_stream,line);
+    } while (line != "GM PK");
+    // get the public key
+    mpz_class N,y;
+    getline(input_stream,line);
+    N.set_str(line,10);
+    getline(input_stream,line);
+    y.set_str(line,10);
+    
+    server_gm_ = new GM({N,y},rand_state_);
 }
 
-void send_disconnect_request(tcp::socket &socket)
+void Client::get_server_pk_paillier()
 {
+    cout << "Resquest server's pubkey for Paillier" << endl;
+
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
+    buff_stream << "GET PK PAILLIER\n\r\n";
+    boost::asio::write(socket_, buff);
+    string line;
     
-    cout << "Disconnect" << endl;
     
-    buff_stream << "DISCONNECT\n\r\n";
-    //    buff_stream << "\r\n";
-    boost::asio::write(socket, buff);
+    boost::asio::read_until(socket_, input_buf_, "END PAILLIER PK\n");
+    std::istream input_stream(&input_buf_);
+    
+    do {
+        getline(input_stream,line);
+    } while (line != "PAILLIER PK");
+    // get the public key
+    mpz_class n,g;
+    getline(input_stream,line);
+    n.set_str(line,10);
+    getline(input_stream,line);
+    g.set_str(line,10);
+    
+    server_paillier_ = new Paillier({n,g},rand_state_);
 }
 
-mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector<mpz_class> &gm_pk, gmp_randstate_t randstate)
+mpz_class Client::run_lsic(const mpz_class &a, size_t l)
 {
-    LSIC_A lsic(a,l,gm_pk,randstate);
-
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    
+    LSIC_A lsic(a,l,server_gm_->pubkey(),rand_state_);
+    
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet;
     bool state;
@@ -68,18 +100,17 @@ mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector
     
     boost::asio::streambuf out_buff;
     std::ostream output_stream(&out_buff);
-    boost::asio::streambuf in_buff;
     string line;
     
     // send the start message
     output_stream << "START LSIC\n\r\n";
-    boost::asio::write(socket, out_buff);
+    boost::asio::write(socket_, out_buff);
     
     // first get the setup round
     
-    boost::asio::read_until(socket, in_buff, "\r\n");
-    std::istream input_stream(&in_buff);
-
+    boost::asio::read_until(socket_, input_buf_, "\r\n");
+    std::istream input_stream(&input_buf_);
+    
     // parse the input
     do {
         getline(input_stream,line);
@@ -88,7 +119,7 @@ mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector
         }
         
         if(line == "LSIC SETUP") {
-//            cout << "LSIC setup received" << endl;
+            //            cout << "LSIC setup received" << endl;
             input_stream >> b_packet;
             
             state = lsic.answerRound(b_packet,&a_packet);
@@ -100,21 +131,21 @@ mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector
             output_stream << "LSIC PACKET\n";
             output_stream << a_packet;
             output_stream << "\r\n";
-            boost::asio::write(socket, out_buff);
-//            cout << "First packet sent to server" << endl;
+            boost::asio::write(socket_, out_buff);
+            //            cout << "First packet sent to server" << endl;
             break;
         }
     } while (!input_stream.eof());
-
+    
     // response-resquest
     for (; ; ) {
-        boost::asio::read_until(socket, in_buff, "\r\n");
-        std::istream input_stream(&in_buff);
-
+        boost::asio::read_until(socket_, input_buf_, "\r\n");
+        std::istream input_stream(&input_buf_);
+        
         // parse the input
         do {
             getline(input_stream,line);
-//            cout << line;
+            //            cout << line;
             if (line == "") {
                 continue;
             }
@@ -127,30 +158,46 @@ mpz_class run_lsic(tcp::socket &socket,const mpz_class &a,size_t l, const vector
                 if (state) {
                     output_stream << "LSIC END\n";
                     output_stream << "\r\n";
-                    boost::asio::write(socket, out_buff);
-
+                    boost::asio::write(socket_, out_buff);
+                    
                     return lsic.output();
                 }
-
+                
                 output_stream << "LSIC PACKET\n";
                 output_stream << a_packet;
                 output_stream << "\r\n";
-                boost::asio::write(socket, out_buff);
+                boost::asio::write(socket_, out_buff);
                 
             }
         } while (!input_stream.eof());
-    }    
+    }      
 }
 
-void decrypt_gm(tcp::socket &socket, mpz_class c)
+
+void Client::disconnect()
 {
+    cout << "Disconnect" << endl;
+    
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
-    
-    buff_stream << "DECRYPT GM\n"<< c << "\n\r\n";
-    boost::asio::write(socket, buff);
-    
+    buff_stream << "DISCONNECT\n\r\n";
+    boost::asio::write(socket_, buff);
 }
+
+
+
+//void decrypt_gm(tcp::socket &socket, mpz_class c)
+//{
+//    boost::asio::streambuf buff;
+//    std::ostream buff_stream(&buff);
+//    
+//    buff_stream << "DECRYPT GM\n"<< c << "\n\r\n";
+//    boost::asio::write(socket, buff);
+//    
+//}
+
+
+
 int main(int argc, char* argv[])
 {
     try
@@ -162,69 +209,22 @@ int main(int argc, char* argv[])
         }
         
         boost::asio::io_service io_service;
-        tcp::resolver resolver(io_service);
-        tcp::resolver::query query(argv[1], "1990");
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-        tcp::socket socket(io_service);
-        boost::asio::connect(socket, endpoint_iterator);
-        
-        
-        
-        send_pk_paillier_request(socket);
-        
-        boost::asio::streambuf response;
-        boost::asio::read_until(socket, response, "END PAILLIER PK\n");
-        
-        std::istream response_stream(&response);
-        std::string line;
 
-        do {
-            getline(response_stream,line);
-        } while (line != "PAILLIER PK");
-        
-        // get the public key
-        mpz_class n,g;
-        getline(response_stream,line);
-        n.set_str(line,10);
-        getline(response_stream,line);
-        g.set_str(line,10);
-        
-        send_pk_gm_request(socket);
-        boost::asio::read_until(socket, response, "END GM PK\n");
-        do {
-            getline(response_stream,line);
-        } while (line != "GM PK");
-        // get the public key
-        mpz_class N,y;
-        getline(response_stream,line);
-        N.set_str(line,10);
-        getline(response_stream,line);
-        y.set_str(line,10);
-
-
-        // generate random cyphertext
         gmp_randstate_t randstate;
         gmp_randinit_default(randstate);
         gmp_randseed_ui(randstate,time(NULL));
-//
-//        mpz_class v;
-//        mpz_urandomm(v.get_mpz_t(),randstate,n.get_mpz_t());
-//
-//        Paillier p({n,g},randstate);
-//        
-//        mpz_class c_v = p.encrypt(v);
+        
 
-        
-        // send it to the server
-//        send_mpz_class(c_v, socket);
-//        cout << v << endl;
-        
-        mpz_class c = run_lsic(socket, 15,5,{N,y}, randstate);
-        
-//        GM gm({N,y},randstate);
-        decrypt_gm(socket,c);
-        
-        send_disconnect_request(socket);
+        Client client(io_service, randstate,1024,100);
+
+        string hostname(argv[1]);
+        client.connect(io_service, hostname);
+
+        mpz_class res = client.run_lsic(15,5);
+
+        client.disconnect();
+    
+//        decrypt_gm(client.socket,res);
     }
     catch (std::exception& e)
     {

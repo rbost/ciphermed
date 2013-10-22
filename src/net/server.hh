@@ -31,12 +31,11 @@ protected:
     GM_priv gm_;
     
     gmp_randstate_t rand_state_;
-    
-//    vector<Server_session> clients_;
+    unsigned int n_clients_;
+
     
     /* statistical security */
     unsigned int lambda_;
-    unsigned int n_clients_;
 };
 
 class Server_session {
