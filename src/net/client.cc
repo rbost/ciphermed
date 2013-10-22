@@ -25,7 +25,7 @@ Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsig
 void Client::connect(boost::asio::io_service& io_service, const string& hostname)
 {
     tcp::resolver resolver(io_service);
-    tcp::resolver::query query(hostname, "1990");
+    tcp::resolver::query query(hostname, to_string( PORT ));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     boost::asio::connect(socket_, endpoint_iterator);
 }
@@ -37,17 +37,17 @@ void Client::get_server_pk_gm()
     
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
-    buff_stream << "GET PK GM\n\r\n";
+    buff_stream << GET_GM_PK <<"\n\r\n";
     boost::asio::write(socket_, buff);
     
     
-    boost::asio::read_until(socket_, input_buf_, "END GM PK\n");
+    boost::asio::read_until(socket_, input_buf_, END_GM_PK);
     std::istream input_stream(&input_buf_);
     string line;
     
     do {
         getline(input_stream,line);
-    } while (line != "GM PK");
+    } while (line != GM_PK);
     // get the public key
     mpz_class N,y;
     getline(input_stream,line);
@@ -64,17 +64,17 @@ void Client::get_server_pk_paillier()
 
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
-    buff_stream << "GET PK PAILLIER\n\r\n";
+    buff_stream <<  GET_PAILLIER_PK <<"\n\r\n";
     boost::asio::write(socket_, buff);
     string line;
     
     
-    boost::asio::read_until(socket_, input_buf_, "END PAILLIER PK\n");
+    boost::asio::read_until(socket_, input_buf_, END_PAILLIER_PK);
     std::istream input_stream(&input_buf_);
     
     do {
         getline(input_stream,line);
-    } while (line != "PAILLIER PK");
+    } while (line != PAILLIER_PK);
     // get the public key
     mpz_class n,g;
     getline(input_stream,line);
@@ -118,7 +118,7 @@ mpz_class Client::run_lsic(const mpz_class &a, size_t l)
             continue;
         }
         
-        if(line == "LSIC SETUP") {
+        if(line == LSIC_SETUP) {
             //            cout << "LSIC setup received" << endl;
             input_stream >> b_packet;
             
@@ -128,7 +128,7 @@ mpz_class Client::run_lsic(const mpz_class &a, size_t l)
                 return lsic.output();
             }
             
-            output_stream << "LSIC PACKET\n";
+            output_stream << LSIC_PACKET << "\n";
             output_stream << a_packet;
             output_stream << "\r\n";
             boost::asio::write(socket_, out_buff);
@@ -150,20 +150,20 @@ mpz_class Client::run_lsic(const mpz_class &a, size_t l)
                 continue;
             }
             
-            if(line == "LSIC PACKET") {
+            if(line == LSIC_PACKET) {
                 input_stream >> b_packet;
                 
                 state = lsic.answerRound(b_packet,&a_packet);
                 
                 if (state) {
-                    output_stream << "LSIC END\n";
+                    output_stream << LSIC_END << "\n";
                     output_stream << "\r\n";
                     boost::asio::write(socket_, out_buff);
                     
                     return lsic.output();
                 }
                 
-                output_stream << "LSIC PACKET\n";
+                output_stream << LSIC_PACKET << "\n";
                 output_stream << a_packet;
                 output_stream << "\r\n";
                 boost::asio::write(socket_, out_buff);
@@ -180,7 +180,7 @@ void Client::disconnect()
     
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
-    buff_stream << "DISCONNECT\n\r\n";
+    buff_stream << DISCONNECT << "\n\r\n";
     boost::asio::write(socket_, buff);
 }
 

@@ -87,19 +87,19 @@ void Server_session::run_session()
                 continue;
             }
 
-            if (line == "GET PK PAILLIER") {
+            if (line == GET_PAILLIER_PK) {
                 send_paillier_pk();
-            }else if(line == "GET PK GM") {
+            }else if(line == GET_GM_PK) {
                 send_gm_pk();
-            }else if(line == "START LSIC") {
+            }else if(line == START_LSIC) {
                 mpz_class b(20);
                 run_lsic(b,5);
-            }else if(line == "DECRYPT GM") {
+            }else if(line == DECRYPT_GM) {
                 mpz_class c(5);
                 getline(input_stream,line);
                 c.set_str(line,10);
                 decrypt_gm(c);
-            }else if(line == "DISCONNECT"){
+            }else if(line == DISCONNECT){
                 should_exit = true;
                 break;
             }
@@ -123,10 +123,10 @@ void Server_session::send_paillier_pk()
     std::ostream buff_stream(&buff);
     
     cout << id_ << ": Send Paillier PK" << endl;
-    buff_stream << "PAILLIER PK\n";
+    buff_stream << PAILLIER_PK << "\n";
     buff_stream << pk[0] << "\n" << pk[1] << "\n";
     
-    buff_stream << "END PAILLIER PK\n";
+    buff_stream << END_PAILLIER_PK << "\n";
     boost::asio::write(*socket_, buff);
 }
 
@@ -137,10 +137,10 @@ void Server_session::send_gm_pk()
     std::ostream buff_stream(&buff);
     
     cout << id_ << ": Send GM PK" << endl;
-    buff_stream << "GM PK\n";
+    buff_stream << GM_PK << "\n";
     buff_stream << pk[0] << "\n" << pk[1] << "\n";
     
-    buff_stream << "END GM PK\n";
+    buff_stream << END_GM_PK << "\n";
     boost::asio::write(*socket_, buff);
 }
 
@@ -156,7 +156,7 @@ void Server_session::run_lsic(const mpz_class &b,size_t l)
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet = lsic.setupRound();
 
-    output_stream << "LSIC SETUP\n";
+    output_stream << LSIC_SETUP << "\n";
     output_stream << b_packet;
     output_stream << "\r\n";
     
@@ -179,10 +179,10 @@ void Server_session::run_lsic(const mpz_class &b,size_t l)
                 continue;
             }
             
-            if (line == "LSIC END") {
+            if (line == LSIC_END) {
                 cout << id_ << ": LSIC finished" << endl;
                 return;
-            }else if(line == "LSIC PACKET") {
+            }else if(line == LSIC_PACKET) {
 //                cout << "New packet" << endl;
                 input_stream >> a_packet;
 
@@ -191,7 +191,7 @@ void Server_session::run_lsic(const mpz_class &b,size_t l)
                 boost::asio::streambuf output_buf;
                 std::ostream output_stream(&output_buf);
                 
-                output_stream << "LSIC PACKET\n";
+                output_stream << LSIC_PACKET << "\n";
                 output_stream << b_packet;
                 output_stream << "\r\n";
                 
