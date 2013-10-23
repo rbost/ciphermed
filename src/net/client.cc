@@ -202,6 +202,9 @@ void Client::test_rev_enc_compare(size_t l)
     mpz_urandom_len(a.get_mpz_t(), rand_state_, l);
     mpz_urandom_len(b.get_mpz_t(), rand_state_, l);
     
+//    cout << "a = " << a << endl;
+//    cout << "b = " << b << endl;
+
     get_server_pk_gm();
     get_server_pk_paillier();
     
@@ -209,7 +212,7 @@ void Client::test_rev_enc_compare(size_t l)
 
     run_rev_enc_compare(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
     
-    cout << "\nResult should be " << (a <= b) << endl;
+    cout << "\nResult should be " << (a < b) << endl;
 }
 
 // we suppose that the client already has the server's public key for Paillier
@@ -218,7 +221,7 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
     assert(has_paillier_pk());
     assert(has_gm_pk());
 
-    Rev_EncCompare_Owner owner(a,b,l,server_gm_->pubkey(),server_paillier_->pubkey(),rand_state_);
+    Rev_EncCompare_Owner owner(a,b,l,server_paillier_->pubkey(),server_gm_->pubkey(),rand_state_);
     
     mpz_class c_z(owner.setup(lambda_));
 
@@ -315,10 +318,10 @@ int main(int argc, char* argv[])
         client.connect(io_service, hostname);
 
         // server has b = 20
-        mpz_class res = client.run_lsic(40,10);
-        decrypt_gm(client.socket(),res);
+//        mpz_class res = client.run_lsic(40,10);
+//        decrypt_gm(client.socket(),res);
 
-//        client.test_rev_enc_compare(5);
+        client.test_rev_enc_compare(5);
         client.disconnect();
     
     }

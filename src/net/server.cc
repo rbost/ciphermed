@@ -106,7 +106,7 @@ void Server_session::run_session()
                 size_t l = strtoul (line.c_str(), NULL, 0);
                 bool b = run_rev_enc_comparison(l,server_->paillier_sk(),server_->gm_sk());
                 
-                cout << "\nRev Enc Compare result: " << b << endl;
+                cout << id_ << ": Rev Enc Compare result: " << b << endl;
             }else if(line == DISCONNECT){
                 should_exit = true;
                 break;
