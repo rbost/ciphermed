@@ -1,6 +1,7 @@
 #pragma once
 
 #define PORT 1990
+#define BASE 62
 
 /* Headers for the protocols */
 

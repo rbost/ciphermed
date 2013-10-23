@@ -132,7 +132,7 @@ void Server_session::send_paillier_pk()
     
     cout << id_ << ": Send Paillier PK" << endl;
     buff_stream << PAILLIER_PK << "\n";
-    buff_stream << pk[0] << "\n" << pk[1] << "\n";
+    buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
     
     buff_stream << END_PAILLIER_PK << "\n";
     boost::asio::write(*socket_, buff);
@@ -146,7 +146,7 @@ void Server_session::send_gm_pk()
     
     cout << id_ << ": Send GM PK" << endl;
     buff_stream << GM_PK << "\n";
-    buff_stream << pk[0] << "\n" << pk[1] << "\n";
+    buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
     
     buff_stream << END_GM_PK << "\n";
     boost::asio::write(*socket_, buff);
@@ -241,7 +241,8 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     // setup the helper if necessary
     if (!helper.is_set_up()) {
         mpz_class c_z;
-        input_stream >> c_z;
+        parseInt(input_stream,c_z,BASE);
+
         helper.setup(c_z);
     }
 
@@ -252,7 +253,7 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     mpz_class c_z_l(helper.get_c_z_l());
     
     output_stream << REV_ENC_COMPARE_CONCLUDE << "\n";
-    output_stream << c_z_l;
+    output_stream << c_z_l.get_str(BASE);
     output_stream << "\r\n";
     
     boost::asio::write(*socket_, output_buf);
@@ -272,7 +273,8 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
             if (line == REV_ENC_COMPARE_RESULT) {
                 cout << id_ << ": Rev encrypted comparison finished" << endl;
                 mpz_class c_t;
-                input_stream >> c_t;
+
+                parseInt(input_stream,c_t,BASE);
 
                 helper.decryptResult(c_t);
                 

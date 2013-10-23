@@ -57,10 +57,8 @@ void Client::get_server_pk_gm()
     } while (line != GM_PK);
     // get the public key
     mpz_class N,y;
-    getline(input_stream,line);
-    N.set_str(line,10);
-    getline(input_stream,line);
-    y.set_str(line,10);
+    parseInt(input_stream,N,BASE);
+    parseInt(input_stream,y,BASE);
     
     server_gm_ = new GM({N,y},rand_state_);
 }
@@ -87,11 +85,9 @@ void Client::get_server_pk_paillier()
     } while (line != PAILLIER_PK);
     // get the public key
     mpz_class n,g;
-    getline(input_stream,line);
-    n.set_str(line,10);
-    getline(input_stream,line);
-    g.set_str(line,10);
-    
+    parseInt(input_stream,n,BASE);
+    parseInt(input_stream,g,BASE);
+
     server_paillier_ = new Paillier({n,g},rand_state_);
 }
 
@@ -233,7 +229,7 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
     // send the start message
     output_stream << START_REV_ENC_COMPARE << "\n";
     output_stream << l << "\n";
-    output_stream << c_z << "\n\r\n";
+    output_stream << c_z.get_str(BASE) << "\n\r\n";
     boost::asio::write(socket_, out_buff);
     
     // the server does some computation, we just have to run the lsic
@@ -255,13 +251,13 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
             
             if (line == REV_ENC_COMPARE_CONCLUDE) {
                 mpz_class c_z_l;
-                input_stream >> c_z_l;
-                
+                parseInt(input_stream,c_z_l,BASE);
+
                 mpz_class c_t = owner.concludeProtocol(c_z_l);
                 
                 // send the last message to the server
                 output_stream << REV_ENC_COMPARE_RESULT << "\n";
-                output_stream << c_t << "\n\r\n";
+                output_stream << c_t.get_str(BASE) << "\n\r\n";
                 boost::asio::write(socket_, out_buff);
 
                 return;
