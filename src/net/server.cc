@@ -5,6 +5,9 @@
 #include <gmpxx.h>
 #include <thread>
 
+#include <FHE.h>
+#include <EncryptedArray.h>
+
 #include <net/defs.hh>
 
 #include <crypto/paillier.hh>
@@ -18,12 +21,53 @@ using boost::asio::ip::tcp;
 
 using namespace std;
 
+static ZZX makeIrredPoly(long p, long d)
+{
+    assert(d >= 1);
+    assert(ProbPrime(p));
+    
+    if (d == 1) return ZZX(1, 1); // the monomial X
+    
+    zz_pBak bak; bak.save();
+    zz_p::init(p);
+    return to_ZZX(BuildIrred_zz_pX(d));
+}
+
 Server::Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda)
 : paillier_(Paillier_priv::keygen(state,nbits_p,abits_p),state), gm_(GM_priv::keygen(state,nbits_gm),state), n_clients_(0), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
 //    cout << "SK GM\np = " << gm_.privkey()[0] << "\nq = " << gm_.privkey()[1] << endl;
 //    cout << "PK Paillier\nn" << paillier_.pubkey()[0] << "\ng" << paillier_.pubkey()[1] << endl;
+    
+    // generate an FHE private key
+    // first generate a context. This one should be consisten with the server's one
+    // i.e. m, p, r must be the same
+    long p = FHE_p;
+    long r = FHE_r
+    long d = FHE_d;
+    long c = FHE_c;
+    long L = FHE_L;
+    long w = FHE_w;
+    long s = FHE_s;
+    long k = FHE_k;
+    long chosen_m = FHE_m;
+    
+    long m = FindM(k, L, c, p, d, s, chosen_m, true);
+    fhe_context_ = new FHEcontext(m, p, r);
+    buildModChain(*fhe_context_, L, c);
+    fhe_sk_ = new FHESecKey(*fhe_context_);
+    fhe_sk_->GenSecKey(w); // A Hamming-weight-w secret key
+
+    // we suppose d > 0
+    fhe_G_ = makeIrredPoly(p, d);
+
+}
+
+Server::~Server()
+{
+    delete fhe_sk_;
+    delete fhe_context_;
 }
 
 void Server::run()
@@ -92,14 +136,20 @@ void Server_session::run_session()
                 send_paillier_pk();
             }else if(line == GET_GM_PK) {
                 send_gm_pk();
+            }else if(line == GET_FHE_PK) {
+                send_fhe_pk();
             }else if(line == START_LSIC) {
                 mpz_class b(20);
                 run_lsic(b,10);
             }else if(line == DECRYPT_GM) {
-                mpz_class c(5);
+                mpz_class c;
                 getline(input_stream,line);
                 c.set_str(line,10);
                 decrypt_gm(c);
+            }else if(line == DECRYPT_FHE) {
+                Ctxt c(server_->fhe_sk());
+                input_stream >> c;
+                decrypt_fhe(c);
             }else if(line == START_REV_ENC_COMPARE){
                 // get the bit length and launch the helper
                 getline(input_stream,line);
@@ -134,7 +184,7 @@ void Server_session::send_paillier_pk()
     buff_stream << PAILLIER_PK << "\n";
     buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
     
-    buff_stream << END_PAILLIER_PK << "\n";
+    buff_stream << END_PAILLIER_PK << "\r\n";
     boost::asio::write(*socket_, buff);
 }
 
@@ -148,7 +198,24 @@ void Server_session::send_gm_pk()
     buff_stream << GM_PK << "\n";
     buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
     
-    buff_stream << END_GM_PK << "\n";
+    buff_stream << END_GM_PK << "\r\n";
+    boost::asio::write(*socket_, buff);
+}
+
+void Server_session::send_fhe_pk()
+{
+    const FHEPubKey& publicKey = server_->fhe_sk(); // cast so we only send the public informations
+    cout << id_ << ": Send FHE PK" << endl;
+
+    boost::asio::streambuf buff;
+    std::ostream buff_stream(&buff);
+ 
+    
+    buff_stream << FHE_PK << "\n";
+    buff_stream << publicKey << "\n";
+    
+    buff_stream << END_FHE_PK << "\r\n";
+
     boost::asio::write(*socket_, buff);
 }
 
@@ -288,6 +355,15 @@ void Server_session::decrypt_gm(const mpz_class &c)
 {
     bool b = (server_->gm()).decrypt(c);
     cout << id_ << ": Decryption result = " << b << endl;
+}
+
+void Server_session::decrypt_fhe(const Ctxt &c)
+{
+    EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
+    PlaintextArray pp0(ea);
+    ea.decrypt(c, server_->fhe_sk(), pp0);
+    cout << id_ << ": Decryption result = " << endl;
+    pp0.print(cout);
 }
 
 int main()

@@ -3,6 +3,9 @@
 #include <boost/asio.hpp>
 #include <gmpxx.h>
 
+#include <FHE.h>
+#include <EncryptedArray.h>
+
 #include <net/defs.hh>
 
 #include <crypto/gm.hh>
@@ -19,10 +22,50 @@ using boost::asio::ip::tcp;
 
 using namespace std;
 
+static ZZX makeIrredPoly(long p, long d)
+{
+    assert(d >= 1);
+    assert(ProbPrime(p));
+    
+    if (d == 1) return ZZX(1, 1); // the monomial X
+    
+    zz_pBak bak; bak.save();
+    zz_p::init(p);
+    return to_ZZX(BuildIrred_zz_pX(d));
+}
+
 Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int nbits_gm, unsigned int lambda)
-: socket_(io_service), gm_(GM_priv::keygen(state,nbits_gm),state), server_paillier_(NULL), server_gm_(NULL), lambda_(lambda)
+: socket_(io_service), gm_(GM_priv::keygen(state,nbits_gm),state), server_paillier_(NULL), server_gm_(NULL), server_fhe_pk_(NULL), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
+    
+    // generate a context. This one should be consisten with the server's one
+    // i.e. m, p, r must be the same
+    long p = FHE_p;
+    long r = FHE_r
+    long d = FHE_d;
+    long c = FHE_c;
+    long L = FHE_L;
+    long w = FHE_w;
+    long s = FHE_s;
+    long k = FHE_k;
+    long chosen_m = FHE_m;
+    
+    long m = FindM(k, L, c, p, d, s, chosen_m, true);
+    fhe_context_ = new FHEcontext(m, p, r);
+    buildModChain(*fhe_context_, L, c);
+
+    // we suppose d > 0
+    fhe_G_ = makeIrredPoly(FHE_p, FHE_d);
+    
+}
+
+Client::~Client()
+{
+    if (server_fhe_pk_ != NULL) {
+        delete server_fhe_pk_;
+    }
+    delete fhe_context_;
 }
 
 
@@ -68,7 +111,7 @@ void Client::get_server_pk_paillier()
     if (server_paillier_) {
         return;
     }
-    cout << "Resquest server's pubkey for Paillier" << endl;
+    cout << "Request server's pubkey for Paillier" << endl;
 
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
@@ -90,6 +133,33 @@ void Client::get_server_pk_paillier()
 
     server_paillier_ = new Paillier({n,g},rand_state_);
 }
+
+void Client::get_server_pk_fhe()
+{
+    if (server_fhe_pk_) {
+        return;
+    }
+    cout << "Request server's pubkey for FHE" << endl;
+    boost::asio::streambuf buff;
+    std::ostream buff_stream(&buff);
+    buff_stream <<  GET_FHE_PK <<"\n\r\n";
+    boost::asio::write(socket_, buff);
+    string line;
+
+    boost::asio::read_until(socket_, input_buf_, END_FHE_PK);
+    std::istream input_stream(&input_buf_);
+    
+    do {
+        getline(input_stream,line);
+    } while (line != FHE_PK);
+    // get the public key
+    
+
+
+    server_fhe_pk_ = new FHEPubKey(*fhe_context_);
+    input_stream >> *server_fhe_pk_;
+}
+
 
 mpz_class Client::run_lsic(const mpz_class &a, size_t l)
 {
@@ -279,16 +349,34 @@ void Client::disconnect()
 
 
 
-void decrypt_gm(tcp::socket &socket,const mpz_class &c)
+void Client::test_decrypt_gm(const mpz_class &c)
 {
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
     
-    buff_stream << "DECRYPT GM\n"<< c << "\n\r\n";
-    boost::asio::write(socket, buff);
+    buff_stream << DECRYPT_GM << "\n"<< c << "\n\r\n";
+    boost::asio::write(socket_, buff);
     
 }
 
+void Client::test_fhe()
+{
+    get_server_pk_fhe();
+    
+    EncryptedArray ea(server_fhe_pk_->getContext(), fhe_G_);
+    PlaintextArray p0(ea);
+    p0.encode(0);
+    p0.print(cout);
+
+    Ctxt c0(*server_fhe_pk_);
+    ea.encrypt(c0, *server_fhe_pk_, p0);
+    
+    boost::asio::streambuf buff;
+    std::ostream buff_stream(&buff);
+    
+    buff_stream << DECRYPT_FHE << "\n"<< c0 << "\n\r\n";
+    boost::asio::write(socket_, buff);
+}
 
 
 int main(int argc, char* argv[])
@@ -317,7 +405,10 @@ int main(int argc, char* argv[])
 //        mpz_class res = client.run_lsic(40,10);
 //        decrypt_gm(client.socket(),res);
 
-        client.test_rev_enc_compare(5);
+//        client.test_rev_enc_compare(5);
+        
+        client.test_fhe();
+        
         client.disconnect();
     
     }
