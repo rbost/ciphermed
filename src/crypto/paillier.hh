@@ -16,6 +16,7 @@ class Paillier {
     mpz_class constMult(const mpz_class &m, const mpz_class &c) const;
     mpz_class constMult(long m, const mpz_class &c) const;
     mpz_class constMult(const mpz_class &c, long m) const { return constMult(m,c); };
+    mpz_class scalarize(const mpz_class &c);
 
     void rand_gen(size_t niter = 100, size_t nmax = 1000);
 

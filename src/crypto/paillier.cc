@@ -75,6 +75,13 @@ Paillier::constMult(long m, const mpz_class &c) const
     return mpz_class_powm(c, m, n2);
 }
 
+mpz_class
+Paillier::scalarize(const mpz_class &c)
+{
+    mpz_class r;
+    mpz_urandomm(r.get_mpz_t(),_randstate,n.get_mpz_t());
+    return constMult(r,c);
+}
 
 /*
  * Private-key operations

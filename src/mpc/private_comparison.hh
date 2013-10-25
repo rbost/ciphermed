@@ -26,6 +26,7 @@ public:
     std::vector<mpz_class> compute_w(const std::vector<mpz_class> &c_a);
     std::vector<mpz_class> compute_sums(const std::vector<mpz_class> &c_w);
     std::vector<mpz_class> compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums);
+    std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c);
     mpz_class unblind(const mpz_class &t_prime);
     
 protected:

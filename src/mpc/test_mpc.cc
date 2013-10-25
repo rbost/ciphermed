@@ -158,7 +158,7 @@ static void test_compare(unsigned int nbits = 256)
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate);
+    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
     Paillier_priv paillier(sk_p,randstate);
     auto sk_gm = GM_priv::keygen(randstate);
     GM_priv gm(sk_gm,randstate);

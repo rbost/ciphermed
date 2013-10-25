@@ -1,5 +1,7 @@
 #include <mpc/private_comparison.hh>
 
+#include <util/util.hh>
+
 using namespace std;
 
 Compare_A::Compare_A(const mpz_class &x, const size_t &l, Paillier_priv &paillier, GM_priv &gm)
@@ -10,6 +12,8 @@ Compare_A::Compare_A(const mpz_class &x, const size_t &l, Paillier_priv &paillie
 
 vector<mpz_class> Compare_A::encrypt_bits()
 {
+    ScopedTimer timer("encrypt_bits");
+
     vector<mpz_class> c_a(bit_length_);
     
     for (size_t i = 0; i < bit_length_; i++) {
@@ -22,6 +26,7 @@ vector<mpz_class> Compare_A::encrypt_bits()
 
 mpz_class Compare_A::search_zero(const vector<mpz_class> &c)
 {
+    ScopedTimer timer("search_zero");
     // can be parallelized
     for (size_t i = 0; i < c.size(); i++) {
         if (paillier_.decrypt(c[i]) == 0) {
@@ -42,6 +47,8 @@ Compare_B::Compare_B(const mpz_class &y, const size_t &l, Paillier &paillier, GM
 
 vector<mpz_class> Compare_B::compute_w(const std::vector<mpz_class> &c_a)
 {
+    ScopedTimer timer("compute_w");
+
     vector<mpz_class> c_w(bit_length_);
     // can be parallelized
     for (size_t i = 0; i < bit_length_; i++) {
@@ -57,6 +64,8 @@ vector<mpz_class> Compare_B::compute_w(const std::vector<mpz_class> &c_a)
 
 vector<mpz_class> Compare_B::compute_sums(const std::vector<mpz_class> &c_w)
 {
+    ScopedTimer timer("compute_sums");
+
     vector<mpz_class> c_sums(bit_length_);
     c_sums[bit_length_-1] = 1;
 
@@ -69,6 +78,8 @@ vector<mpz_class> Compare_B::compute_sums(const std::vector<mpz_class> &c_w)
 
 vector<mpz_class> Compare_B::compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums)
 {
+    ScopedTimer timer("compute_c");
+
     vector<mpz_class> c(bit_length_);
 
     for (size_t i = 0; i < bit_length_; i++) {
@@ -97,12 +108,26 @@ vector<mpz_class> Compare_B::compute_c(const std::vector<mpz_class> &c_a,const s
         
     }
     
-    // you will have to shuffle c
+    // you will have to rerandomize and shuffle c
     return c;
+}
+
+vector<mpz_class> Compare_B::rerandomize(const vector<mpz_class> &c)
+{
+    ScopedTimer timer("rerandomize");
+    vector<mpz_class> c_rand(c);
+    
+    for (size_t i = 0; i < c_rand.size(); i++) {
+        c_rand[i] = paillier_.scalarize(c_rand[i]);
+    }
+    
+    return c_rand;
 }
 
 mpz_class Compare_B::unblind(const mpz_class &t_prime)
 {
+    ScopedTimer timer("unblind");
+
     if (s_ == -1) {
         return t_prime;
     }
@@ -117,11 +142,14 @@ mpz_class runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t st
     vector<mpz_class> c_w = party_b.compute_w(c_a);
     vector<mpz_class> c_sums = party_b.compute_sums(c_w);
     vector<mpz_class> c = party_b.compute_c(c_a,c_sums);
-
+    vector<mpz_class> c_rand = party_b.rerandomize(c);
+    
     // we have to suffle
-    random_shuffle(c.begin(),c.end(),[state](int n){ return gmp_urandomm_ui(state,n); });
+    ScopedTimer *timer = new ScopedTimer("shuffle");
+
+    random_shuffle(c_rand.begin(),c_rand.end(),[state](int n){ return gmp_urandomm_ui(state,n); });
     
-    
-    mpz_class t_prime = party_a.search_zero(c);
+    delete timer;
+    mpz_class t_prime = party_a.search_zero(c_rand);
     return party_b.unblind(t_prime);
 }
