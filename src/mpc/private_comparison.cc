@@ -151,15 +151,15 @@ vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c)
     return c_rand;
 }
 
-mpz_class Compare_A::unblind(const mpz_class &t_prime)
+void Compare_A::unblind(const mpz_class &t_prime)
 {
     ScopedTimer timer("unblind");
 
     if (s_ == 1) {
-        return t_prime;
+        res_ = t_prime;
+    }else{
+        res_ = gm_.neg(t_prime);
     }
-    
-    return gm_.neg(t_prime);
 }
 
 mpz_class runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state)
@@ -181,5 +181,7 @@ mpz_class runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t st
     
     delete timer;
     mpz_class t_prime = party_b.search_zero(c_rand);
-    return party_a.unblind(t_prime);
+    party_a.unblind(t_prime);
+    
+    return party_a.output();
 }

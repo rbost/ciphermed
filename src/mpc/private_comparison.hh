@@ -13,8 +13,9 @@ public:
     std::vector<mpz_class> compute_sums(const std::vector<mpz_class> &c_w);
     std::vector<mpz_class> compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums);
     std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c);
-    mpz_class unblind(const mpz_class &t_prime);
+    void unblind(const mpz_class &t_prime);
     
+    mpz_class output() const { return res_; }
 protected:
     mpz_class b_;
     long s_;
@@ -22,6 +23,7 @@ protected:
     Paillier paillier_;
     GM gm_;
     
+    mpz_class res_;
     mpz_class paillier_one_;
 };
 
