@@ -10,6 +10,7 @@
 #include <NTL/ZZ.h>
 #include <util/util.hh>
 #include <math/util_gmp_rand.h>
+#include <mpc/private_comparison.hh>
 
 #include <FHE.h>
 
@@ -142,6 +143,49 @@ static void test_lsic(unsigned int nbits = 256)
     assert( result == (a < b));
     
     cout << "Test LSIC passed" << endl;
+}
+
+static void test_compare(unsigned int nbits = 256)
+{
+    cout << "Test compare ..." << endl;
+    ScopedTimer timer("Compare");
+    
+    ScopedTimer *t;
+    t = new ScopedTimer("Compare init");
+    
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_p = Paillier_priv::keygen(randstate);
+    Paillier_priv paillier(sk_p,randstate);
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm(sk_gm,randstate);
+
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
+    mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
+    
+//    cout << "a = " << a.get_str(2) << endl;
+//    cout << "b = " << b.get_str(2) << endl;
+    
+    Compare_A party_a(a, nbits, paillier, gm);
+    Compare_B party_b(b, nbits, paillier, gm, randstate);
+    
+    delete t;
+    
+    t = new ScopedTimer("Compare execution");
+    
+    mpz_class c_t = runProtocol(party_a, party_b,randstate);
+    
+    bool result = gm.decrypt(c_t);
+    
+    delete t;
+    
+    assert( result == (a < b));
+    
+    cout << "Test Compare passed" << endl;
 }
 
 static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
@@ -325,7 +369,9 @@ int main(int ac, char **av)
     
 //	test_millionaire();
 
-//    test_lsic(l);
+    test_lsic(l);
+    test_compare(l);
+
 //    cout << "\n\n";
     
     
@@ -335,7 +381,7 @@ int main(int ac, char **av)
     //	test_simple_svm();
 
 //    cout << "\n\n";
-    test_enc_argmax(n,l,lambda,t);
-    
+//    test_enc_argmax(n,l,lambda,t);
+
 	return 0;
 }
