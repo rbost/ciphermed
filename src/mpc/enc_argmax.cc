@@ -3,7 +3,7 @@
 #include <thread>
 #include <ctime>
 
-EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &pk_gm, gmp_randstate_t state)
+EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, GM &gm, gmp_randstate_t state)
 : k_(a.size()),is_protocol_done_(false)
 {    
     perm_ = genRandomPermutation(k_);
@@ -14,7 +14,7 @@ EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, co
         comparators_[i] = vector<Rev_EncCompare_Owner*>(i);
         for (size_t j = 0; j < i; j++) {
             size_t p_i = perm_[i], p_j = perm_[j];
-            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,pk_p,pk_gm,state);
+            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,p,gm,state);
 
         }
     }
@@ -42,7 +42,7 @@ void EncArgmax_Owner::unpermuteResult(size_t argmax_perm)
 
 
 
-EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,const std::vector<mpz_class> &sk_p, const std::vector<mpz_class> &sk_gm, gmp_randstate_t state)
+EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, GM_priv &gm, gmp_randstate_t state)
 : k_(k)
 {
     comparators_ = vector< vector<Rev_EncCompare_Helper*> >(k_);
@@ -50,7 +50,7 @@ EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,const std::v
     for (size_t i = 0; i < k_; i++) {
         comparators_[i] = vector<Rev_EncCompare_Helper*>(i);
         for (size_t j = 0; j < i; j++) {
-            comparators_[i][j] = new Rev_EncCompare_Helper(l,sk_p,sk_gm,state);
+            comparators_[i][j] = new Rev_EncCompare_Helper(l,pp,gm,state);
         }
     }
  

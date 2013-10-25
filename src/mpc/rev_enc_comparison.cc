@@ -6,8 +6,8 @@
 using namespace std;
 
 
-Rev_EncCompare_Owner::Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &pk_gm, gmp_randstate_t state)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,pk_gm,state), two_l_(0)
+Rev_EncCompare_Owner::Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, GM &gm, gmp_randstate_t state)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(p), lsic_(0,bit_length_,gm), two_l_(0)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
@@ -51,15 +51,8 @@ mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
     return c_t;
 }
 
-Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm, gmp_randstate_t state)
-: bit_length_(l), paillier_(sk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0), is_protocol_done_(false)
-{
-    gmp_randinit_set(randstate_, state);
-    mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
-}
-
-Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, gmp_randstate_t state, unsigned int key_size)
-: bit_length_(l), paillier_(Paillier_priv::keygen(state,key_size),state), lsic_(0,bit_length_,GM_priv::keygen(state,key_size),state), two_l_(0), is_protocol_done_(false)
+Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM_priv &gm, gmp_randstate_t state)
+: bit_length_(l), paillier_(pp), lsic_(0,bit_length_,gm), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l

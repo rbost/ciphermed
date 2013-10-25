@@ -15,7 +15,8 @@
 
 class Rev_EncCompare_Owner {
 public:
-    Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const std::vector<mpz_class> pk_p, const std::vector<mpz_class> &pk_gm, gmp_randstate_t state);
+//    Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const std::vector<mpz_class> pk_p, const std::vector<mpz_class> &pk_gm, gmp_randstate_t state);
+    Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, GM &gm, gmp_randstate_t state);
     
     mpz_class setup(unsigned int lambda); // lambda is the parameter for statistical security. r <- [0, 2^{l+lambda}[ \cap \Z
     mpz_class concludeProtocol(const mpz_class &c_r_l_);
@@ -40,8 +41,7 @@ protected:
 
 class Rev_EncCompare_Helper {
 public:
-    Rev_EncCompare_Helper(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm, gmp_randstate_t state);
-    Rev_EncCompare_Helper(const size_t &l, gmp_randstate_t state, unsigned int key_size = 1024);
+    Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM_priv &gm, gmp_randstate_t state);
 
     void setup(const mpz_class &c_z);
     void decryptResult(const mpz_class &c_t);

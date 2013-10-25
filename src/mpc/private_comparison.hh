@@ -17,8 +17,8 @@ public:
 protected:
     mpz_class a_;
     size_t bit_length_; // bit length of the numbers to compare
-    Paillier_priv &paillier_;
-    GM_priv &gm_;
+    Paillier_priv paillier_;
+    GM_priv gm_;
 };
 
 class Compare_B {
@@ -35,8 +35,8 @@ protected:
     mpz_class b_;
     long s_;
     size_t bit_length_; // bit length of the numbers to compare
-    Paillier &paillier_;
-    GM &gm_;
+    Paillier paillier_;
+    GM gm_;
 
     mpz_class paillier_one_;
 };

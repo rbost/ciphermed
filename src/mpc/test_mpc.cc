@@ -127,8 +127,12 @@ static void test_lsic(unsigned int nbits = 256)
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
 
-    LSIC_B party_b(b, nbits, randstate);
-    LSIC_A party_a(a, nbits, party_b.pubparams(), randstate);
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+    
+    LSIC_B party_b(b, nbits, gm_priv);
+    LSIC_A party_a(a, nbits, gm);
     
     delete t;
     
@@ -201,15 +205,19 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     gmp_randseed_ui(randstate,time(NULL));
     
     auto sk_p = Paillier_priv::keygen(randstate);
-    Paillier_priv paillier(sk_p,randstate);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
     
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
     
-    EncCompare_Owner client(paillier.encrypt(a),paillier.encrypt(b), nbits, paillier.pubkey(), randstate);
-    auto pk_gm = client.lsic().gm().pubkey();
-    EncCompare_Helper server(nbits,sk_p,pk_gm,randstate);
+    EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,gm_priv, randstate);
+    EncCompare_Helper server(nbits,pp,gm,randstate);
     
     delete t;
     
@@ -239,17 +247,19 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     gmp_randseed_ui(randstate,time(NULL));
     
     auto sk_p = Paillier_priv::keygen(randstate);
-    Paillier_priv paillier(sk_p,randstate);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
     
     auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
     
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
     
-    Rev_EncCompare_Helper server(nbits,sk_p,sk_gm,randstate);
-    auto pk_gm = server.lsic().gm().pubkey();
-    Rev_EncCompare_Owner client(paillier.encrypt(a),paillier.encrypt(b), nbits, paillier.pubkey(),pk_gm, randstate);
+    Rev_EncCompare_Helper server(nbits,pp,gm_priv,randstate);
+    Rev_EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,gm, randstate);
     
     delete t;
     
@@ -281,6 +291,14 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
 
+    auto sk_p = Paillier_priv::keygen(randstate);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+
     
     size_t real_argmax = 0;
     for (size_t i = 0; i < k; i++) {
@@ -290,19 +308,19 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
         }
     }
 
-    vector<mpz_class> sk_p = Paillier_priv::keygen(randstate);
-    vector<mpz_class> pk_p = {sk_p[0]*sk_p[1], sk_p[2]};
-    vector<mpz_class> sk_gm = GM_priv::keygen(randstate);
-    vector<mpz_class> pk_gm = {sk_gm[0],sk_gm[1]};
+//    vector<mpz_class> sk_p = Paillier_priv::keygen(randstate);
+//    vector<mpz_class> pk_p = {sk_p[0]*sk_p[1], sk_p[2]};
+//    vector<mpz_class> sk_gm = GM_priv::keygen(randstate);
+//    vector<mpz_class> pk_gm = {sk_gm[0],sk_gm[1]};
 
-    Paillier_priv paillier(sk_p,randstate);
+//    Paillier_priv paillier(sk_p,randstate);
 
     for (size_t i = 0; i < k; i++) {
-        v[i] = paillier.encrypt(v[i]);
+        v[i] = pp.encrypt(v[i]);
     }
     
-    EncArgmax_Owner client(v,nbits,pk_p,pk_gm,randstate);
-    EncArgmax_Helper server(nbits,k,sk_p,sk_gm,randstate);
+    EncArgmax_Owner client(v,nbits,p,gm,randstate);
+    EncArgmax_Helper server(nbits,k,pp,gm_priv,randstate);
     
     delete t;
     
@@ -367,21 +385,19 @@ int main(int ac, char **av)
     SetSeed(to_ZZ(time(NULL)));
     srand(time(NULL));
     
-//	test_millionaire();
 
     test_lsic(l);
     test_compare(l);
 
-//    cout << "\n\n";
+    cout << "\n\n";
     
     
-//    test_enc_compare(l,lambda);
-//    cout << "\n\n";
-//    test_rev_enc_compare(l,lambda);
-    //	test_simple_svm();
+    test_enc_compare(l,lambda);
+    cout << "\n\n";
+    test_rev_enc_compare(l,lambda);
 
-//    cout << "\n\n";
-//    test_enc_argmax(n,l,lambda,t);
+    cout << "\n\n";
+    test_enc_argmax(n,l,lambda,t);
 
 	return 0;
 }

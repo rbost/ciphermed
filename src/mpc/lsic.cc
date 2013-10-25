@@ -27,8 +27,13 @@ LSIC_Packet_B::LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2)
 
 /* LSIC_A */
 
-LSIC_A::LSIC_A(const mpz_class &x,const size_t &l,const vector<mpz_class> &gm_pk, gmp_randstate_t state)
-: a_(x), bit_length_(l), gm_(gm_pk,state), i_(0)
+//LSIC_A::LSIC_A(const mpz_class &x,const size_t &l,const vector<mpz_class> &gm_pk, gmp_randstate_t state)
+//: a_(x), bit_length_(l), gm_(gm_pk,state), i_(0)
+//{
+//}
+
+LSIC_A::LSIC_A(const mpz_class &x,const size_t &l,GM &gm)
+: a_(x), bit_length_(l), gm_(gm), i_(0)
 {
 }
 
@@ -126,13 +131,8 @@ mpz_class LSIC_A::output() const
 
 /* LSIC_B */
 
-LSIC_B::LSIC_B(const mpz_class &y,const size_t l,const vector<mpz_class> &gm_sk, gmp_randstate_t state)
-: b_(y), bit_length_(l), gm_(gm_sk,state), protocol_started_(false)
-{
-}
-
-LSIC_B::LSIC_B(const mpz_class &y,const size_t l, gmp_randstate_t state, unsigned int key_size)
-: b_(y), bit_length_(l), gm_(GM_priv::keygen(state,key_size),state), protocol_started_(false)
+LSIC_B::LSIC_B(const mpz_class &y,const size_t l, GM_priv &gm)
+: b_(y), bit_length_(l), gm_(gm), protocol_started_(false)
 {
 }
 

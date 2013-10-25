@@ -6,15 +6,8 @@
 using namespace std;
 
 
-EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &sk_gm, gmp_randstate_t state)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,sk_gm,state), two_l_(0), is_protocol_done_(false)
-{
-    gmp_randinit_set(randstate_, state);
-    mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
-}
-
-EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const vector<mpz_class> pk_p, gmp_randstate_t state, unsigned int key_size)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(pk_p,state), lsic_(0,bit_length_,state,key_size), two_l_(0), is_protocol_done_(false)
+EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, GM_priv &gm,gmp_randstate_t state)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(p), lsic_(0,bit_length_,gm), two_l_(0), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
@@ -55,15 +48,8 @@ void EncCompare_Owner::decryptResult(const mpz_class &c_t)
 }
 
 
-EncCompare_Helper::EncCompare_Helper(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &pk_gm, gmp_randstate_t state)
-: bit_length_(l), paillier_(sk_p,state), lsic_(0,bit_length_,pk_gm,state), two_l_(0)
-{
-    gmp_randinit_set(randstate_, state);
-    mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
-}
-
-EncCompare_Helper::EncCompare_Helper(const size_t &l, const std::vector<mpz_class> &pk_gm, gmp_randstate_t state, unsigned int key_size)
-: bit_length_(l), paillier_(Paillier_priv::keygen(state,key_size),state), lsic_(0,bit_length_,pk_gm,state), two_l_(0)
+EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, gmp_randstate_t state)
+: bit_length_(l), paillier_(pp), lsic_(0,bit_length_,gm), two_l_(0)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l

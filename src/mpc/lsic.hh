@@ -33,7 +33,7 @@ struct LSIC_Packet_B {
 
 class LSIC_A{
 public:
-    LSIC_A(const mpz_class &x,const size_t &l,const std::vector<mpz_class> &gm_pk, gmp_randstate_t state);
+    LSIC_A(const mpz_class &x,const size_t &l,GM &gm);
 
     void set_value(const mpz_class &x);
     GM gm() const { return gm_; };
@@ -80,8 +80,7 @@ protected:
 
 class LSIC_B{
 public:
-    LSIC_B(const mpz_class &y,const size_t l, const std::vector<mpz_class> &gm_sk, gmp_randstate_t state);
-    LSIC_B(const mpz_class &y,const size_t l, gmp_randstate_t state, unsigned int key_size = 1024);
+    LSIC_B(const mpz_class &y,const size_t l, GM_priv &gm);
     
 	std::vector<mpz_class> privparams() const { return gm_.privkey(); };
 	std::vector<mpz_class> pubparams() const { return gm_.pubkey(); };
