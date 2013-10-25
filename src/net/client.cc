@@ -16,6 +16,7 @@
 #include <math/util_gmp_rand.h>
 
 #include <net/net_utils.hh>
+#include <util/util.hh>
 
 #include <net/client.hh>
 
@@ -301,16 +302,14 @@ mpz_class Client::run_priv_compare_B(Compare_B &comparator)
         cout << line << endl;
     } while (line != PRIV_COMP_ENC_BITS_START);
     
-    cout << "Start parsing" << endl;
     input_stream >> c_a;
-    cout << "Finished parsing" << endl;
     
     // discard the line up to the finishing header
     do {
         getline(input_stream,line);
-        if (line != "") {
-            cout << line << endl;
-        }
+//        if (line != "") {
+//            cout << line << endl;
+//        }
 
     } while (line != PRIV_COMP_ENC_BITS_END);
 
@@ -326,7 +325,6 @@ mpz_class Client::run_priv_compare_B(Compare_B &comparator)
     output_stream << c_rand ;
     output_stream << PRIV_COMP_INTERM_END << "\n\r\n";
     boost::asio::write(socket_, out_buff);
-    cout << "Sent intermediate results" << endl;
 
     // wait for the encrypted result
     for (; ; ) {
@@ -494,10 +492,21 @@ int main(int argc, char* argv[])
         client.connect(io_service, hostname);
 
         // server has b = 20
-//        mpz_class res = client.run_lsic(40,10);
-        mpz_class res = client.test_compare(10,100);
-//        decrypt_gm(client.socket(),res);
-        client.test_decrypt_gm(res);
+        
+        ScopedTimer *t_lsic = new ScopedTimer("LSIC");
+        mpz_class res_lsic = client.run_lsic(40,100);
+        delete t_lsic;
+        client.test_decrypt_gm(res_lsic);
+
+        ScopedTimer *t_comp = new ScopedTimer("Comp");
+        mpz_class res_comp = client.test_compare(10,100);
+        delete t_comp;
+        client.test_decrypt_gm(res_comp);
+        
+        
+        
+        
+        
 //        client.test_rev_enc_compare(5);
         
 //        client.test_fhe();
