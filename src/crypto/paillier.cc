@@ -12,7 +12,7 @@ using namespace NTL;
 
 Paillier::Paillier(const vector<mpz_class> &pk, gmp_randstate_t state)
     : n(pk[0]), g(pk[1]),
-      nbits(mpz_sizeinbase(n.get_mpz_t(),2)), n2(n*n)
+      nbits(mpz_sizeinbase(n.get_mpz_t(),2)), n2(n*n), good_generator(g == n+1)
 {
     assert(pk.size() == 2);
     gmp_randinit_set(_randstate, state);
@@ -42,14 +42,25 @@ Paillier::encrypt(const mpz_class &plaintext)
         mpz_class rn = *i;
         rqueue.pop_front();
 
+        if (good_generator) {
+            // g = n+1 -> we can avoid an exponentiation
+            return ((1+plaintext*n)*rn) %n2;
+        }
+        
         return (mpz_class_powm(g,plaintext,n2) * rn) % n2;
     } else {
         mpz_class r;
         mpz_urandomm(r.get_mpz_t(),_randstate,n.get_mpz_t());
 
+        if (good_generator) {
+            r = mpz_class_powm(r,n,n2);
+            // g = n+1 -> we can avoid an exponentiation
+            return ((1+plaintext*n)*r) %n2;
+        }
         return mpz_class_powm(g,plaintext + n*r, n2);
     }
 }
+
 
 mpz_class
 Paillier::add(const mpz_class &c0, const mpz_class &c1) const
@@ -80,6 +91,9 @@ Paillier::scalarize(const mpz_class &c)
 {
     mpz_class r;
     mpz_urandomm(r.get_mpz_t(),_randstate,n.get_mpz_t());
+    // here, we should multiply by r when r is coprime with n
+    // to save time, as this will not happen with negligible probability,
+    // we don't test this property
     return constMult(r,c);
 }
 
@@ -118,7 +132,18 @@ Paillier_priv::Paillier_priv(const vector<mpz_class> &sk, gmp_randstate_t state)
       hq(mpz_class_invert(Lfast(mpz_class_powm(g % q2, fast ? a : (q-1), q2),
                       qinv, two_q, q), q))
 {
-    assert(sk.size() == 4);                 
+    assert(sk.size() == 4);
+    find_crt_factors();
+}
+
+void Paillier_priv::find_crt_factors()
+{
+    mpz_class d, u_p2,u_q2;
+    mpz_gcdext(d.get_mpz_t(),u_p2.get_mpz_t(),u_q2.get_mpz_t(),p2.get_mpz_t(),q2.get_mpz_t());
+    
+    assert(d == 1);
+    e_p2 = (q2*u_q2) %n2;
+    e_q2 = (p2*u_p2) %n2;
 }
 
 std::vector<mpz_class>
@@ -158,13 +183,127 @@ Paillier_priv::keygen(gmp_randstate_t state, uint nbits, uint abits)
         g = mpz_class_powm(2, lambda / a, n);
     } else {
         g = 1;
-        do {
-            g++;
-        } while (mpz_class_gcd(L(mpz_class_powm(g, lambda, n*n), n), n) != 1);
+//        do {
+//            g++;
+//        } while (mpz_class_gcd(L(mpz_class_powm(g, lambda, n*n), n), n) != 1);
+        g = n+1; // use a well chosen generator to speed up encryption (approx. x2)
     }
 
     return { p, q, g, a };
 }
+
+mpz_class
+Paillier_priv::fast_encrypt(const mpz_class &plaintext)
+{
+    if (fast) {
+        // a != 0
+        return encrypt(plaintext);
+    }
+    mpz_class rn;
+
+    auto i = rqueue.begin();
+    if (i != rqueue.end()) {
+        rqueue.pop_front();
+        rn = *i;
+        
+        mpz_class c;
+        mpz_class c_p;
+        mpz_class c_q;
+        if (good_generator) {
+            // g = n+1 -> we can avoid an exponentiation
+            c_p = ((1+plaintext*n)) % p2;
+            c_q = ((1+plaintext*n)) % q2;
+
+        }else{
+            c_p = mpz_class_powm(g,plaintext, p2);
+            c_q = mpz_class_powm(g,plaintext, q2);
+        }
+        c = mpz_class_crt_2(c_p,c_q,p2,q2);
+
+        return (c*rn) %n2;
+    } else {
+        mpz_class r;
+        mpz_urandomm(r.get_mpz_t(),_randstate,n.get_mpz_t());
+
+        mpz_class r_p,r_q;
+        r_p = mpz_class_powm(r,n,p2);
+        r_q = mpz_class_powm(r,n,q2);
+        mpz_class c_p;
+        mpz_class c_q;
+
+        if (good_generator) {
+            // g = n+1 -> we can avoid an exponentiation
+            c_p = ((1+plaintext*n)*r_p) % p2;
+            c_q = ((1+plaintext*n)*r_q) % q2;
+            
+            
+            //            return ((1+plaintext*n)*r) %n2;
+        }else{
+            c_p = mpz_class_powm(g,plaintext, p2)*r_p %p2;
+            c_q = mpz_class_powm(g,plaintext, q2)*r_q %q2;
+        }
+
+        // g = n+1 -> we can avoid an exponentiation
+        return mpz_class_crt_2(c_p,c_q,p2,q2);
+    }
+
+}
+
+mpz_class
+Paillier_priv::fast_encrypt_precompute(const mpz_class &plaintext)
+{
+    if (fast) {
+        // a != 0
+        return encrypt(plaintext);
+    }
+    mpz_class rn;
+    
+    auto i = rqueue.begin();
+    if (i != rqueue.end()) {
+        rqueue.pop_front();
+        rn = *i;
+        
+        mpz_class c;
+        mpz_class c_p;
+        mpz_class c_q;
+        if (good_generator) {
+            // g = n+1 -> we can avoid an exponentiation
+            c_p = ((1+plaintext*n)) % p2;
+            c_q = ((1+plaintext*n)) % q2;
+        }else{
+            c_p = mpz_class_powm(g,plaintext, p2);
+            c_q = mpz_class_powm(g,plaintext, q2);
+        }
+        c =  (c_p*e_p2 + c_q*e_q2) % n2;
+        
+        return (c*rn) %n2;
+    } else {
+        mpz_class r;
+        mpz_urandomm(r.get_mpz_t(),_randstate,n.get_mpz_t());
+        
+        mpz_class r_p,r_q;
+        r_p = mpz_class_powm(r,n,p2);
+        r_q = mpz_class_powm(r,n,q2);
+        mpz_class c_p;
+        mpz_class c_q;
+        
+        if (good_generator) {
+            // g = n+1 -> we can avoid an exponentiation
+            c_p = ((1+plaintext*n)*r_p) % p2;
+            c_q = ((1+plaintext*n)*r_q) % q2;
+            
+        }else{
+            c_p = mpz_class_powm(g,plaintext, p2)*r_p %p2;
+            c_q = mpz_class_powm(g,plaintext, q2)*r_q %q2;
+        }
+        
+        // g = n+1 -> we can avoid an exponentiation
+        
+        return (c_p*e_p2 + c_q*e_q2) % n2;
+    }
+    
+}
+
 
 mpz_class
 Paillier_priv::decrypt(const mpz_class &ciphertext) const
