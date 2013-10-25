@@ -10,6 +10,8 @@ public:
     Compare_A(const mpz_class &x, const size_t &l, Paillier_priv &paillier, GM_priv &gm);
     
     std::vector<mpz_class> encrypt_bits();
+    std::vector<mpz_class> encrypt_bits_fast();
+    std::vector<mpz_class> encrypt_bits_fast_precompute();
     mpz_class search_zero(const std::vector<mpz_class> &c);
     
 protected:

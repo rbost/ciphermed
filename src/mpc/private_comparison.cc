@@ -13,12 +13,41 @@ Compare_A::Compare_A(const mpz_class &x, const size_t &l, Paillier_priv &paillie
 vector<mpz_class> Compare_A::encrypt_bits()
 {
     ScopedTimer timer("encrypt_bits");
-
+    
     vector<mpz_class> c_a(bit_length_);
     
     for (size_t i = 0; i < bit_length_; i++) {
         c_a[i] = paillier_.encrypt(mpz_tstbit(a_.get_mpz_t(),i));
-//        c_a[i] = mpz_tstbit(a_.get_mpz_t(),i);
+        
+        //        c_a[i] = mpz_tstbit(a_.get_mpz_t(),i);
+    }
+    
+    return c_a;
+}
+vector<mpz_class> Compare_A::encrypt_bits_fast()
+{
+    ScopedTimer timer("encrypt_bits_fast");
+    
+    vector<mpz_class> c_a(bit_length_);
+    
+    for (size_t i = 0; i < bit_length_; i++) {
+        c_a[i] = paillier_.fast_encrypt(mpz_tstbit(a_.get_mpz_t(),i));
+        
+        //        c_a[i] = mpz_tstbit(a_.get_mpz_t(),i);
+    }
+    
+    return c_a;
+}
+vector<mpz_class> Compare_A::encrypt_bits_fast_precompute()
+{
+    ScopedTimer timer("encrypt_bits_fast_precompute");
+    
+    vector<mpz_class> c_a(bit_length_);
+    
+    for (size_t i = 0; i < bit_length_; i++) {
+        c_a[i] = paillier_.fast_encrypt_precompute(mpz_tstbit(a_.get_mpz_t(),i));
+        
+        //        c_a[i] = mpz_tstbit(a_.get_mpz_t(),i);
     }
     
     return c_a;
@@ -137,7 +166,10 @@ mpz_class Compare_B::unblind(const mpz_class &t_prime)
 
 mpz_class runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state)
 {
-    vector<mpz_class> c_a = party_a.encrypt_bits();
+    vector<mpz_class> c_a;
+//    c_a = party_a.encrypt_bits();
+    c_a = party_a.encrypt_bits_fast();
+//    c_a = party_a.encrypt_bits_fast_precompute();
     
     vector<mpz_class> c_w = party_b.compute_w(c_a);
     vector<mpz_class> c_sums = party_b.compute_sums(c_w);
