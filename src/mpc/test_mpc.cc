@@ -163,9 +163,12 @@ static void test_compare(unsigned int nbits = 256)
     gmp_randseed_ui(randstate,time(NULL));
     
     auto sk_p = Paillier_priv::keygen(randstate,1024,0);
-    Paillier_priv paillier(sk_p,randstate);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
+    
     auto sk_gm = GM_priv::keygen(randstate);
-    GM_priv gm(sk_gm,randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
 
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
@@ -174,8 +177,8 @@ static void test_compare(unsigned int nbits = 256)
 //    cout << "a = " << a.get_str(2) << endl;
 //    cout << "b = " << b.get_str(2) << endl;
     
-    Compare_A party_a(a, nbits, paillier, gm);
-    Compare_B party_b(b, nbits, paillier, gm, randstate);
+    Compare_A party_a(a, nbits, p, gm, randstate);
+    Compare_B party_b(b, nbits, pp, gm_priv);
     
     delete t;
     
@@ -183,7 +186,7 @@ static void test_compare(unsigned int nbits = 256)
     
     mpz_class c_t = runProtocol(party_a, party_b,randstate);
     
-    bool result = gm.decrypt(c_t);
+    bool result = gm_priv.decrypt(c_t);
     
     delete t;
     
@@ -204,7 +207,7 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate);
+    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
     Paillier_priv pp(sk_p,randstate);
     Paillier p(pp.pubkey(),randstate);
     
@@ -246,7 +249,7 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate);
+    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
     Paillier_priv pp(sk_p,randstate);
     Paillier p(pp.pubkey(),randstate);
     
@@ -291,7 +294,7 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
 
-    auto sk_p = Paillier_priv::keygen(randstate);
+    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
     Paillier_priv pp(sk_p,randstate);
     Paillier p(pp.pubkey(),randstate);
     
@@ -307,13 +310,6 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
             real_argmax = i;
         }
     }
-
-//    vector<mpz_class> sk_p = Paillier_priv::keygen(randstate);
-//    vector<mpz_class> pk_p = {sk_p[0]*sk_p[1], sk_p[2]};
-//    vector<mpz_class> sk_gm = GM_priv::keygen(randstate);
-//    vector<mpz_class> pk_gm = {sk_gm[0],sk_gm[1]};
-
-//    Paillier_priv paillier(sk_p,randstate);
 
     for (size_t i = 0; i < k; i++) {
         v[i] = pp.encrypt(v[i]);
