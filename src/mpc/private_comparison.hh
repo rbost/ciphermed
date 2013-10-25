@@ -14,6 +14,8 @@ public:
     std::vector<mpz_class> encrypt_bits_fast_precompute();
     mpz_class search_zero(const std::vector<mpz_class> &c);
     
+    size_t bit_length() const { return bit_length_; }
+
 protected:
     mpz_class a_;
     size_t bit_length_; // bit length of the numbers to compare
@@ -31,6 +33,8 @@ public:
     std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c);
     mpz_class unblind(const mpz_class &t_prime);
     
+    size_t bit_length() const { return bit_length_; }
+
 protected:
     mpz_class b_;
     long s_;

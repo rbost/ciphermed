@@ -59,6 +59,23 @@ istream& operator>>(istream& in, LSIC_Packet_B& p)
     return in;
 }
 
+ostream& operator<<(ostream& out, const vector<mpz_class> &v)
+{
+    for (auto it = v.begin(); it != v.end(); it++) {
+        out << *it << "\n";
+    }
+    return out;
+}
+
+istream& operator>>(istream& in, vector<mpz_class> &v)
+{
+    for (auto it = v.begin(); it != v.end(); it++) {
+        in >> (*it);
+    }
+    return in;
+}
+
+
 istream& parseInt(istream& in, mpz_class &i, int base)
 {
     std::string line;

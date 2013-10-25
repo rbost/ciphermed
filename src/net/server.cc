@@ -12,6 +12,7 @@
 
 #include <crypto/paillier.hh>
 #include <mpc/lsic.hh>
+#include <mpc/private_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 
 #include <net/server.hh>
@@ -141,6 +142,9 @@ void Server_session::run_session()
             }else if(line == START_LSIC) {
                 mpz_class b(20);
                 run_lsic(b,10);
+            }else if(line == START_PRIV_COMP) {
+                mpz_class b(20);
+                test_compare(b,100);
             }else if(line == DECRYPT_GM) {
                 mpz_class c;
                 getline(input_stream,line);
@@ -282,6 +286,64 @@ void Server_session::run_lsic_B(LSIC_B &lsic)
         } while (!input_stream.eof());
     }
     
+}
+
+void Server_session::test_compare(const mpz_class &a,size_t l)
+{
+    cout << id_ << ": Test compare" << endl;
+    Compare_A comparator(a,l,server_->paillier(),server_->gm());
+    run_priv_compare_A(comparator);
+}
+
+void Server_session::run_priv_compare_A(Compare_A &comparator)
+{
+    boost::asio::streambuf output_buf;
+    std::ostream output_stream(&output_buf);
+    std::istream input_stream(&input_buf_);
+    std::string line;
+
+    vector<mpz_class> c(comparator.bit_length());
+
+    
+    // send the encrypted bits
+    output_stream << PRIV_COMP_ENC_BITS_START << "\n";
+    output_stream << comparator.encrypt_bits_fast();
+    output_stream << PRIV_COMP_ENC_BITS_END << "\n\r\n";
+    boost::asio::write(*socket_, output_buf);
+
+    // wait for the answer from the client
+    cout << "Wait for intermediate results" << endl;
+
+    boost::asio::read_until(*socket_, input_buf_, PRIV_COMP_INTERM_END);
+//    boost::asio::read_until(*socket_, input_buf_, "\r\n");
+    cout << "Should have received intermediate results" << endl;
+
+    // discard the line before the beginning header
+    do {
+        getline(input_stream,line);
+        if (line != "") {
+            cout << line << endl;
+        }
+    } while (line != PRIV_COMP_INTERM_START);
+    cout << "Received intermediate results" << endl;
+
+    cout << "Start parsing" << endl;
+    input_stream >> c;
+    cout << "Finished parsing" << endl;
+
+    // discard the line up to the finishing header
+    do {
+        getline(input_stream,line);
+    } while (line != PRIV_COMP_INTERM_END);
+    
+    mpz_class c_t_prime = comparator.search_zero(c);
+    
+    // send the blinded result
+    output_stream << PRIV_COMP_RESULT << "\n";
+    output_stream << c_t_prime;
+    output_stream << "\r\n";
+    boost::asio::write(*socket_, output_buf);
+
 }
 
 bool Server_session::run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm)

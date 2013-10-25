@@ -10,6 +10,7 @@
 
 #include <crypto/gm.hh>
 #include <mpc/lsic.hh>
+#include <mpc/private_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 
 #include <math/util_gmp_rand.h>
@@ -262,6 +263,97 @@ mpz_class Client::run_lsic_A(LSIC_A &lsic)
     }
 }
 
+mpz_class Client::test_compare(const mpz_class &b, size_t l)
+{
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    if (!has_paillier_pk()) {
+        get_server_pk_paillier();
+    }
+    // send the start message
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    output_stream << START_PRIV_COMP << "\n\r\n";
+    boost::asio::write(socket_, out_buff);
+    
+    Compare_B comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
+    return run_priv_compare_B(comparator);
+}
+
+
+mpz_class Client::run_priv_compare_B(Compare_B &comparator)
+{
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    std::istream input_stream(&input_buf_);
+
+    vector<mpz_class> c_a(comparator.bit_length());
+
+    // first get encrypted bits
+    
+    boost::asio::read_until(socket_, input_buf_, PRIV_COMP_ENC_BITS_END);
+    
+    // discard the line before the beginning header
+    do {
+        getline(input_stream,line);
+        cout << line << endl;
+    } while (line != PRIV_COMP_ENC_BITS_START);
+    
+    cout << "Start parsing" << endl;
+    input_stream >> c_a;
+    cout << "Finished parsing" << endl;
+    
+    // discard the line up to the finishing header
+    do {
+        getline(input_stream,line);
+        if (line != "") {
+            cout << line << endl;
+        }
+
+    } while (line != PRIV_COMP_ENC_BITS_END);
+
+    vector<mpz_class> c_w = comparator.compute_w(c_a);
+    vector<mpz_class> c_sums = comparator.compute_sums(c_w);
+    vector<mpz_class> c = comparator.compute_c(c_a,c_sums);
+    vector<mpz_class> c_rand = comparator.rerandomize(c);
+    
+    // we have to suffle    
+    random_shuffle(c_rand.begin(),c_rand.end(),[this](int n){ return gmp_urandomm_ui(rand_state_,n); });
+
+    output_stream << PRIV_COMP_INTERM_START << "\n";
+    output_stream << c_rand ;
+    output_stream << PRIV_COMP_INTERM_END << "\n\r\n";
+    boost::asio::write(socket_, out_buff);
+    cout << "Sent intermediate results" << endl;
+
+    // wait for the encrypted result
+    for (; ; ) {
+        boost::asio::read_until(socket_, input_buf_, "\r\n");
+        std::istream input_stream(&input_buf_);
+        // parse the input
+        do {
+            getline(input_stream,line);
+            //            cout << line;
+            if (line == "") {
+                continue;
+            }
+            
+            if (line == PRIV_COMP_RESULT) {
+                mpz_class c_t_prime;
+                parseInt(input_stream,c_t_prime,BASE);
+                
+                mpz_class c_t = comparator.unblind(c_t_prime);
+                
+                return c_t_prime;
+            }
+        } while (!input_stream.eof());
+    }    
+
+    
+}
+
 void Client::test_rev_enc_compare(size_t l)
 {
     mpz_class a, b;
@@ -403,11 +495,12 @@ int main(int argc, char* argv[])
 
         // server has b = 20
 //        mpz_class res = client.run_lsic(40,10);
+        mpz_class res = client.test_compare(10,100);
 //        decrypt_gm(client.socket(),res);
-
+        client.test_decrypt_gm(res);
 //        client.test_rev_enc_compare(5);
         
-        client.test_fhe();
+//        client.test_fhe();
         
         client.disconnect();
     

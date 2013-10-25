@@ -1,7 +1,7 @@
 #pragma once
 
 #define PORT 1990
-#define BASE 62
+#define BASE 10
 
 
 #define FHE_p 2
@@ -34,6 +34,17 @@ const std::string START_LSIC = "START LSIC";
 const std::string LSIC_SETUP = "LSIC SETUP";
 const std::string LSIC_END = "LSIC END";
 const std::string LSIC_PACKET = "LSIC PACKET";
+
+const std::string START_PRIV_COMP = "START PRIVATE COMPARE";
+const std::string PRIV_COMP_SETUP = "PRIVATE COMPARE SETUP";
+const std::string PRIV_COMP_END = "PRIVATE COMPARE END";
+const std::string PRIV_COMP_ENC_BITS_START = "PRIVATE COMPARE ENC BITS START";
+const std::string PRIV_COMP_ENC_BITS_END = "PRIVATE COMPARE ENC BITS END";
+const std::string PRIV_COMP_INTERM_START = "PRIVATE COMPARE INTERM START";
+const std::string PRIV_COMP_INTERM_END = "PRIVATE COMPARE INTERM END";
+const std::string PRIV_COMP_RESULT = "PRIVATE COMPARE RESULT";
+
+const std::string PRIV_COMP_PACKET = "PRIVATE COMPARE PACKET";
 
 const std::string DISCONNECT = "DISCONNECT";
 

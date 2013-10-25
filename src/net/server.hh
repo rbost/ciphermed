@@ -23,10 +23,10 @@ public:
     
     void run();
     
-    const Paillier_priv& paillier() { return paillier_; };
+    Paillier_priv& paillier() { return paillier_; };
     vector<mpz_class> paillier_pk() const { return paillier_.pubkey(); }
     vector<mpz_class> paillier_sk() const { return paillier_.privkey(); }
-    const GM_priv& gm() { return gm_; };
+    GM_priv& gm() { return gm_; };
     vector<mpz_class> gm_pk() const { return gm_.pubkey(); }
     vector<mpz_class> gm_sk() const { return {gm_.pubkey()[0],gm_.pubkey()[1],gm_.privkey()[0],gm_.privkey()[1]}; }
     
@@ -61,6 +61,9 @@ public:
     void run_lsic(const mpz_class &b,size_t l);
     void run_lsic_B(LSIC_B &lsic);
     
+    void test_compare(const mpz_class &a,size_t l);
+    void run_priv_compare_A(Compare_A &comparator);
+
     bool run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm);
     bool run_rev_enc_comparison(Rev_EncCompare_Helper &helper);
 
