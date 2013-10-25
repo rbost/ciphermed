@@ -16,6 +16,7 @@ class Paillier {
     mpz_class constMult(const mpz_class &m, const mpz_class &c) const;
     mpz_class constMult(long m, const mpz_class &c) const;
     mpz_class constMult(const mpz_class &c, long m) const { return constMult(m,c); };
+    mpz_class scalarize(const mpz_class &c);
 
     void rand_gen(size_t niter = 100, size_t nmax = 1000);
 
@@ -29,7 +30,8 @@ class Paillier {
     /* Cached values */
     const uint nbits;
     const mpz_class n2;
-
+    bool good_generator;
+    
     /* Pre-computed randomness */
     std::list<mpz_class> rqueue;
 };
@@ -38,6 +40,13 @@ class Paillier_priv : public Paillier {
  public:
     Paillier_priv(const std::vector<mpz_class> &sk, gmp_randstate_t state);
     std::vector<mpz_class> privkey() const { return { p, q, g, a }; }
+    void find_crt_factors();
+    
+    // if a !=0, and if you are encrypting using the private key, use this function
+    // 75% speedup
+    mpz_class fast_encrypt(const mpz_class &plaintext);
+    // no speedup compared to the fast_encrypt
+    mpz_class fast_encrypt_precompute(const mpz_class &plaintext);
 
     mpz_class decrypt(const mpz_class &ciphertext) const;
     static std::vector<mpz_class> keygen(gmp_randstate_t state, uint nbits = 1024, uint abits = 256);
@@ -51,6 +60,7 @@ class Paillier_priv : public Paillier {
     /* Cached values */
     const bool fast;
     const mpz_class p2, q2;
+    mpz_class e_p2, e_q2;
     const mpz_class two_p, two_q;
     const mpz_class pinv, qinv;
     const mpz_class hp, hq;
