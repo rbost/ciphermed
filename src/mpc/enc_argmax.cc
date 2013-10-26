@@ -3,27 +3,11 @@
 #include <thread>
 #include <ctime>
 
-//EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, Comparison_protocol_A* comparator, gmp_randstate_t state)
-//: k_(a.size()),is_protocol_done_(false)
-//{
-//    perm_ = genRandomPermutation(k_);
-//    
-//    comparators_ = vector< vector<Rev_EncCompare_Owner*> >(k_);
-//    
-//    for (size_t i = 0; i < k_; i++) {
-//        comparators_[i] = vector<Rev_EncCompare_Owner*>(i);
-//        for (size_t j = 0; j < i; j++) {
-//            size_t p_i = perm_[i], p_j = perm_[j];
-//            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,p,comparator,state);
-//            
-//        }
-//    }
-//}
 
 EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, function<Comparison_protocol_A*()> comparator_creator, gmp_randstate_t state)
 : k_(a.size()),is_protocol_done_(false)
 {
-    perm_ = genRandomPermutation(k_);
+    perm_ = genRandomPermutation(k_,state);
     
     comparators_ = vector< vector<Rev_EncCompare_Owner*> >(k_);
     
@@ -61,19 +45,6 @@ void EncArgmax_Owner::unpermuteResult(size_t argmax_perm)
 
 
 
-//EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, Comparison_protocol_B* comparator, gmp_randstate_t state)
-//: k_(k)
-//{
-//    comparators_ = vector< vector<Rev_EncCompare_Helper*> >(k_);
-//    
-//    for (size_t i = 0; i < k_; i++) {
-//        comparators_[i] = vector<Rev_EncCompare_Helper*>(i);
-//        for (size_t j = 0; j < i; j++) {
-//            comparators_[i][j] = new Rev_EncCompare_Helper(l,pp,comparator,state);
-//        }
-//    }
-//    
-//}
 
 EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator)
 : k_(k)
@@ -149,7 +120,7 @@ size_t EncArgmax_Helper::permuted_argmax() const
 }
 
 
-map<size_t,size_t> genRandomPermutation(const size_t &n)
+map<size_t,size_t> genRandomPermutation(const size_t &n, gmp_randstate_t state)
 {
     map<size_t,size_t> perm;
     
@@ -160,7 +131,7 @@ map<size_t,size_t> genRandomPermutation(const size_t &n)
     
     for (size_t i = 0; i < n; i++)
     {
-        unsigned long randomValue = rand()%(n - 1); // we should use a better PRG here!!
+        unsigned long randomValue = gmp_urandomm_ui(state,n);
         swap(perm[i], perm[randomValue]);
     }
     return perm;

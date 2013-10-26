@@ -14,7 +14,6 @@ using namespace std;
 
 class EncArgmax_Owner {
 public:
-//    EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, Comparison_protocol_A* comparator, gmp_randstate_t state);
     EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, function<Comparison_protocol_A*()> comparator_creator, gmp_randstate_t state);
     ~EncArgmax_Owner();
     
@@ -37,7 +36,6 @@ protected:
 
 class EncArgmax_Helper {
 public:
-//    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, Comparison_protocol_B* comparator, gmp_randstate_t state);
     EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator);
 
     ~EncArgmax_Helper();
@@ -58,8 +56,7 @@ protected:
     bool is_sorted_;
 };
 
-// generate a random permutation using rand() <-- BAD !!
-map<size_t,size_t> genRandomPermutation(const size_t &n);
+map<size_t,size_t> genRandomPermutation(const size_t &n, gmp_randstate_t state);
 
 void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda = 100);
 
