@@ -54,4 +54,8 @@ protected:
 
 
 
-mpz_class runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state);
+void runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state);
+inline void runProtocol(Compare_A *party_a, Compare_B *party_b, gmp_randstate_t state)
+{
+    runProtocol(*party_a,*party_b, state);
+}

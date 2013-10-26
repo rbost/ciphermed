@@ -103,4 +103,8 @@ protected:
     bool protocol_started_;
 };
 
-void runProtocol(LSIC_A &party_a, LSIC_B &party_b);
+void runProtocol(LSIC_A &party_a, LSIC_B &party_b, gmp_randstate_t state);
+inline void runProtocol(LSIC_A *party_a, LSIC_B *party_b, gmp_randstate_t state)
+{
+    runProtocol(*party_a,*party_b,state);
+}

@@ -66,4 +66,4 @@ protected:
     mpz_class two_l_; // 2^l = 1 << bit_length_
 };
 
-void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, unsigned int lambda = 100);
+void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, gmp_randstate_t state, unsigned int lambda = 100);

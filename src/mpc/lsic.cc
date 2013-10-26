@@ -166,7 +166,7 @@ LSIC_Packet_B LSIC_B::answerRound(const LSIC_Packet_A &pack)
     return LSIC_Packet_B(pack.index,gm_.reRand(tb),gm_.encrypt(bi));
 }
 
-void runProtocol(LSIC_A &party_a, LSIC_B &party_b)
+void runProtocol(LSIC_A &party_a, LSIC_B &party_b, gmp_randstate_t rand_state)
 {
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet = party_b.setupRound();

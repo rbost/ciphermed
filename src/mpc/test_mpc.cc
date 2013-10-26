@@ -138,7 +138,7 @@ static void test_lsic(unsigned int nbits = 256)
     
     t = new ScopedTimer("LSIC execution");
 
-    runProtocol(party_a, party_b);
+    runProtocol(party_a, party_b, randstate);
     
     bool result = party_b.gm().decrypt(party_a.output());
     
@@ -184,9 +184,9 @@ static void test_compare(unsigned int nbits = 256)
     
     t = new ScopedTimer("Compare execution");
     
-    mpz_class c_t = runProtocol(party_a, party_b,randstate);
+    runProtocol(party_a, party_b,randstate);
     
-    bool result = gm_priv.decrypt(c_t);
+    bool result = party_b.gm().decrypt(party_a.output());
     
     delete t;
     
@@ -226,7 +226,7 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     
     t = new ScopedTimer("Running protocol");
 
-    runProtocol(client,server,lambda);
+    runProtocol(client,server,randstate,lambda);
 
     delete t;
 
@@ -268,7 +268,7 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     
     t = new ScopedTimer("Running protocol");
 
-    runProtocol(client,server,lambda);
+    runProtocol(client,server,randstate,lambda);
     
     delete t;
     
@@ -336,9 +336,9 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
 
     
     if (num_threads > 1) {
-        runProtocol(client,server,lambda,num_threads);
+        runProtocol(client,server,randstate,lambda,num_threads);
     }else{
-        runProtocol(client,server,lambda);
+        runProtocol(client,server,randstate,lambda);
     }
     delete t;
     
@@ -383,7 +383,7 @@ int main(int ac, char **av)
     
 
     test_lsic(l);
-    test_compare(l);
+//    test_compare(l);
 
     cout << "\n\n";
     

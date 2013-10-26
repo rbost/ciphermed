@@ -162,7 +162,7 @@ void Compare_A::unblind(const mpz_class &t_prime)
     }
 }
 
-mpz_class runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state)
+void runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state)
 {
     vector<mpz_class> c_b;
 //    c_a = party_a.encrypt_bits();
@@ -182,6 +182,4 @@ mpz_class runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t st
     delete timer;
     mpz_class t_prime = party_b.search_zero(c_rand);
     party_a.unblind(t_prime);
-    
-    return party_a.output();
 }

@@ -77,12 +77,12 @@ void Rev_EncCompare_Helper::decryptResult(const mpz_class &c_t)
     t_ = lsic_.gm().decrypt(c_t);
 }
 
-void runProtocol(Rev_EncCompare_Owner &owner, Rev_EncCompare_Helper &helper, unsigned int lambda)
+void runProtocol(Rev_EncCompare_Owner &owner, Rev_EncCompare_Helper &helper, gmp_randstate_t state, unsigned int lambda)
 {
     mpz_class c_z(owner.setup(lambda));
     helper.setup(c_z);
     
-    runProtocol(owner.lsic(),helper.lsic());
+    runProtocol(owner.lsic(),helper.lsic(),state);
     
     mpz_class c_z_l(helper.get_c_z_l());
     mpz_class c_t(owner.concludeProtocol(c_z_l));

@@ -69,4 +69,4 @@ protected:
     bool t_;
 };
 
-void runProtocol(Rev_EncCompare_Owner &owner, Rev_EncCompare_Helper &helper, unsigned int lambda = 100);
+void runProtocol(Rev_EncCompare_Owner &owner, Rev_EncCompare_Helper &helper, gmp_randstate_t state, unsigned int lambda = 100);

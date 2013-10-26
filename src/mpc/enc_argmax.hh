@@ -57,8 +57,8 @@ protected:
 // generate a random permutation using rand() <-- BAD !!
 map<size_t,size_t> genRandomPermutation(const size_t &n);
 
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda = 100);
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda = 100);
 
 // Parallelization
-void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, unsigned int lambda, size_t i_begin, size_t i_end);
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda, unsigned int num_threads);
+void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, gmp_randstate_t state, unsigned int lambda, size_t i_begin, size_t i_end);
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda, unsigned int num_threads);

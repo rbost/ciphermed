@@ -79,12 +79,12 @@ mpz_class EncCompare_Helper::concludeProtocol(const mpz_class &c_r_l)
     return c_t;
 }
 
-void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, unsigned int lambda)
+void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, gmp_randstate_t state, unsigned int lambda)
 {
     mpz_class c_z(owner.setup(lambda));
     helper.setup(c_z);
 
-    runProtocol(helper.lsic(),owner.lsic());
+    runProtocol(helper.comparator(),owner.comparator(),state);
 
     mpz_class c_r_l(owner.get_c_r_l());
     mpz_class c_t(helper.concludeProtocol(c_r_l));

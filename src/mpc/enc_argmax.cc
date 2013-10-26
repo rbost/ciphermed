@@ -131,13 +131,13 @@ map<size_t,size_t> genRandomPermutation(const size_t &n)
     return perm;
 }
 
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda)
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda)
 {
     size_t k = owner.comparators().size();
     
     for (size_t i = 0; i < k; i++) {
         for (size_t j = 0; j < i; j++) {
-            runProtocol(*(owner.comparators()[i][j]), *(helper.comparators()[i][j]), lambda);
+            runProtocol(*(owner.comparators()[i][j]), *(helper.comparators()[i][j]), state, lambda);
         }
     }
     
@@ -145,14 +145,14 @@ void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int 
     owner.unpermuteResult(helper.permuted_argmax());
 }
 
-void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, unsigned int lambda, size_t i_begin, size_t i_end)
+void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, gmp_randstate_t state, unsigned int lambda, size_t i_begin, size_t i_end)
 {
 //    struct timespec t0,t1;
 //    clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t0);
     
     for (size_t i = i_begin; i < i_end; i++) {
         for (size_t j = 0; j < i; j++) {
-            runProtocol(*(owner->comparators()[i][j]), *(helper->comparators()[i][j]), lambda);
+            runProtocol(*(owner->comparators()[i][j]), *(helper->comparators()[i][j]), state, lambda);
         }
     }
 //    clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t1);
@@ -161,7 +161,7 @@ void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, un
 //    cerr << "Thread i_begin=" << i_begin << " took time "<< t/1000000 <<"ms" << endl;
 }
 
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda, unsigned int num_threads)
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda, unsigned int num_threads)
 {
     size_t k = owner.comparators().size();
     
@@ -173,14 +173,14 @@ void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int 
     for (size_t i = 0; i < k; i++) {
         c_count += i;
         if (c_count >= m) {
-            threads[t] = thread(threadCall, &owner, &helper, lambda, i_begin,i+1);
+            threads[t] = thread(threadCall, &owner, &helper, state, lambda, i_begin,i+1);
             i_begin = i+1;
             c_count = 0;
             t++;
         }
     }
     if (c_count >0) {
-        threads[t] = thread(threadCall, &owner, &helper, lambda, i_begin,k);
+        threads[t] = thread(threadCall, &owner, &helper, state, lambda, i_begin,k);
         t++;
     }
 
