@@ -7,6 +7,7 @@
 #include <utility>
 #include <crypto/gm.hh>                          
            
+#include <mpc/comparison_protocol.hh>
 
 /*
  *  Implementation of Yao's Millionaires' protocol based on the
@@ -31,7 +32,7 @@ struct LSIC_Packet_B {
     LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2);
 };
 
-class LSIC_A{
+class LSIC_A : public Comparison_protocol_A{
 public:
     LSIC_A(const mpz_class &x,const size_t &l,GM &gm);
 
@@ -78,7 +79,7 @@ protected:
     void updateStep_(const LSIC_Packet_B &pack);
 };
 
-class LSIC_B{
+class LSIC_B : public Comparison_protocol_B{
 public:
     LSIC_B(const mpz_class &y,const size_t l, GM_priv &gm);
     

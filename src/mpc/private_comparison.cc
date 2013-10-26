@@ -66,7 +66,7 @@ mpz_class Compare_B::search_zero(const vector<mpz_class> &c)
 }
 
 Compare_A::Compare_A(const mpz_class &x, const size_t &l, Paillier &paillier, GM &gm, gmp_randstate_t state)
-: b_(x), bit_length_(l), paillier_(paillier), gm_(gm)
+: a_(x), bit_length_(l), paillier_(paillier), gm_(gm)
 {
     s_ = 1 - 2*gmp_urandomb_ui(state,1);
     paillier_one_ = paillier_.pubkey()[1]; // g is an encryption of 1
@@ -79,7 +79,7 @@ vector<mpz_class> Compare_A::compute_w(const std::vector<mpz_class> &c_b)
     vector<mpz_class> c_w(bit_length_);
     // can be parallelized
     for (size_t i = 0; i < bit_length_; i++) {
-        if (mpz_tstbit(b_.get_mpz_t(),i) == 0) {
+        if (mpz_tstbit(a_.get_mpz_t(),i) == 0) {
             c_w[i] = c_b[i];
         }else{
             c_w[i] = paillier_.sub(paillier_one_,c_b[i]);
@@ -114,9 +114,9 @@ vector<mpz_class> Compare_A::compute_c(const std::vector<mpz_class> &c_b,const s
     
         c[i] = paillier_.sub(c[i], c_b[i]);
       
-        long b_i = mpz_tstbit(b_.get_mpz_t(),i);
+        long a_i = mpz_tstbit(a_.get_mpz_t(),i);
         
-        switch (b_i+s_) {
+        switch (a_i+s_) {
             case 1:
                 c[i] = paillier_.add(c[i], paillier_one_);
                 break;
