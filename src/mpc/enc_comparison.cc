@@ -48,10 +48,9 @@ void EncCompare_Owner::decryptResult(const mpz_class &c_t)
 }
 
 
-EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, Comparison_protocol_A *comparator, gmp_randstate_t state)
+EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, Comparison_protocol_A *comparator)
 : bit_length_(l), paillier_(pp), two_l_(0), comparator_(comparator)
 {
-    gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 

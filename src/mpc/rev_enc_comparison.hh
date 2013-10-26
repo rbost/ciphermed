@@ -41,7 +41,7 @@ protected:
 
 class Rev_EncCompare_Helper {
 public:
-    Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_B *comparator, gmp_randstate_t state);
+    Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_B *comparator);
 
     void setup(const mpz_class &c_z);
     void decryptResult(const mpz_class &c_t);
@@ -56,7 +56,6 @@ protected:
     size_t bit_length_;
     Paillier_priv paillier_;
     Comparison_protocol_B *comparator_;
-    gmp_randstate_t randstate_;
     
     /* intermediate values */
     mpz_class c_z_l_; // encryption of the l-th bit of r

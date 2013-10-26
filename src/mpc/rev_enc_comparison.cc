@@ -51,10 +51,9 @@ mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
     return c_t;
 }
 
-Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_B *comparator, gmp_randstate_t state)
+Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_B *comparator)
 : bit_length_(l), paillier_(pp), comparator_(comparator), two_l_(0), is_protocol_done_(false)
 {
-    gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 

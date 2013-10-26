@@ -38,7 +38,7 @@ protected:
 class EncArgmax_Helper {
 public:
 //    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, Comparison_protocol_B* comparator, gmp_randstate_t state);
-    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator, gmp_randstate_t state);
+    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator);
 
     ~EncArgmax_Helper();
     

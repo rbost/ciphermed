@@ -47,7 +47,7 @@ protected:
 
 class EncCompare_Helper {
 public:
-    EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, Comparison_protocol_A *comparator, gmp_randstate_t state);
+    EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, Comparison_protocol_A *comparator);
 
     void setup(const mpz_class &c_z);
     mpz_class concludeProtocol(const mpz_class &c_r_l_);
@@ -59,7 +59,6 @@ protected:
     size_t bit_length_;
     Paillier_priv paillier_;
     Comparison_protocol_A *comparator_;
-    gmp_randstate_t randstate_;
     
     /* intermediate values */
     mpz_class c_z_l_; // encryption of the l-th bit of z
