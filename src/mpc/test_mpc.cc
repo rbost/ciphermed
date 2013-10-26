@@ -11,6 +11,7 @@
 #include <util/util.hh>
 #include <math/util_gmp_rand.h>
 #include <mpc/private_comparison.hh>
+#include <functional>
 
 #include <FHE.h>
 
@@ -219,8 +220,11 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
     
-    EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,gm_priv, randstate);
-    EncCompare_Helper server(nbits,pp,gm,randstate);
+    LSIC_A party_a(0, nbits, gm);
+    LSIC_B party_b(0, nbits, gm_priv);
+
+    EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,gm_priv, &party_b, randstate);
+    EncCompare_Helper server(nbits,pp,gm, &party_a,randstate);
     
     delete t;
     
@@ -257,12 +261,15 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     GM_priv gm_priv(sk_gm,randstate);
     GM gm(gm_priv.pubkey(),randstate);
     
+    LSIC_A party_a(0, nbits, gm);
+    LSIC_B party_b(0, nbits, gm_priv);
+
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
     
-    Rev_EncCompare_Helper server(nbits,pp,gm_priv,randstate);
-    Rev_EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,gm, randstate);
+    Rev_EncCompare_Helper server(nbits,pp,&party_b,randstate);
+    Rev_EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,&party_a, randstate);
     
     delete t;
     
@@ -302,6 +309,8 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     GM_priv gm_priv(sk_gm,randstate);
     GM gm(gm_priv.pubkey(),randstate);
 
+//    LSIC_A party_a(0, nbits, gm);
+//    LSIC_B party_b(0, nbits, gm_priv);
     
     size_t real_argmax = 0;
     for (size_t i = 0; i < k; i++) {
@@ -314,9 +323,14 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     for (size_t i = 0; i < k; i++) {
         v[i] = pp.encrypt(v[i]);
     }
+    GM *gm_ptr = &gm;
+    GM_priv *gm_priv_ptr = &gm_priv;
     
-    EncArgmax_Owner client(v,nbits,p,gm,randstate);
-    EncArgmax_Helper server(nbits,k,pp,gm_priv,randstate);
+    auto party_a_creator = [gm_ptr,nbits](){ return new LSIC_A(0,nbits,*gm_ptr); };
+    auto party_b_creator = [gm_priv_ptr,nbits](){ return new LSIC_B(0,nbits,*gm_priv_ptr); };
+    
+    EncArgmax_Owner client(v,nbits,p,party_a_creator,randstate);
+    EncArgmax_Helper server(nbits,k,pp,party_b_creator,randstate);
     
     delete t;
     

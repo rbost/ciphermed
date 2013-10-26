@@ -17,3 +17,6 @@ public:
     virtual void set_value(const mpz_class &x) {}
     virtual GM_priv gm() const { };
 };
+
+// dynamicaly call the right test function
+void runProtocol(Comparison_protocol_A *party_a, Comparison_protocol_B *party_b, gmp_randstate_t state);

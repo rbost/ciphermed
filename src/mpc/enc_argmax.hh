@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <cstddef>
+#include <functional>
 
 using namespace std;
 
@@ -13,7 +14,8 @@ using namespace std;
 
 class EncArgmax_Owner {
 public:
-    EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, GM &gm, gmp_randstate_t state);
+//    EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, Comparison_protocol_A* comparator, gmp_randstate_t state);
+    EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, function<Comparison_protocol_A*()> comparator_creator, gmp_randstate_t state);
     ~EncArgmax_Owner();
     
     vector< vector<Rev_EncCompare_Owner*> >comparators() const { return comparators_; }
@@ -35,7 +37,9 @@ protected:
 
 class EncArgmax_Helper {
 public:
-    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, GM_priv &gm, gmp_randstate_t state);
+//    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, Comparison_protocol_B* comparator, gmp_randstate_t state);
+    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator, gmp_randstate_t state);
+
     ~EncArgmax_Helper();
     
     vector< vector<Rev_EncCompare_Helper*> >comparators() const { return comparators_; }

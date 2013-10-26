@@ -3,19 +3,36 @@
 #include <thread>
 #include <ctime>
 
-EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, GM &gm, gmp_randstate_t state)
+//EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, Comparison_protocol_A* comparator, gmp_randstate_t state)
+//: k_(a.size()),is_protocol_done_(false)
+//{
+//    perm_ = genRandomPermutation(k_);
+//    
+//    comparators_ = vector< vector<Rev_EncCompare_Owner*> >(k_);
+//    
+//    for (size_t i = 0; i < k_; i++) {
+//        comparators_[i] = vector<Rev_EncCompare_Owner*>(i);
+//        for (size_t j = 0; j < i; j++) {
+//            size_t p_i = perm_[i], p_j = perm_[j];
+//            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,p,comparator,state);
+//            
+//        }
+//    }
+//}
+
+EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, function<Comparison_protocol_A*()> comparator_creator, gmp_randstate_t state)
 : k_(a.size()),is_protocol_done_(false)
-{    
+{
     perm_ = genRandomPermutation(k_);
     
     comparators_ = vector< vector<Rev_EncCompare_Owner*> >(k_);
-     
+    
     for (size_t i = 0; i < k_; i++) {
         comparators_[i] = vector<Rev_EncCompare_Owner*>(i);
         for (size_t j = 0; j < i; j++) {
             size_t p_i = perm_[i], p_j = perm_[j];
-            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,p,gm,state);
-
+            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,p,comparator_creator(),state);
+            
         }
     }
 }
@@ -24,6 +41,8 @@ EncArgmax_Owner::~EncArgmax_Owner()
 {
     for (size_t i = 0; i < k_; i++) {
         for (size_t j = 0; j < i; j++) {
+            // delete the private comparators
+            delete comparators_[i][j]->comparator();
             delete comparators_[i][j];
         }
     }
@@ -42,7 +61,21 @@ void EncArgmax_Owner::unpermuteResult(size_t argmax_perm)
 
 
 
-EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, GM_priv &gm, gmp_randstate_t state)
+//EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, Comparison_protocol_B* comparator, gmp_randstate_t state)
+//: k_(k)
+//{
+//    comparators_ = vector< vector<Rev_EncCompare_Helper*> >(k_);
+//    
+//    for (size_t i = 0; i < k_; i++) {
+//        comparators_[i] = vector<Rev_EncCompare_Helper*>(i);
+//        for (size_t j = 0; j < i; j++) {
+//            comparators_[i][j] = new Rev_EncCompare_Helper(l,pp,comparator,state);
+//        }
+//    }
+//    
+//}
+
+EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator, gmp_randstate_t state)
 : k_(k)
 {
     comparators_ = vector< vector<Rev_EncCompare_Helper*> >(k_);
@@ -50,16 +83,18 @@ EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_pri
     for (size_t i = 0; i < k_; i++) {
         comparators_[i] = vector<Rev_EncCompare_Helper*>(i);
         for (size_t j = 0; j < i; j++) {
-            comparators_[i][j] = new Rev_EncCompare_Helper(l,pp,gm,state);
+            comparators_[i][j] = new Rev_EncCompare_Helper(l,pp,comparator_creator(),state);
         }
     }
- 
+    
 }
 
 EncArgmax_Helper::~EncArgmax_Helper()
 {
     for (size_t i = 0; i < comparators_.size(); i++) {
         for (size_t j = 0; j < comparators_[i].size(); j++) {
+            // delete the private comparators
+            delete comparators_[i][j]->comparator();
             delete comparators_[i][j];
         }
     }

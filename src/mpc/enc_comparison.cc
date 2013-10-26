@@ -6,8 +6,8 @@
 using namespace std;
 
 
-EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, GM_priv &gm,gmp_randstate_t state)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(p), lsic_(0,bit_length_,gm), two_l_(0), is_protocol_done_(false)
+EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, GM_priv &gm, Comparison_protocol_B *comparator, gmp_randstate_t state)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(p), two_l_(0), is_protocol_done_(false), comparator_(comparator)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
@@ -29,10 +29,10 @@ mpz_class EncCompare_Owner::setup(unsigned int lambda)
     // c = r mod 2^l
     c = r % two_l_;
     
-    lsic_.set_value(c);
+    comparator_->set_value(c);
     
     bool r_l = (bool)mpz_tstbit(r.get_mpz_t(),bit_length_); // gets the l-th bit of r
-    c_r_l_ = lsic_.gm().encrypt(r_l);
+    c_r_l_ = comparator_->gm().encrypt(r_l);
 
     
 //    cout << "l = " << bit_length_ << endl;
@@ -44,12 +44,12 @@ mpz_class EncCompare_Owner::setup(unsigned int lambda)
 void EncCompare_Owner::decryptResult(const mpz_class &c_t)
 {
     is_protocol_done_ = true;
-    t_ = lsic_.gm().decrypt(c_t);
+    t_ = comparator_->gm().decrypt(c_t);
 }
 
 
-EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, gmp_randstate_t state)
-: bit_length_(l), paillier_(pp), lsic_(0,bit_length_,gm), two_l_(0)
+EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, Comparison_protocol_A *comparator, gmp_randstate_t state)
+: bit_length_(l), paillier_(pp), two_l_(0), comparator_(comparator)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
@@ -59,10 +59,10 @@ void EncCompare_Helper::setup(const mpz_class &c_z)
 {
     mpz_class z = paillier_.decrypt(c_z);
     mpz_class d = z % two_l_;
-    lsic_.set_value(d);
+    comparator_->set_value(d);
     
     bool z_l = (bool)mpz_tstbit(z.get_mpz_t(),bit_length_);
-    c_z_l_ = lsic_.gm().encrypt(z_l);
+    c_z_l_ = comparator_->gm().encrypt(z_l);
     
 //    cout << "Helper setup: \nz = " << z << "\t" << z.get_str(2)<< "\nz_l = " << z_l << "\nd = " << d << endl;
 
@@ -70,11 +70,11 @@ void EncCompare_Helper::setup(const mpz_class &c_z)
 
 mpz_class EncCompare_Helper::concludeProtocol(const mpz_class &c_r_l)
 {
-    mpz_class c_t_prime = lsic_.output();
+    mpz_class c_t_prime = comparator_->output();
     
     // t = t' + z_l + r_l (over F_2)
-    mpz_class c_t = lsic_.gm().XOR(c_t_prime,c_r_l);
-    c_t = lsic_.gm().XOR(c_t,c_z_l_);
+    mpz_class c_t = comparator_->gm().XOR(c_t_prime,c_r_l);
+    c_t = comparator_->gm().XOR(c_t,c_z_l_);
 
     return c_t;
 }
