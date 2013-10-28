@@ -226,7 +226,7 @@ void Server_session::send_fhe_pk()
 void Server_session::run_lsic(const mpz_class &b,size_t l)
 {
     cout << id_ << ": Start LSIC" << endl;
-    LSIC_B lsic(b,l, server_->gm_sk(),rand_state_);
+    LSIC_B lsic(b,l, server_->gm());
     run_lsic_B(lsic);
 }
 
@@ -291,11 +291,11 @@ void Server_session::run_lsic_B(LSIC_B &lsic)
 void Server_session::test_compare(const mpz_class &a,size_t l)
 {
     cout << id_ << ": Test compare" << endl;
-    Compare_A comparator(a,l,server_->paillier(),server_->gm());
-    run_priv_compare_A(comparator);
+    Compare_B comparator(a,l,server_->paillier(),server_->gm());
+    run_priv_compare_B(comparator);
 }
 
-void Server_session::run_priv_compare_A(Compare_A &comparator)
+void Server_session::run_priv_compare_B(Compare_B &comparator)
 {
     boost::asio::streambuf output_buf;
     std::ostream output_stream(&output_buf);
@@ -341,7 +341,8 @@ void Server_session::run_priv_compare_A(Compare_A &comparator)
 
 bool Server_session::run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm)
 {
-    Rev_EncCompare_Helper helper(l,server_->paillier_sk(),server_->gm_sk(),rand_state_);
+    LSIC_B lsic(0,l,server_->gm());
+    Rev_EncCompare_Helper helper(l,server_->paillier(),&lsic);
     return run_rev_enc_comparison(helper);
 }
 
@@ -369,7 +370,7 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     }
 
     // now, we need to run the LSIC protocol
-    run_lsic_B(helper.lsic());
+    run_lsic_B(*((LSIC_B*)helper.comparator()));
     
     
     mpz_class c_z_l(helper.get_c_z_l());

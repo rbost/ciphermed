@@ -3,19 +3,20 @@
 #include <thread>
 #include <ctime>
 
-EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &pk_gm, gmp_randstate_t state)
+
+EncArgmax_Owner::EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, function<Comparison_protocol_A*()> comparator_creator, gmp_randstate_t state)
 : k_(a.size()),is_protocol_done_(false)
-{    
-    perm_ = genRandomPermutation(k_);
+{
+    perm_ = genRandomPermutation(k_,state);
     
     comparators_ = vector< vector<Rev_EncCompare_Owner*> >(k_);
-     
+    
     for (size_t i = 0; i < k_; i++) {
         comparators_[i] = vector<Rev_EncCompare_Owner*>(i);
         for (size_t j = 0; j < i; j++) {
             size_t p_i = perm_[i], p_j = perm_[j];
-            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,pk_p,pk_gm,state);
-
+            (comparators_[i])[j] = new Rev_EncCompare_Owner(a[p_i],a[p_j],l,p,comparator_creator(),state);
+            
         }
     }
 }
@@ -24,6 +25,8 @@ EncArgmax_Owner::~EncArgmax_Owner()
 {
     for (size_t i = 0; i < k_; i++) {
         for (size_t j = 0; j < i; j++) {
+            // delete the private comparators
+            delete comparators_[i][j]->comparator();
             delete comparators_[i][j];
         }
     }
@@ -42,7 +45,8 @@ void EncArgmax_Owner::unpermuteResult(size_t argmax_perm)
 
 
 
-EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,const std::vector<mpz_class> &sk_p, const std::vector<mpz_class> &sk_gm, gmp_randstate_t state)
+
+EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator)
 : k_(k)
 {
     comparators_ = vector< vector<Rev_EncCompare_Helper*> >(k_);
@@ -50,16 +54,18 @@ EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,const std::v
     for (size_t i = 0; i < k_; i++) {
         comparators_[i] = vector<Rev_EncCompare_Helper*>(i);
         for (size_t j = 0; j < i; j++) {
-            comparators_[i][j] = new Rev_EncCompare_Helper(l,sk_p,sk_gm,state);
+            comparators_[i][j] = new Rev_EncCompare_Helper(l,pp,comparator_creator());
         }
     }
- 
+    
 }
 
 EncArgmax_Helper::~EncArgmax_Helper()
 {
     for (size_t i = 0; i < comparators_.size(); i++) {
         for (size_t j = 0; j < comparators_[i].size(); j++) {
+            // delete the private comparators
+            delete comparators_[i][j]->comparator();
             delete comparators_[i][j];
         }
     }
@@ -114,7 +120,7 @@ size_t EncArgmax_Helper::permuted_argmax() const
 }
 
 
-map<size_t,size_t> genRandomPermutation(const size_t &n)
+map<size_t,size_t> genRandomPermutation(const size_t &n, gmp_randstate_t state)
 {
     map<size_t,size_t> perm;
     
@@ -125,19 +131,19 @@ map<size_t,size_t> genRandomPermutation(const size_t &n)
     
     for (size_t i = 0; i < n; i++)
     {
-        unsigned long randomValue = rand()%(n - 1); // we should use a better PRG here!!
+        unsigned long randomValue = gmp_urandomm_ui(state,n);
         swap(perm[i], perm[randomValue]);
     }
     return perm;
 }
 
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda)
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda)
 {
     size_t k = owner.comparators().size();
     
     for (size_t i = 0; i < k; i++) {
         for (size_t j = 0; j < i; j++) {
-            runProtocol(*(owner.comparators()[i][j]), *(helper.comparators()[i][j]), lambda);
+            runProtocol(*(owner.comparators()[i][j]), *(helper.comparators()[i][j]), state, lambda);
         }
     }
     
@@ -145,14 +151,14 @@ void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int 
     owner.unpermuteResult(helper.permuted_argmax());
 }
 
-void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, unsigned int lambda, size_t i_begin, size_t i_end)
+void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, gmp_randstate_t state, unsigned int lambda, size_t i_begin, size_t i_end)
 {
 //    struct timespec t0,t1;
 //    clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t0);
     
     for (size_t i = i_begin; i < i_end; i++) {
         for (size_t j = 0; j < i; j++) {
-            runProtocol(*(owner->comparators()[i][j]), *(helper->comparators()[i][j]), lambda);
+            runProtocol(*(owner->comparators()[i][j]), *(helper->comparators()[i][j]), state, lambda);
         }
     }
 //    clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t1);
@@ -161,7 +167,7 @@ void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, un
 //    cerr << "Thread i_begin=" << i_begin << " took time "<< t/1000000 <<"ms" << endl;
 }
 
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda, unsigned int num_threads)
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda, unsigned int num_threads)
 {
     size_t k = owner.comparators().size();
     
@@ -173,14 +179,14 @@ void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int 
     for (size_t i = 0; i < k; i++) {
         c_count += i;
         if (c_count >= m) {
-            threads[t] = thread(threadCall, &owner, &helper, lambda, i_begin,i+1);
+            threads[t] = thread(threadCall, &owner, &helper, state, lambda, i_begin,i+1);
             i_begin = i+1;
             c_count = 0;
             t++;
         }
     }
     if (c_count >0) {
-        threads[t] = thread(threadCall, &owner, &helper, lambda, i_begin,k);
+        threads[t] = thread(threadCall, &owner, &helper, state, lambda, i_begin,k);
         t++;
     }
 

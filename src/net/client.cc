@@ -174,7 +174,7 @@ mpz_class Client::run_lsic(const mpz_class &a, size_t l)
     output_stream << START_LSIC << "\n\r\n";
     boost::asio::write(socket_, out_buff);
 
-    LSIC_A lsic(a,l,server_gm_->pubkey(),rand_state_);
+    LSIC_A lsic(a,l,*server_gm_);
     return run_lsic_A(lsic);
 }
 
@@ -278,19 +278,19 @@ mpz_class Client::test_compare(const mpz_class &b, size_t l)
     output_stream << START_PRIV_COMP << "\n\r\n";
     boost::asio::write(socket_, out_buff);
     
-    Compare_B comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
-    return run_priv_compare_B(comparator);
+    Compare_A comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
+    return run_priv_compare_A(comparator);
 }
 
 
-mpz_class Client::run_priv_compare_B(Compare_B &comparator)
+mpz_class Client::run_priv_compare_A(Compare_A &comparator)
 {
     boost::asio::streambuf out_buff;
     std::ostream output_stream(&out_buff);
     string line;
     std::istream input_stream(&input_buf_);
 
-    vector<mpz_class> c_a(comparator.bit_length());
+    vector<mpz_class> c_b(comparator.bit_length());
 
     // first get encrypted bits
     
@@ -302,7 +302,7 @@ mpz_class Client::run_priv_compare_B(Compare_B &comparator)
         cout << line << endl;
     } while (line != PRIV_COMP_ENC_BITS_START);
     
-    input_stream >> c_a;
+    input_stream >> c_b;
     
     // discard the line up to the finishing header
     do {
@@ -313,9 +313,9 @@ mpz_class Client::run_priv_compare_B(Compare_B &comparator)
 
     } while (line != PRIV_COMP_ENC_BITS_END);
 
-    vector<mpz_class> c_w = comparator.compute_w(c_a);
+    vector<mpz_class> c_w = comparator.compute_w(c_b);
     vector<mpz_class> c_sums = comparator.compute_sums(c_w);
-    vector<mpz_class> c = comparator.compute_c(c_a,c_sums);
+    vector<mpz_class> c = comparator.compute_c(c_b,c_sums);
     vector<mpz_class> c_rand = comparator.rerandomize(c);
     
     // we have to suffle    
@@ -342,9 +342,9 @@ mpz_class Client::run_priv_compare_B(Compare_B &comparator)
                 mpz_class c_t_prime;
                 parseInt(input_stream,c_t_prime,BASE);
                 
-                mpz_class c_t = comparator.unblind(c_t_prime);
+                comparator.unblind(c_t_prime);
                 
-                return c_t_prime;
+                return comparator.output();
             }
         } while (!input_stream.eof());
     }    
@@ -377,7 +377,8 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
     assert(has_paillier_pk());
     assert(has_gm_pk());
 
-    Rev_EncCompare_Owner owner(a,b,l,server_paillier_->pubkey(),server_gm_->pubkey(),rand_state_);
+    LSIC_A lsic(0,l,*server_gm_);
+    Rev_EncCompare_Owner owner(a,b,l,*server_paillier_,&lsic,rand_state_);
     
     mpz_class c_z(owner.setup(lambda_));
 
@@ -394,7 +395,7 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
     
     // the server does some computation, we just have to run the lsic
     
-    run_lsic_A(owner.lsic());
+    run_lsic_A(lsic);
     
     // wait for the conlude message
     
@@ -499,7 +500,7 @@ int main(int argc, char* argv[])
         client.test_decrypt_gm(res_lsic);
 
         ScopedTimer *t_comp = new ScopedTimer("Comp");
-        mpz_class res_comp = client.test_compare(10,100);
+        mpz_class res_comp = client.test_compare(40,100);
         delete t_comp;
         client.test_decrypt_gm(res_comp);
         

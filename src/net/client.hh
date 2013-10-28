@@ -38,7 +38,7 @@ public:
     
     
     mpz_class test_compare(const mpz_class &b, size_t l);
-    mpz_class run_priv_compare_B(Compare_B &comparator);
+    mpz_class run_priv_compare_A(Compare_A &comparator);
     
     void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
 

@@ -7,6 +7,7 @@
 #include <utility>
 #include <crypto/gm.hh>                          
            
+#include <mpc/comparison_protocol.hh>
 
 /*
  *  Implementation of Yao's Millionaires' protocol based on the
@@ -32,9 +33,9 @@ struct LSIC_Packet_B {
     LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2);
 };
 
-class LSIC_A{
+class LSIC_A : public Comparison_protocol_A{
 public:
-    LSIC_A(const mpz_class &x,const size_t &l,const std::vector<mpz_class> &gm_pk, gmp_randstate_t state);
+    LSIC_A(const mpz_class &x,const size_t &l,GM &gm);
 
     void set_value(const mpz_class &x);
     GM gm() const { return gm_; };
@@ -79,10 +80,9 @@ protected:
     void updateStep_(const LSIC_Packet_B &pack);
 };
 
-class LSIC_B{
+class LSIC_B : public Comparison_protocol_B{
 public:
-    LSIC_B(const mpz_class &y,const size_t l, const std::vector<mpz_class> &gm_sk, gmp_randstate_t state);
-    LSIC_B(const mpz_class &y,const size_t l, gmp_randstate_t state, unsigned int key_size = 1024);
+    LSIC_B(const mpz_class &y,const size_t l, GM_priv &gm);
     
 	std::vector<mpz_class> privparams() const { return gm_.privkey(); };
 	std::vector<mpz_class> pubparams() const { return gm_.pubkey(); };
@@ -104,4 +104,8 @@ protected:
     bool protocol_started_;
 };
 
-void runProtocol(LSIC_A &party_a, LSIC_B &party_b);
+void runProtocol(LSIC_A &party_a, LSIC_B &party_b, gmp_randstate_t state);
+inline void runProtocol(LSIC_A *party_a, LSIC_B *party_b, gmp_randstate_t state)
+{
+    runProtocol(*party_a,*party_b,state);
+}

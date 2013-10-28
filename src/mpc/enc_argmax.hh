@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <cstddef>
+#include <functional>
 
 using namespace std;
 
@@ -13,7 +14,7 @@ using namespace std;
 
 class EncArgmax_Owner {
 public:
-    EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, const vector<mpz_class> pk_p, const vector<mpz_class> &pk_gm, gmp_randstate_t state);
+    EncArgmax_Owner(const vector<mpz_class> &a, const size_t &l, Paillier &p, function<Comparison_protocol_A*()> comparator_creator, gmp_randstate_t state);
     ~EncArgmax_Owner();
     
     vector< vector<Rev_EncCompare_Owner*> >comparators() const { return comparators_; }
@@ -35,7 +36,8 @@ protected:
 
 class EncArgmax_Helper {
 public:
-    EncArgmax_Helper(const size_t &l, const size_t &k,const std::vector<mpz_class> &sk_p, const std::vector<mpz_class> &sk_gm, gmp_randstate_t state);
+    EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator);
+
     ~EncArgmax_Helper();
     
     vector< vector<Rev_EncCompare_Helper*> >comparators() const { return comparators_; }
@@ -54,11 +56,10 @@ protected:
     bool is_sorted_;
 };
 
-// generate a random permutation using rand() <-- BAD !!
-map<size_t,size_t> genRandomPermutation(const size_t &n);
+map<size_t,size_t> genRandomPermutation(const size_t &n, gmp_randstate_t state);
 
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda = 100);
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda = 100);
 
 // Parallelization
-void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, unsigned int lambda, size_t i_begin, size_t i_end);
-void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, unsigned int lambda, unsigned int num_threads);
+void threadCall(const EncArgmax_Owner *owner, const EncArgmax_Helper *helper, gmp_randstate_t state, unsigned int lambda, size_t i_begin, size_t i_end);
+void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate_t state, unsigned int lambda, unsigned int num_threads);

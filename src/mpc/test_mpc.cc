@@ -11,6 +11,7 @@
 #include <util/util.hh>
 #include <math/util_gmp_rand.h>
 #include <mpc/private_comparison.hh>
+#include <functional>
 
 #include <FHE.h>
 
@@ -127,14 +128,18 @@ static void test_lsic(unsigned int nbits = 256)
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
 
-    LSIC_B party_b(b, nbits, randstate);
-    LSIC_A party_a(a, nbits, party_b.pubparams(), randstate);
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+    
+    LSIC_B party_b(b, nbits, gm_priv);
+    LSIC_A party_a(a, nbits, gm);
     
     delete t;
     
     t = new ScopedTimer("LSIC execution");
 
-    runProtocol(party_a, party_b);
+    runProtocol(party_a, party_b, randstate);
     
     bool result = party_b.gm().decrypt(party_a.output());
     
@@ -159,9 +164,12 @@ static void test_compare(unsigned int nbits = 256)
     gmp_randseed_ui(randstate,time(NULL));
     
     auto sk_p = Paillier_priv::keygen(randstate,1024,0);
-    Paillier_priv paillier(sk_p,randstate);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
+    
     auto sk_gm = GM_priv::keygen(randstate);
-    GM_priv gm(sk_gm,randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
 
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
@@ -170,16 +178,16 @@ static void test_compare(unsigned int nbits = 256)
 //    cout << "a = " << a.get_str(2) << endl;
 //    cout << "b = " << b.get_str(2) << endl;
     
-    Compare_A party_a(a, nbits, paillier, gm);
-    Compare_B party_b(b, nbits, paillier, gm, randstate);
+    Compare_A party_a(a, nbits, p, gm, randstate);
+    Compare_B party_b(b, nbits, pp, gm_priv);
     
     delete t;
     
     t = new ScopedTimer("Compare execution");
     
-    mpz_class c_t = runProtocol(party_a, party_b,randstate);
+    runProtocol(party_a, party_b,randstate);
     
-    bool result = gm.decrypt(c_t);
+    bool result = party_b.gm().decrypt(party_a.output());
     
     delete t;
     
@@ -200,22 +208,29 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate);
-    Paillier_priv paillier(sk_p,randstate);
+    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
     
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
     
-    EncCompare_Owner client(paillier.encrypt(a),paillier.encrypt(b), nbits, paillier.pubkey(), randstate);
-    auto pk_gm = client.lsic().gm().pubkey();
-    EncCompare_Helper server(nbits,sk_p,pk_gm,randstate);
+    LSIC_A party_a(0, nbits, gm);
+    LSIC_B party_b(0, nbits, gm_priv);
+
+    EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,gm_priv, &party_b, randstate);
+    EncCompare_Helper server(nbits,pp,gm, &party_a);
     
     delete t;
     
     t = new ScopedTimer("Running protocol");
 
-    runProtocol(client,server,lambda);
+    runProtocol(client,server,randstate,lambda);
 
     delete t;
 
@@ -238,24 +253,29 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate);
-    Paillier_priv paillier(sk_p,randstate);
+    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
     
     auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
     
+    LSIC_A party_a(0, nbits, gm);
+    LSIC_B party_b(0, nbits, gm_priv);
+
     mpz_class a, b;
     mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
     mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
     
-    Rev_EncCompare_Helper server(nbits,sk_p,sk_gm,randstate);
-    auto pk_gm = server.lsic().gm().pubkey();
-    Rev_EncCompare_Owner client(paillier.encrypt(a),paillier.encrypt(b), nbits, paillier.pubkey(),pk_gm, randstate);
+    Rev_EncCompare_Helper server(nbits,pp,&party_b);
+    Rev_EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,&party_a, randstate);
     
     delete t;
     
     t = new ScopedTimer("Running protocol");
 
-    runProtocol(client,server,lambda);
+    runProtocol(client,server,randstate,lambda);
     
     delete t;
     
@@ -281,6 +301,13 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
 
+    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
+    Paillier_priv pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
     
     size_t real_argmax = 0;
     for (size_t i = 0; i < k; i++) {
@@ -290,19 +317,22 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
         }
     }
 
-    vector<mpz_class> sk_p = Paillier_priv::keygen(randstate);
-    vector<mpz_class> pk_p = {sk_p[0]*sk_p[1], sk_p[2]};
-    vector<mpz_class> sk_gm = GM_priv::keygen(randstate);
-    vector<mpz_class> pk_gm = {sk_gm[0],sk_gm[1]};
-
-    Paillier_priv paillier(sk_p,randstate);
-
     for (size_t i = 0; i < k; i++) {
-        v[i] = paillier.encrypt(v[i]);
+        v[i] = pp.encrypt(v[i]);
     }
-    
-    EncArgmax_Owner client(v,nbits,pk_p,pk_gm,randstate);
-    EncArgmax_Helper server(nbits,k,sk_p,sk_gm,randstate);
+    GM *gm_ptr = &gm;
+    GM_priv *gm_priv_ptr = &gm_priv;
+    Paillier *p_ptr = &p;
+    Paillier_priv *pp_ptr = &pp;
+    gmp_randstate_t *randstate_ptr = &randstate;
+
+    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
+    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
+//    auto party_a_creator = [gm_ptr,nbits](){ return new LSIC_A(0,nbits,*gm_ptr); };
+//    auto party_b_creator = [gm_priv_ptr,nbits](){ return new LSIC_B(0,nbits,*gm_priv_ptr); };
+   
+    EncArgmax_Owner client(v,nbits,p,party_a_creator,randstate);
+    EncArgmax_Helper server(nbits,k,pp,party_b_creator);
     
     delete t;
     
@@ -322,9 +352,9 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
 
     
     if (num_threads > 1) {
-        runProtocol(client,server,lambda,num_threads);
+        runProtocol(client,server,randstate,lambda,num_threads);
     }else{
-        runProtocol(client,server,lambda);
+        runProtocol(client,server,randstate,lambda);
     }
     delete t;
     
@@ -367,21 +397,19 @@ int main(int ac, char **av)
     SetSeed(to_ZZ(time(NULL)));
     srand(time(NULL));
     
-//	test_millionaire();
 
     test_lsic(l);
-    test_compare(l);
+//    test_compare(l);
 
-//    cout << "\n\n";
+    cout << "\n\n";
     
     
-//    test_enc_compare(l,lambda);
-//    cout << "\n\n";
-//    test_rev_enc_compare(l,lambda);
-    //	test_simple_svm();
+    test_enc_compare(l,lambda);
+    cout << "\n\n";
+    test_rev_enc_compare(l,lambda);
 
-//    cout << "\n\n";
-//    test_enc_argmax(n,l,lambda,t);
+    cout << "\n\n";
+    test_enc_argmax(n,l,lambda,t);
 
 	return 0;
 }
