@@ -53,14 +53,14 @@ $(OBJDIR)/%.o: %.cc
 	@mkdir -p $(@D)
 	$(CXX) -MD $(CXXFLAGS) -c $< -o $@
 
-#include util/Makefrag
-#include math/Makefrag
-#include crypto/Makefrag
-#include mpc/Makefrag
-#include fhe/Makefrag
-#include shaifhe/Makefrag
-#include tree/Makefrag
-#include net/Makefrag
+include util/Makefrag
+include math/Makefrag
+include crypto/Makefrag
+include mpc/Makefrag
+include fhe/Makefrag
+include shaifhe/Makefrag
+include tree/Makefrag
+include net/Makefrag
 include protobuf/Makefrag
 
 $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))

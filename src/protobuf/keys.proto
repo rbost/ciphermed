@@ -1,0 +1,13 @@
+package Protobuf;
+
+import "bigint.proto";
+
+message Paillier_PK {
+    required BigInt N = 1;
+    required BigInt g = 2;
+}
+
+message GM_PK {
+    required BigInt N = 1;
+    required BigInt y = 2;
+}
