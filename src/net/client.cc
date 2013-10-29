@@ -165,9 +165,9 @@ void Client::get_server_pk_fhe()
 
 mpz_class Client::run_comparison_protocol_A(Comparison_protocol_A *comparator)
 {
-    if(typeid(comparator) == typeid(LSIC_A)) {
+    if(typeid(*comparator) == typeid(LSIC_A)) {
         run_lsic_A(reinterpret_cast<LSIC_A*>(comparator));
-    }else if(typeid(comparator) == typeid(Compare_A)){
+    }else if(typeid(*comparator) == typeid(Compare_A)){
         run_priv_compare_A(reinterpret_cast<Compare_A*>(comparator));
     }
     
@@ -527,7 +527,7 @@ int main(int argc, char* argv[])
         
         
         
-//        client.test_rev_enc_compare(5);
+        client.test_rev_enc_compare(5);
         
 //        client.test_fhe();
         

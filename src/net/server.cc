@@ -226,9 +226,9 @@ void Server_session::send_fhe_pk()
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
-    if(typeid(comparator) == typeid(LSIC_B)) {
+    if(typeid(*comparator) == typeid(LSIC_B)) {
         run_lsic_B(reinterpret_cast<LSIC_B*>(comparator));
-    }else if(typeid(comparator) == typeid(Compare_B)){
+    }else if(typeid(*comparator) == typeid(Compare_B)){
         run_priv_compare_B(reinterpret_cast<Compare_B*>(comparator));
     }
 }
