@@ -40,9 +40,10 @@ public:
     mpz_class test_lsic(const mpz_class &a, size_t l);
     mpz_class test_compare(const mpz_class &b, size_t l);
     
-    void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
-
     void test_rev_enc_compare(size_t l);
+    void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
+    void run_rev_enc_comparison(Rev_EncCompare_Owner &owner);
+
     void test_decrypt_gm(const mpz_class &c);
     void test_fhe();
 

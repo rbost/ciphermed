@@ -25,6 +25,7 @@ public:
     Comparison_protocol_A* comparator() { return comparator_; };
     mpz_class get_c_r_l() const { return c_r_l_; };
     bool is_set_up() const { return is_set_up_; }
+    size_t bit_length() const { return bit_length_; }
 
 protected:
     mpz_class a_,b_;
@@ -54,6 +55,7 @@ public:
     Comparison_protocol_B* comparator() { return comparator_; };
     mpz_class get_c_z_l() const { return c_z_l_; };
     bool is_set_up() const { return is_set_up_; }
+    size_t bit_length() const { return bit_length_; }
 
 protected:
     size_t bit_length_;

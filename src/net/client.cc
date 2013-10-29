@@ -388,10 +388,18 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
 {
     assert(has_paillier_pk());
     assert(has_gm_pk());
-
+    
     LSIC_A lsic(0,l,*server_gm_);
     Rev_EncCompare_Owner owner(a,b,l,*server_paillier_,&lsic,rand_state_);
-    
+    run_rev_enc_comparison(owner);
+}
+
+void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
+{
+    assert(has_paillier_pk());
+    assert(has_gm_pk());
+ 
+    size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda_));
 
     
@@ -407,7 +415,7 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
     
     // the server does some computation, we just have to run the lsic
     
-    run_comparison_protocol_A(&lsic);
+    run_comparison_protocol_A(owner.comparator());
     
     // wait for the conlude message
     
@@ -436,10 +444,9 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
                 return;
             }
         } while (!input_stream.eof());
-    }    
-
-    
+    }
 }
+
 void Client::disconnect()
 {
     cout << "Disconnect" << endl;
