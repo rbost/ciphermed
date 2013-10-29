@@ -141,7 +141,7 @@ void Server_session::run_session()
                 send_fhe_pk();
             }else if(line == START_LSIC) {
                 mpz_class b(20);
-                run_lsic(b,100);
+                test_lsic(b,100);
             }else if(line == START_PRIV_COMP) {
                 mpz_class b(20);
                 test_compare(b,100);
@@ -223,14 +223,24 @@ void Server_session::send_fhe_pk()
     boost::asio::write(*socket_, buff);
 }
 
-void Server_session::run_lsic(const mpz_class &b,size_t l)
+
+void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
+{
+    if(typeid(comparator) == typeid(LSIC_B)) {
+        run_lsic_B(reinterpret_cast<LSIC_B*>(comparator));
+    }else if(typeid(comparator) == typeid(Compare_B)){
+        run_priv_compare_B(reinterpret_cast<Compare_B*>(comparator));
+    }
+}
+
+void Server_session::test_lsic(const mpz_class &b,size_t l)
 {
     cout << id_ << ": Start LSIC" << endl;
     LSIC_B lsic(b,l, server_->gm());
-    run_lsic_B(lsic);
+    run_lsic_B(&lsic);
 }
 
-void Server_session::run_lsic_B(LSIC_B &lsic)
+void Server_session::run_lsic_B(LSIC_B *lsic)
 {
     cout << id_ << ": Start LSIC B" << endl;
     boost::asio::streambuf output_buf;
@@ -238,7 +248,7 @@ void Server_session::run_lsic_B(LSIC_B &lsic)
     std::string line;
         
     LSIC_Packet_A a_packet;
-    LSIC_Packet_B b_packet = lsic.setupRound();
+    LSIC_Packet_B b_packet = lsic->setupRound();
     
     output_stream << LSIC_SETUP << "\n";
     output_stream << b_packet;
@@ -270,7 +280,7 @@ void Server_session::run_lsic_B(LSIC_B &lsic)
                 //                cout << "New packet" << endl;
                 input_stream >> a_packet;
                 
-                b_packet = lsic.answerRound(a_packet);
+                b_packet = lsic->answerRound(a_packet);
                 
                 boost::asio::streambuf output_buf;
                 std::ostream output_stream(&output_buf);
@@ -292,22 +302,22 @@ void Server_session::test_compare(const mpz_class &a,size_t l)
 {
     cout << id_ << ": Test compare" << endl;
     Compare_B comparator(a,l,server_->paillier(),server_->gm());
-    run_priv_compare_B(comparator);
+    run_priv_compare_B(&comparator);
 }
 
-void Server_session::run_priv_compare_B(Compare_B &comparator)
+void Server_session::run_priv_compare_B(Compare_B *comparator)
 {
     boost::asio::streambuf output_buf;
     std::ostream output_stream(&output_buf);
     std::istream input_stream(&input_buf_);
     std::string line;
 
-    vector<mpz_class> c(comparator.bit_length());
+    vector<mpz_class> c(comparator->bit_length());
 
     
     // send the encrypted bits
     output_stream << PRIV_COMP_ENC_BITS_START << "\n";
-    output_stream << comparator.encrypt_bits_fast();
+    output_stream << comparator->encrypt_bits_fast();
     output_stream << PRIV_COMP_ENC_BITS_END << "\n\r\n";
     boost::asio::write(*socket_, output_buf);
 
@@ -329,7 +339,7 @@ void Server_session::run_priv_compare_B(Compare_B &comparator)
         getline(input_stream,line);
     } while (line != PRIV_COMP_INTERM_END);
     
-    mpz_class c_t_prime = comparator.search_zero(c);
+    mpz_class c_t_prime = comparator->search_zero(c);
     
     // send the blinded result
     output_stream << PRIV_COMP_RESULT << "\n";
@@ -370,7 +380,7 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     }
 
     // now, we need to run the LSIC protocol
-    run_lsic_B(*((LSIC_B*)helper.comparator()));
+    run_comparison_protocol_B(helper.comparator());
     
     
     mpz_class c_z_l(helper.get_c_z_l());

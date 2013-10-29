@@ -33,12 +33,12 @@ public:
     void get_server_pk_paillier();
     void get_server_pk_fhe();
     
-    mpz_class run_lsic(const mpz_class &a, size_t l);
-    mpz_class run_lsic_A(LSIC_A &lsic);
-    
-    
+    mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
+    mpz_class run_lsic_A(LSIC_A *lsic);
+    mpz_class run_priv_compare_A(Compare_A *comparator);
+
+    mpz_class test_lsic(const mpz_class &a, size_t l);
     mpz_class test_compare(const mpz_class &b, size_t l);
-    mpz_class run_priv_compare_A(Compare_A &comparator);
     
     void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
 

@@ -163,22 +163,18 @@ void Client::get_server_pk_fhe()
 }
 
 
-mpz_class Client::run_lsic(const mpz_class &a, size_t l)
+mpz_class Client::run_comparison_protocol_A(Comparison_protocol_A *comparator)
 {
-    if (!has_gm_pk()) {
-        get_server_pk_gm();
+    if(typeid(comparator) == typeid(LSIC_A)) {
+        run_lsic_A(reinterpret_cast<LSIC_A*>(comparator));
+    }else if(typeid(comparator) == typeid(Compare_A)){
+        run_priv_compare_A(reinterpret_cast<Compare_A*>(comparator));
     }
-    // send the start message
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << START_LSIC << "\n\r\n";
-    boost::asio::write(socket_, out_buff);
-
-    LSIC_A lsic(a,l,*server_gm_);
-    return run_lsic_A(lsic);
+    
+    return comparator->output();
 }
 
-mpz_class Client::run_lsic_A(LSIC_A &lsic)
+mpz_class Client::run_lsic_A(LSIC_A *lsic)
 {
     
     LSIC_Packet_A a_packet;
@@ -210,10 +206,10 @@ mpz_class Client::run_lsic_A(LSIC_A &lsic)
                 //            cout << "LSIC setup received" << endl;
                 input_stream >> b_packet;
                 
-                state = lsic.answerRound(b_packet,&a_packet);
+                state = lsic->answerRound(b_packet,&a_packet);
                 
                 if (state) {
-                    return lsic.output();
+                    return lsic->output();
                 }
                 
                 output_stream << LSIC_PACKET << "\n";
@@ -244,14 +240,14 @@ mpz_class Client::run_lsic_A(LSIC_A &lsic)
             if(line == LSIC_PACKET) {
                 input_stream >> b_packet;
                 
-                state = lsic.answerRound(b_packet,&a_packet);
+                state = lsic->answerRound(b_packet,&a_packet);
                 
                 if (state) {
                     output_stream << LSIC_END << "\n";
                     output_stream << "\r\n";
                     boost::asio::write(socket_, out_buff);
                     
-                    return lsic.output();
+                    return lsic->output();
                 }
                 
                 output_stream << LSIC_PACKET << "\n";
@@ -264,33 +260,15 @@ mpz_class Client::run_lsic_A(LSIC_A &lsic)
     }
 }
 
-mpz_class Client::test_compare(const mpz_class &b, size_t l)
-{
-    if (!has_gm_pk()) {
-        get_server_pk_gm();
-    }
-    if (!has_paillier_pk()) {
-        get_server_pk_paillier();
-    }
-    // send the start message
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << START_PRIV_COMP << "\n\r\n";
-    boost::asio::write(socket_, out_buff);
-    
-    Compare_A comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
-    return run_priv_compare_A(comparator);
-}
 
-
-mpz_class Client::run_priv_compare_A(Compare_A &comparator)
+mpz_class Client::run_priv_compare_A(Compare_A *comparator)
 {
     boost::asio::streambuf out_buff;
     std::ostream output_stream(&out_buff);
     string line;
     std::istream input_stream(&input_buf_);
 
-    vector<mpz_class> c_b(comparator.bit_length());
+    vector<mpz_class> c_b(comparator->bit_length());
 
     // first get encrypted bits
     
@@ -299,7 +277,7 @@ mpz_class Client::run_priv_compare_A(Compare_A &comparator)
     // discard the line before the beginning header
     do {
         getline(input_stream,line);
-        cout << line << endl;
+//        cout << line << endl;
     } while (line != PRIV_COMP_ENC_BITS_START);
     
     input_stream >> c_b;
@@ -313,10 +291,10 @@ mpz_class Client::run_priv_compare_A(Compare_A &comparator)
 
     } while (line != PRIV_COMP_ENC_BITS_END);
 
-    vector<mpz_class> c_w = comparator.compute_w(c_b);
-    vector<mpz_class> c_sums = comparator.compute_sums(c_w);
-    vector<mpz_class> c = comparator.compute_c(c_b,c_sums);
-    vector<mpz_class> c_rand = comparator.rerandomize(c);
+    vector<mpz_class> c_w = comparator->compute_w(c_b);
+    vector<mpz_class> c_sums = comparator->compute_sums(c_w);
+    vector<mpz_class> c = comparator->compute_c(c_b,c_sums);
+    vector<mpz_class> c_rand = comparator->rerandomize(c);
     
     // we have to suffle    
     random_shuffle(c_rand.begin(),c_rand.end(),[this](int n){ return gmp_urandomm_ui(rand_state_,n); });
@@ -342,15 +320,49 @@ mpz_class Client::run_priv_compare_A(Compare_A &comparator)
                 mpz_class c_t_prime;
                 parseInt(input_stream,c_t_prime,BASE);
                 
-                comparator.unblind(c_t_prime);
+                comparator->unblind(c_t_prime);
                 
-                return comparator.output();
+                return comparator->output();
             }
         } while (!input_stream.eof());
     }    
 
     
 }
+
+mpz_class Client::test_lsic(const mpz_class &a, size_t l)
+{
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    // send the start message
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    output_stream << START_LSIC << "\n\r\n";
+    boost::asio::write(socket_, out_buff);
+    
+    LSIC_A lsic(a,l,*server_gm_);
+    return run_lsic_A(&lsic);
+}
+
+mpz_class Client::test_compare(const mpz_class &b, size_t l)
+{
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    if (!has_paillier_pk()) {
+        get_server_pk_paillier();
+    }
+    // send the start message
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    output_stream << START_PRIV_COMP << "\n\r\n";
+    boost::asio::write(socket_, out_buff);
+    
+    Compare_A comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
+    return run_priv_compare_A(&comparator);
+}
+
 
 void Client::test_rev_enc_compare(size_t l)
 {
@@ -395,7 +407,7 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
     
     // the server does some computation, we just have to run the lsic
     
-    run_lsic_A(lsic);
+    run_comparison_protocol_A(&lsic);
     
     // wait for the conlude message
     
@@ -495,7 +507,7 @@ int main(int argc, char* argv[])
         // server has b = 20
         
         ScopedTimer *t_lsic = new ScopedTimer("LSIC");
-        mpz_class res_lsic = client.run_lsic(40,100);
+        mpz_class res_lsic = client.test_lsic(40,100);
         delete t_lsic;
         client.test_decrypt_gm(res_lsic);
 
