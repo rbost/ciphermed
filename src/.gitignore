@@ -4,5 +4,7 @@ tags
 *.swp
 config.mk
 
+proto_src
+proto_obj
 *.pb.h
 *.pb.cc

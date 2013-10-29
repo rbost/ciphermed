@@ -1,11 +1,29 @@
+PROTO_SRC_DIR = proto_src
+PROTO_OBJ_DIR = proto_obj
+
+$(PROTO_SRC_DIR)/%.pb.h $(PROTO_SRC_DIR)/%.pb.cc: protobuf/%.proto
+	@mkdir -p $(@D)
+	cd protobuf; \
+    $(PROTOC) -I. --cpp_out=../$(PROTO_SRC_DIR) $(*F).proto ;\
+	cd ..
+    
+$(PROTO_OBJ_DIR)/%.pb.o: $(PROTO_SRC_DIR)/%.pb.cc
+	@mkdir -p $(@D)
+	$(CXX) -MD $(CXXFLAGS) -c $< -o $@
+
+
+
+
+
+
 OBJDIRS     += protobuf
 SRC  := protobuf_conversion.cc # bigint.pb.cc
 OBJ  := $(patsubst %.cc,$(OBJDIR)/protobuf/%.o,$(SRC))
 
-PROTO_FILE = $(wildcard protobuf/*.proto)
-PROTO_H = $(patsubst %.proto, %.pb.h,$(PROTO_FILE))
-PROTO_CC = $(patsubst %.proto, %.pb.cc,$(PROTO_FILE))
-PROTO_OBJ = $(patsubst %.proto, $(OBJDIR)/%.pb.o,$(PROTO_FILE))
+PROTO_FILE = $(patsubst protobuf/%,%,$(wildcard protobuf/*.proto))
+PROTO_H = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.h,$(PROTO_FILE))
+PROTO_CC = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.cc,$(PROTO_FILE))
+PROTO_OBJ = $(patsubst %.proto, $(PROTO_OBJ_DIR)/%.pb.o,$(PROTO_FILE))
 
 
 $(OBJDIR)/protobuf/test_protobuf.o : $(PROTO_H)
