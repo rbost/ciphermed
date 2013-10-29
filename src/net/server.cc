@@ -17,6 +17,9 @@
 
 #include <net/server.hh>
 #include <net/net_utils.hh>
+#include <net/message_io.hh>
+
+#include <protobuf/protobuf_conversion.hh>
 
 using boost::asio::ip::tcp;
 
@@ -178,32 +181,40 @@ void Server_session::run_session()
     delete this;
 }
 
+//void Server_session::send_paillier_pk()
+//{
+//    auto pk = server_->paillier_pk();
+//    boost::asio::streambuf buff;
+//    std::ostream buff_stream(&buff);
+//    
+//    cout << id_ << ": Send Paillier PK" << endl;
+//    buff_stream << PAILLIER_PK << "\n";
+//    buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
+//    
+//    buff_stream << "\n" <<  END_PAILLIER_PK << "\r\n";
+//    boost::asio::write(*socket_, buff);
+//}
+//
 void Server_session::send_paillier_pk()
 {
-    auto pk = server_->paillier_pk();
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
     
     cout << id_ << ": Send Paillier PK" << endl;
-    buff_stream << PAILLIER_PK << "\n";
-    buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
+    Protobuf::Paillier_PK pk_message = get_pk_message(&(server_->paillier()));
     
-    buff_stream << END_PAILLIER_PK << "\r\n";
-    boost::asio::write(*socket_, buff);
+    sendMessageToSocket<Protobuf::Paillier_PK>(*socket_,pk_message);
 }
 
 void Server_session::send_gm_pk()
 {
-    auto pk = server_->gm_pk();
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
     
     cout << id_ << ": Send GM PK" << endl;
-    buff_stream << GM_PK << "\n";
-    buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
+    Protobuf::GM_PK pk_message = get_pk_message(&(server_->gm()));
     
-    buff_stream << END_GM_PK << "\r\n";
-    boost::asio::write(*socket_, buff);
+    sendMessageToSocket<Protobuf::GM_PK>(*socket_,pk_message);
 }
 
 void Server_session::send_fhe_pk()

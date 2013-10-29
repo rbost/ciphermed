@@ -16,9 +16,12 @@
 #include <math/util_gmp_rand.h>
 
 #include <net/net_utils.hh>
+#include <net/message_io.hh>
 #include <util/util.hh>
 
 #include <net/client.hh>
+
+#include <protobuf/protobuf_conversion.hh>
 
 using boost::asio::ip::tcp;
 
@@ -86,54 +89,31 @@ void Client::get_server_pk_gm()
         return;
     }
     cout << "Request server's pubkey for GM" << endl;
-    
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
     buff_stream << GET_GM_PK <<"\n\r\n";
     boost::asio::write(socket_, buff);
     
-    
-    boost::asio::read_until(socket_, input_buf_, END_GM_PK);
-    std::istream input_stream(&input_buf_);
-    string line;
-    
-    do {
-        getline(input_stream,line);
-    } while (line != GM_PK);
-    // get the public key
-    mpz_class N,y;
-    parseInt(input_stream,N,BASE);
-    parseInt(input_stream,y,BASE);
-    
-    server_gm_ = new GM({N,y},rand_state_);
+    Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(socket_);
+    cout << "Received PK" << endl;
+    server_gm_ = create_from_pk_message(pk,rand_state_);
 }
+
 
 void Client::get_server_pk_paillier()
 {
     if (server_paillier_) {
         return;
     }
-    cout << "Request server's pubkey for Paillier" << endl;
-
+    cout << "Request server's pubkey for GM" << endl;
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
-    buff_stream <<  GET_PAILLIER_PK <<"\n\r\n";
+    buff_stream << GET_PAILLIER_PK <<"\n\r\n";
     boost::asio::write(socket_, buff);
-    string line;
     
-    
-    boost::asio::read_until(socket_, input_buf_, END_PAILLIER_PK);
-    std::istream input_stream(&input_buf_);
-    
-    do {
-        getline(input_stream,line);
-    } while (line != PAILLIER_PK);
-    // get the public key
-    mpz_class n,g;
-    parseInt(input_stream,n,BASE);
-    parseInt(input_stream,g,BASE);
-
-    server_paillier_ = new Paillier({n,g},rand_state_);
+    Protobuf::Paillier_PK pk = readMessageFromSocket<Protobuf::Paillier_PK>(socket_);
+    cout << "Received PK" << endl;
+    server_paillier_ = create_from_pk_message(pk,rand_state_);
 }
 
 void Client::get_server_pk_fhe()
