@@ -3,3 +3,6 @@ tags
 *.o
 *.swp
 config.mk
+
+*.pb.h
+*.pb.cc

@@ -1,0 +1,5 @@
+package Protobuf;
+
+message BigInt {
+	required bytes data = 1;
+}

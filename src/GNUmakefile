@@ -25,6 +25,8 @@ CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
 LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
 LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)
 
+PROTOC ?= protoc
+
 ## To be populated by Makefrag files
 OBJDIRS	:=
 
@@ -36,7 +38,7 @@ install:
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR)
+	rm -rf $(OBJDIR) */*.pb.h */*.pb.cc
 
 # Eliminate default suffix rules
 .SUFFIXES:
@@ -45,9 +47,16 @@ clean:
 .DELETE_ON_ERROR:
 
 # make it so that no intermediate .o files are ever deleted
-.PRECIOUS: %.o
+.PRECIOUS: %.o %.pb.h %.pb.cc
 
 $(OBJDIR)/%.o: %.cc
+	@mkdir -p $(@D)
+	$(CXX) -MD $(CXXFLAGS) -c $< -o $@
+
+%.pb.h %.pb.cc: %.proto
+	$(PROTOC) -I. --cpp_out=. $<
+    
+$(OBJDIR)/%.pb.o: %.pb.cc
 	@mkdir -p $(@D)
 	$(CXX) -MD $(CXXFLAGS) -c $< -o $@
 
@@ -59,6 +68,7 @@ include fhe/Makefrag
 include shaifhe/Makefrag
 include tree/Makefrag
 include net/Makefrag
+include protobuf/Makefrag
 
 $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
 	@mkdir -p $(@D)

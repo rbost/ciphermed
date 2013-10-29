@@ -1,0 +1,22 @@
+OBJDIRS     += protobuf
+SRC  := protobuf_conversion.cc # bigint.pb.cc
+OBJ  := $(patsubst %.cc,$(OBJDIR)/protobuf/%.o,$(SRC))
+
+PROTO_FILE = $(wildcard protobuf/*.proto)
+PROTO_H = $(patsubst %.proto, %.pb.h,$(PROTO_FILE))
+PROTO_CC = $(patsubst %.proto, %.pb.cc,$(PROTO_FILE))
+PROTO_OBJ = $(patsubst %.proto, $(OBJDIR)/%.pb.o,$(PROTO_FILE))
+
+
+$(OBJDIR)/protobuf/test_protobuf.o : $(PROTO_H)
+
+all:	$(OBJDIR)/protobuf/test_protobuf
+$(OBJDIR)/protobuf/test_protobuf: $(OBJDIR)/protobuf/test_protobuf.o $(OBJ) $(PROTO_OBJ)
+	$(CXX) $^ -o $@ $(LDFLAGS) -lgmp -lprotobuf
+
+
+#clean: clean-proto
+#clean-proto:
+#	rm -f protobuf/*.pb.h
+
+# vim: set noexpandtab:
