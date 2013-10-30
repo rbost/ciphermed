@@ -1,0 +1,14 @@
+package Protobuf;
+
+import "bigint.proto";
+
+message LSIC_A_Message {
+    required uint32 index = 1;
+    required BigInt tau = 2;
+}
+
+message LSIC_B_Message {
+    required uint32 index = 1;
+    required BigInt tb = 2;
+    required BigInt bi = 3;
+}

@@ -20,8 +20,8 @@ struct LSIC_Packet_A {
     size_t index;
     mpz_class tau;
     
-    LSIC_Packet_A();
-    LSIC_Packet_A(size_t i, const mpz_class &c);
+    LSIC_Packet_A() : index(0), tau(0) {};
+    LSIC_Packet_A(size_t i, const mpz_class &c) : index(i), tau(c) {};
 };
 
 struct LSIC_Packet_B {
@@ -29,8 +29,8 @@ struct LSIC_Packet_B {
     mpz_class tb;
     mpz_class bi;
     
-    LSIC_Packet_B();
-    LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2);
+    LSIC_Packet_B() : index(0), tb(0), bi(0) {};
+    LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2) : index(i), tb(c1), bi(c2){};
 };
 
 class LSIC_A : public Comparison_protocol_A{

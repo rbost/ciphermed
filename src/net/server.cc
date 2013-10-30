@@ -236,63 +236,37 @@ void Server_session::test_lsic(const mpz_class &b,size_t l)
     LSIC_B lsic(b,l, server_->gm());
     run_lsic_B(&lsic);
 }
-
 void Server_session::run_lsic_B(LSIC_B *lsic)
 {
     cout << id_ << ": Start LSIC B" << endl;
     boost::asio::streambuf output_buf;
     std::ostream output_stream(&output_buf);
     std::string line;
-        
+    
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet = lsic->setupRound();
+    Protobuf::LSIC_A_Message a_message;
+    Protobuf::LSIC_B_Message b_message;
     
-    output_stream << LSIC_SETUP << "\n";
-    output_stream << b_packet;
-    output_stream << "\r\n";
+    b_message = convert_to_message(b_packet);
+    sendMessageToSocket(*socket_, b_message);
     
-    boost::asio::write(*socket_, output_buf);
-    
-    //    cout << "LSIC setup sent" << endl;
+    cout << "LSIC setup sent" << endl;
     
     // wait for packets
     
-    for (; ; ) {
-        boost::asio::read_until(*socket_, input_buf_, "\r\n");
-        std::istream input_stream(&input_buf_);
+    for (;b_packet.index < lsic->bitLength()-1; ) {
+        a_message = readMessageFromSocket<Protobuf::LSIC_A_Message>(*socket_);
+        a_packet = convert_from_message(a_message);
+
+        b_packet = lsic->answerRound(a_packet);
         
-        //        cout << "Received something" << endl;
-        // parse the input
-        do {
-            getline(input_stream,line);
-            //            cout << line;
-            if (line == "") {
-                continue;
-            }
-            
-            if (line == LSIC_END) {
-                cout << id_ << ": LSIC finished" << endl;
-                return;
-            }else if(line == LSIC_PACKET) {
-                //                cout << "New packet" << endl;
-                input_stream >> a_packet;
-                
-                b_packet = lsic->answerRound(a_packet);
-                
-                boost::asio::streambuf output_buf;
-                std::ostream output_stream(&output_buf);
-                
-                output_stream << LSIC_PACKET << "\n";
-                output_stream << b_packet;
-                output_stream << "\r\n";
-                
-                boost::asio::write(*socket_, output_buf);
-                
-                //                cout << "Sent packet " << b_packet.index << endl;
-            }
-        } while (!input_stream.eof());
+        b_message = convert_to_message(b_packet);
+        sendMessageToSocket(*socket_, b_message);
     }
     
+    cout << id_ << ": LSIC B Done" << endl;
+
 }
 
 void Server_session::test_compare(const mpz_class &a,size_t l)

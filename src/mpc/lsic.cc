@@ -6,30 +6,6 @@ using namespace std;
 using namespace NTL;
 
 
-/* LSIC_Packet_A */
-
-LSIC_Packet_A::LSIC_Packet_A(size_t i, const mpz_class &c)
-: index(i), tau(c)
-{
-}
-
-LSIC_Packet_A::LSIC_Packet_A()
-: index(0), tau(0)
-{
-}
-
-/* LSIC_Packet_B */
-
-LSIC_Packet_B::LSIC_Packet_B()
-: index(0), tb(0), bi(0)
-{
-}
-
-LSIC_Packet_B::LSIC_Packet_B(size_t i, const mpz_class &c1, const mpz_class &c2)
-: index(i), tb(c1), bi(c2)
-{
-}
-
 /* LSIC_A */
 
 //LSIC_A::LSIC_A(const mpz_class &x,const size_t &l,const vector<mpz_class> &gm_pk, gmp_randstate_t state)

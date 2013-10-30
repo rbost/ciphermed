@@ -105,7 +105,7 @@ void Client::get_server_pk_paillier()
     if (server_paillier_) {
         return;
     }
-    cout << "Request server's pubkey for GM" << endl;
+    cout << "Request server's pubkey for Paillier" << endl;
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
     buff_stream << GET_PAILLIER_PK <<"\n\r\n";
@@ -159,6 +159,9 @@ mpz_class Client::run_lsic_A(LSIC_A *lsic)
     
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet;
+    Protobuf::LSIC_A_Message a_message;
+    Protobuf::LSIC_B_Message b_message;
+    
     bool state;
     
     
@@ -167,79 +170,21 @@ mpz_class Client::run_lsic_A(LSIC_A *lsic)
     string line;
     
     
-    // first get the setup round
-    
-    boost::asio::read_until(socket_, input_buf_, "\r\n");
-    
-    // parse the input - discard all the messages before the setup message
-    bool received_setup = false;
-    while (!received_setup) {
-        std::istream input_stream(&input_buf_);
-
-        while (!input_stream.eof()) {
-            getline(input_stream,line);
-            if (line == "") {
-                continue;
-            }
-            
-            if(line == LSIC_SETUP) {
-                //            cout << "LSIC setup received" << endl;
-                input_stream >> b_packet;
-                
-                state = lsic->answerRound(b_packet,&a_packet);
-                
-                if (state) {
-                    return lsic->output();
-                }
-                
-                output_stream << LSIC_PACKET << "\n";
-                output_stream << a_packet;
-                output_stream << "\r\n";
-                boost::asio::write(socket_, out_buff);
-                received_setup = true;
-//                cout << "First packet sent to server" << endl;
-                break;
-            }
-        } ;
-        boost::asio::read_until(socket_, input_buf_, "\r\n");
-    }
-    
     // response-request
     for (; ; ) {
-        boost::asio::read_until(socket_, input_buf_, "\r\n");
-        std::istream input_stream(&input_buf_);
-        
-        // parse the input
-        do {
-            getline(input_stream,line);
-            //            cout << line;
-            if (line == "") {
-                continue;
-            }
-            
-            if(line == LSIC_PACKET) {
-                input_stream >> b_packet;
-                
-                state = lsic->answerRound(b_packet,&a_packet);
-                
-                if (state) {
-                    output_stream << LSIC_END << "\n";
-                    output_stream << "\r\n";
-                    boost::asio::write(socket_, out_buff);
-                    
-                    return lsic->output();
-                }
-                
-                output_stream << LSIC_PACKET << "\n";
-                output_stream << a_packet;
-                output_stream << "\r\n";
-                boost::asio::write(socket_, out_buff);
-                
-            }
-        } while (!input_stream.eof());
-    }
-}
+        b_message = readMessageFromSocket<Protobuf::LSIC_B_Message>(socket_);
+        b_packet = convert_from_message(b_message);
 
+        state = lsic->answerRound(b_packet,&a_packet);
+                
+        if (state) {
+            return lsic->output();
+        }
+        
+        a_message = convert_to_message(a_packet);
+        sendMessageToSocket(socket_, a_message);
+    }
+ }
 
 mpz_class Client::run_priv_compare_A(Compare_A *comparator)
 {

@@ -58,6 +58,46 @@ Protobuf::BigIntArray convert_to_message(const std::vector<mpz_class> &v)
     return m;
 }
 
+LSIC_Packet_A convert_from_message(const Protobuf::LSIC_A_Message &m)
+{
+    LSIC_Packet_A p;
+    p.index = m.index();
+    p.tau = convert_from_message(m.tau());
+    
+    return p;
+}
+
+LSIC_Packet_B convert_from_message(const Protobuf::LSIC_B_Message &m)
+{
+    LSIC_Packet_B p;
+    p.index = m.index();
+    p.tb = convert_from_message(m.tb());
+    p.bi = convert_from_message(m.bi());
+    
+    return p;
+}
+
+Protobuf::LSIC_A_Message convert_to_message(const LSIC_Packet_A &p)
+{
+    Protobuf::LSIC_A_Message m;
+    m.set_index(p.index);
+    *(m.mutable_tau()) = convert_to_message(p.tau);
+    
+    return m;
+}
+
+Protobuf::LSIC_B_Message convert_to_message(const LSIC_Packet_B &p)
+{
+    Protobuf::LSIC_B_Message m;
+    m.set_index(p.index);
+    *(m.mutable_tb()) = convert_to_message(p.tb);
+    *(m.mutable_bi()) = convert_to_message(p.bi);
+    
+    return m;
+}
+
+
+
 GM* create_from_pk_message(const Protobuf::GM_PK &m_pk, gmp_randstate_t state)
 {
     mpz_class n(convert_from_message(m_pk.n()));
