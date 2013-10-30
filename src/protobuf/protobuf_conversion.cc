@@ -33,6 +33,31 @@ Protobuf::BigInt convert_to_message(const mpz_class &v)
     return m;
 }
 
+
+std::vector<mpz_class> convert_from_message(const Protobuf::BigIntArray &m)
+{
+    size_t n = m.values_size();
+    std::vector<mpz_class> v(n);
+    
+    for (size_t i = 0; i < n; i++) {
+        v[i] = convert_from_message(m.values(i));
+    }
+    
+    return v;
+}
+
+Protobuf::BigIntArray convert_to_message(const std::vector<mpz_class> &v)
+{
+    Protobuf::BigIntArray m;
+    
+    for (size_t i = 0; i < v.size(); i++) {
+        Protobuf::BigInt *bi_ptr = m.add_values();
+        *bi_ptr = convert_to_message(v[i]);
+    }
+    
+    return m;
+}
+
 GM* create_from_pk_message(const Protobuf::GM_PK &m_pk, gmp_randstate_t state)
 {
     mpz_class n(convert_from_message(m_pk.n()));

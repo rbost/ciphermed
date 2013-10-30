@@ -181,20 +181,6 @@ void Server_session::run_session()
     delete this;
 }
 
-//void Server_session::send_paillier_pk()
-//{
-//    auto pk = server_->paillier_pk();
-//    boost::asio::streambuf buff;
-//    std::ostream buff_stream(&buff);
-//    
-//    cout << id_ << ": Send Paillier PK" << endl;
-//    buff_stream << PAILLIER_PK << "\n";
-//    buff_stream << pk[0].get_str(BASE) << "\n" << pk[1].get_str(BASE) << "\n";
-//    
-//    buff_stream << "\n" <<  END_PAILLIER_PK << "\r\n";
-//    boost::asio::write(*socket_, buff);
-//}
-//
 void Server_session::send_paillier_pk()
 {
     boost::asio::streambuf buff;
@@ -322,42 +308,27 @@ void Server_session::run_priv_compare_B(Compare_B *comparator)
     std::ostream output_stream(&output_buf);
     std::istream input_stream(&input_buf_);
     std::string line;
-
+    
     vector<mpz_class> c(comparator->bit_length());
-
+    
     
     // send the encrypted bits
-    output_stream << PRIV_COMP_ENC_BITS_START << "\n";
-    output_stream << comparator->encrypt_bits_fast();
-    output_stream << PRIV_COMP_ENC_BITS_END << "\n\r\n";
-    boost::asio::write(*socket_, output_buf);
+    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits_fast());
+    sendMessageToSocket(*socket_, c_b_message);
 
     // wait for the answer from the client
-    boost::asio::read_until(*socket_, input_buf_, PRIV_COMP_INTERM_END);
-
-    // discard the line before the beginning header
-    do {
-        getline(input_stream,line);
-//        if (line != "") {
-//            cout << line << endl;
-//        }
-    } while (line != PRIV_COMP_INTERM_START);
-
-    input_stream >> c;
-
-    // discard the line up to the finishing header
-    do {
-        getline(input_stream,line);
-    } while (line != PRIV_COMP_INTERM_END);
+    Protobuf::BigIntArray c_message = readMessageFromSocket<Protobuf::BigIntArray>(*socket_);
+    c = convert_from_message(c_message);
+    
+    
+//    input_stream >> c;
     
     mpz_class c_t_prime = comparator->search_zero(c);
     
     // send the blinded result
-    output_stream << PRIV_COMP_RESULT << "\n";
-    output_stream << c_t_prime;
-    output_stream << "\r\n";
-    boost::asio::write(*socket_, output_buf);
-
+    Protobuf::BigInt c_t_prime_message = convert_to_message(c_t_prime);
+    sendMessageToSocket(*socket_, c_t_prime_message);
+    
 }
 
 bool Server_session::run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm)

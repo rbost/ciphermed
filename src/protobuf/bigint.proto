@@ -3,3 +3,7 @@ package Protobuf;
 message BigInt {
 	required bytes data = 1;
 }
+
+message BigIntArray {
+    repeated BigInt values = 1;
+}

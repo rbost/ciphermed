@@ -247,65 +247,36 @@ mpz_class Client::run_priv_compare_A(Compare_A *comparator)
     std::ostream output_stream(&out_buff);
     string line;
     std::istream input_stream(&input_buf_);
-
+    
     vector<mpz_class> c_b(comparator->bit_length());
-
+    
     // first get encrypted bits
     
-    boost::asio::read_until(socket_, input_buf_, PRIV_COMP_ENC_BITS_END);
+    Protobuf::BigIntArray c_b_message = readMessageFromSocket<Protobuf::BigIntArray>(socket_);
+    c_b = convert_from_message(c_b_message);
     
-    // discard the line before the beginning header
-    do {
-        getline(input_stream,line);
-//        cout << line << endl;
-    } while (line != PRIV_COMP_ENC_BITS_START);
-    
-    input_stream >> c_b;
-    
-    // discard the line up to the finishing header
-    do {
-        getline(input_stream,line);
-//        if (line != "") {
-//            cout << line << endl;
-//        }
-
-    } while (line != PRIV_COMP_ENC_BITS_END);
-
     vector<mpz_class> c_w = comparator->compute_w(c_b);
     vector<mpz_class> c_sums = comparator->compute_sums(c_w);
     vector<mpz_class> c = comparator->compute_c(c_b,c_sums);
     vector<mpz_class> c_rand = comparator->rerandomize(c);
     
-    // we have to suffle    
+    // we have to suffle
     random_shuffle(c_rand.begin(),c_rand.end(),[this](int n){ return gmp_urandomm_ui(rand_state_,n); });
-
-    output_stream << PRIV_COMP_INTERM_START << "\n";
-    output_stream << c_rand ;
-    output_stream << PRIV_COMP_INTERM_END << "\n\r\n";
-    boost::asio::write(socket_, out_buff);
-
+    
+    // send the result
+    
+    Protobuf::BigIntArray c_rand_message = convert_to_message(c_rand);
+    sendMessageToSocket(socket_, c_rand_message);
+    
     // wait for the encrypted result
-    for (; ; ) {
-        boost::asio::read_until(socket_, input_buf_, "\r\n");
-        std::istream input_stream(&input_buf_);
-        // parse the input
-        do {
-            getline(input_stream,line);
-            //            cout << line;
-            if (line == "") {
-                continue;
-            }
-            
-            if (line == PRIV_COMP_RESULT) {
-                mpz_class c_t_prime;
-                parseInt(input_stream,c_t_prime,BASE);
-                
-                comparator->unblind(c_t_prime);
-                
-                return comparator->output();
-            }
-        } while (!input_stream.eof());
-    }    
+    mpz_class c_t_prime;
+
+    Protobuf::BigInt c_t_prime_message = readMessageFromSocket<Protobuf::BigInt>(socket_);
+    c_t_prime = convert_from_message(c_t_prime_message);
+
+    comparator->unblind(c_t_prime);
+
+    return comparator->output();
 
     
 }
@@ -507,7 +478,7 @@ int main(int argc, char* argv[])
         
         
         
-        client.test_rev_enc_compare(5);
+//        client.test_rev_enc_compare(5);
         
 //        client.test_fhe();
         
