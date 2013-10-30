@@ -39,7 +39,7 @@ void encode_header(vector<byte>& buf, unsigned size)
 }
 
 template <class T>
-T readMessageFromSocket(tcp::socket &socket) {
+T readMessageFromSocket(boost::asio::ip::tcp::socket &socket) {
     vector<byte> m_readbuf;
     m_readbuf.resize(HEADER_SIZE);
     boost::asio::read(socket, boost::asio::buffer(m_readbuf));
@@ -62,7 +62,7 @@ T readMessageFromSocket(tcp::socket &socket) {
 }
 
 template <class T>
-void sendMessageToSocket(tcp::socket &socket, const T& msg) {
+void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
     vector<byte> writebuf;
     unsigned msg_size = msg.ByteSize();
     

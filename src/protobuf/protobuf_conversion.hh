@@ -7,8 +7,8 @@
 #include <crypto/gm.hh>
 #include <crypto/paillier.hh>
 
-mpz_class bigint_message_to_mpz_class(const Protobuf::BigInt &m);
-Protobuf::BigInt mpz_class_to_bigint_message(const mpz_class &v);
+mpz_class convert_from_message(const Protobuf::BigInt &m);
+Protobuf::BigInt convert_to_message(const mpz_class &v);
 
 
 GM* create_from_pk_message(const Protobuf::GM_PK &m_pk, gmp_randstate_t state);

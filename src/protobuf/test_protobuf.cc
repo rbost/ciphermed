@@ -5,8 +5,8 @@
 int main()
 {
     mpz_class v = 50;
-    Protobuf::BigInt m = mpz_class_to_bigint_message(v);
-    assert(v == bigint_message_to_mpz_class(m));
+    Protobuf::BigInt m = convert_to_message(v);
+    assert(v == convert_from_message(m));
     
     gmp_randstate_t randstate;
     gmp_randinit_default(randstate);
