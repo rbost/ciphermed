@@ -12,3 +12,8 @@ message LSIC_B_Message {
     required BigInt tb = 2;
     required BigInt bi = 3;
 }
+
+message Enc_Compare_Setup_Message {
+    optional uint32 bit_length = 1;
+    required BigInt c_z = 2;
+}

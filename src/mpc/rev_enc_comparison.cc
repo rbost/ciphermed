@@ -9,10 +9,10 @@ using namespace std;
 Rev_EncCompare_Owner::Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p,Comparison_protocol_A* comparator, gmp_randstate_t state)
 : a_(v_a), b_(v_b), bit_length_(l), paillier_(p), comparator_(comparator), two_l_(0)
 {
+    assert(bit_length_ != 0);
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
-
 
 mpz_class Rev_EncCompare_Owner::setup(unsigned int lambda)
 {
@@ -53,13 +53,23 @@ mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
 }
 
 Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_B *comparator)
-: bit_length_(l), paillier_(pp), comparator_(comparator), two_l_(0), is_protocol_done_(false)
+: bit_length_(l), paillier_(pp), comparator_(comparator), two_l_(0), is_protocol_done_(false), is_set_up_(false)
 {
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 
+void Rev_EncCompare_Helper::set_bit_length(size_t l)
+{
+    assert(!is_set_up_);
+    bit_length_ = l;
+    two_l_ = 0;
+    mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
+    comparator_->set_bit_length(l);
+}
+
 void Rev_EncCompare_Helper::setup(const mpz_class &c_z)
 {
+    assert(bit_length_ != 0);
     mpz_class z = paillier_.decrypt(c_z);
     mpz_class d = z % two_l_;
     comparator_->set_value(d);

@@ -48,6 +48,7 @@ public:
     bool answerRound(const LSIC_Packet_B &pack, LSIC_Packet_A *outputPacket);
 
     size_t bitLength() const { return bit_length_; }
+    void set_bit_length(size_t l);
 
     /* Returns the output of the protocol if the last round has been ran.
      *  An assert will fail otherwise
@@ -91,7 +92,8 @@ public:
     GM_priv gm() const { return gm_; };
     
     size_t bitLength() const { return bit_length_; }
-    
+    void set_bit_length(size_t l) { bit_length_ = l; };
+
     /* The beginning of the protocol - line 1 in the paper */
     LSIC_Packet_B setupRound();
     /* Lines 18 to 25 in the paper */

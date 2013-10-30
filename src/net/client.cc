@@ -297,6 +297,7 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
  
     size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda_));
+    cout << "l = " << l << endl;
 
     
     boost::asio::streambuf out_buff;
@@ -305,42 +306,25 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
     
     // send the start message
     output_stream << START_REV_ENC_COMPARE << "\n";
-    output_stream << l << "\n";
-    output_stream << c_z.get_str(BASE) << "\n\r\n";
+    output_stream << "\r\n";
+
     boost::asio::write(socket_, out_buff);
-    
+    Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
+    sendMessageToSocket(socket_, setup_message);
+
     // the server does some computation, we just have to run the lsic
     
     run_comparison_protocol_A(owner.comparator());
     
-    // wait for the conlude message
+    Protobuf::BigInt c_z_l_message = readMessageFromSocket<Protobuf::BigInt>(socket_);
+    mpz_class c_z_l = convert_from_message(c_z_l_message);
+
+
+    mpz_class c_t = owner.concludeProtocol(c_z_l);
     
-    for (; ; ) {
-        boost::asio::read_until(socket_, input_buf_, "\r\n");
-        std::istream input_stream(&input_buf_);
-        // parse the input
-        do {
-            getline(input_stream,line);
-            //            cout << line;
-            if (line == "") {
-                continue;
-            }
-            
-            if (line == REV_ENC_COMPARE_CONCLUDE) {
-                mpz_class c_z_l;
-                parseInt(input_stream,c_z_l,BASE);
-
-                mpz_class c_t = owner.concludeProtocol(c_z_l);
-                
-                // send the last message to the server
-                output_stream << REV_ENC_COMPARE_RESULT << "\n";
-                output_stream << c_t.get_str(BASE) << "\n\r\n";
-                boost::asio::write(socket_, out_buff);
-
-                return;
-            }
-        } while (!input_stream.eof());
-    }
+    // send the last message to the server
+    Protobuf::BigInt c_t_message = convert_to_message(c_t);
+    sendMessageToSocket(socket_, c_t_message);
 }
 
 void Client::disconnect()
@@ -408,7 +392,7 @@ int main(int argc, char* argv[])
         client.connect(io_service, hostname);
 
         // server has b = 20
-        
+/*
         ScopedTimer *t_lsic = new ScopedTimer("LSIC");
         mpz_class res_lsic = client.test_lsic(40,100);
         delete t_lsic;
@@ -419,11 +403,11 @@ int main(int argc, char* argv[])
         delete t_comp;
         client.test_decrypt_gm(res_comp);
         
+*/
         
         
         
-        
-//        client.test_rev_enc_compare(5);
+        client.test_rev_enc_compare(5);
         
 //        client.test_fhe();
         

@@ -25,6 +25,12 @@ void LSIC_A::set_value(const mpz_class &x)
     a_ = x;
 }
 
+void LSIC_A::set_bit_length(size_t l) {
+    // we must not be able to reset a after the protocol started
+    assert(i_ == 0);
+    bit_length_ = l;
+}
+
 mpz_class LSIC_A::blindingStep_()
 {
     c_ = (bool)RandomLen_long(1);

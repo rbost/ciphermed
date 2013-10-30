@@ -56,7 +56,8 @@ public:
     mpz_class get_c_z_l() const { return c_z_l_; };
     bool is_set_up() const { return is_set_up_; }
     size_t bit_length() const { return bit_length_; }
-
+    void set_bit_length(size_t l);
+    
 protected:
     size_t bit_length_;
     Paillier_priv paillier_;

@@ -7,6 +7,9 @@
 class Comparison_protocol_A {
 public:
     virtual void set_value(const mpz_class &x) {}
+    virtual size_t bit_length() const { return 0; }
+    virtual void set_bit_length(size_t l) {}
+    
     virtual mpz_class output() const { }
     virtual GM gm() const { }
 };
@@ -15,6 +18,9 @@ public:
 class Comparison_protocol_B {
 public:
     virtual void set_value(const mpz_class &x) {}
+    virtual size_t bit_length() const { return 0; }
+    virtual void set_bit_length(size_t l) {}
+
     virtual GM_priv gm() const { };
 };
 

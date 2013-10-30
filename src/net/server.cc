@@ -159,9 +159,7 @@ void Server_session::run_session()
                 decrypt_fhe(c);
             }else if(line == START_REV_ENC_COMPARE){
                 // get the bit length and launch the helper
-                getline(input_stream,line);
-                size_t l = strtoul (line.c_str(), NULL, 0);
-                bool b = run_rev_enc_comparison(l,server_->paillier_sk(),server_->gm_sk());
+                bool b = run_rev_enc_comparison(0,server_->paillier_sk(),server_->gm_sk());
                 
                 cout << id_ << ": Rev Enc Compare result: " << b << endl;
             }else if(line == DISCONNECT){
@@ -320,17 +318,13 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     std::string line;
 
     
-//    size_t l;
-//
-//    // get the bit length
-//    getline(input_stream,line);
-//    l = strtoul (line.c_str(), NULL, 0);
-
-
     // setup the helper if necessary
     if (!helper.is_set_up()) {
-        mpz_class c_z;
-        parseInt(input_stream,c_z,BASE);
+        Protobuf::Enc_Compare_Setup_Message setup_message = readMessageFromSocket<Protobuf::Enc_Compare_Setup_Message>(*socket_);
+        if (setup_message.has_bit_length()) {
+            helper.set_bit_length(setup_message.bit_length());
+        }
+        mpz_class c_z = convert_from_message(setup_message);
 
         helper.setup(c_z);
     }
@@ -341,36 +335,15 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     
     mpz_class c_z_l(helper.get_c_z_l());
     
-    output_stream << REV_ENC_COMPARE_CONCLUDE << "\n";
-    output_stream << c_z_l.get_str(BASE);
-    output_stream << "\r\n";
-    
-    boost::asio::write(*socket_, output_buf);
+    Protobuf::BigInt c_z_l_message = convert_to_message(c_z_l);
+    sendMessageToSocket(*socket_, c_z_l_message);
 
     // wait for the answer of the owner
-    for (; ; ) {
-        boost::asio::read_until(*socket_, input_buf_, "\r\n");
-        std::istream input_stream(&input_buf_);
-        // parse the input
-        do {
-            getline(input_stream,line);
-            //            cout << line;
-            if (line == "") {
-                continue;
-            }
-            
-            if (line == REV_ENC_COMPARE_RESULT) {
-                cout << id_ << ": Rev encrypted comparison finished" << endl;
-                mpz_class c_t;
+    Protobuf::BigInt c_t_message = readMessageFromSocket<Protobuf::BigInt>(*socket_);
+    mpz_class c_t = convert_from_message(c_t_message);
+    helper.decryptResult(c_t);
+    return helper.output();
 
-                parseInt(input_stream,c_t,BASE);
-
-                helper.decryptResult(c_t);
-                
-                return helper.output();
-            }
-        } while (!input_stream.eof());
-    }    
 }
 
 void Server_session::decrypt_gm(const mpz_class &c)

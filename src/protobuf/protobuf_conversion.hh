@@ -19,6 +19,10 @@ LSIC_Packet_B convert_from_message(const Protobuf::LSIC_B_Message &m);
 Protobuf::LSIC_A_Message convert_to_message(const LSIC_Packet_A &p);
 Protobuf::LSIC_B_Message convert_to_message(const LSIC_Packet_B &p);
 
+mpz_class convert_from_message(const Protobuf::Enc_Compare_Setup_Message &m);
+Protobuf::Enc_Compare_Setup_Message convert_to_message_partial(const mpz_class &c_z);
+Protobuf::Enc_Compare_Setup_Message convert_to_message(const mpz_class &c_z, size_t bit_length);
+
 GM* create_from_pk_message(const Protobuf::GM_PK &m_pk, gmp_randstate_t state);
 Paillier* create_from_pk_message(const Protobuf::Paillier_PK &m_pk, gmp_randstate_t state);
 

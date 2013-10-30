@@ -21,6 +21,8 @@ public:
     
     GM gm() const { return gm_; }
     size_t bit_length() const { return bit_length_; }
+    virtual void set_bit_length(size_t l) {bit_length_ = l;}
+
     mpz_class output() const { return res_; }
 protected:
     mpz_class a_;
@@ -46,6 +48,7 @@ public:
     
     GM_priv gm() const { return gm_; };
     size_t bit_length() const { return bit_length_; }
+    virtual void set_bit_length(size_t l) {bit_length_ = l;}
 
 protected:
     mpz_class b_;
