@@ -12,6 +12,7 @@
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
+#include <mpc/enc_comparison.hh>
 
 #include <math/util_gmp_rand.h>
 
@@ -223,6 +224,78 @@ mpz_class Client::run_priv_compare_A(Compare_A *comparator)
 
     return comparator->output();
 
+    
+}
+
+
+
+void Client::run_comparison_protocol_B(Comparison_protocol_B *comparator)
+{
+    if(typeid(*comparator) == typeid(LSIC_B)) {
+        run_lsic_B(reinterpret_cast<LSIC_B*>(comparator));
+    }else if(typeid(*comparator) == typeid(Compare_B)){
+        run_priv_compare_B(reinterpret_cast<Compare_B*>(comparator));
+    }
+}
+
+void Client::run_lsic_B(LSIC_B *lsic)
+{
+    cout << "Start LSIC B" << endl;
+    boost::asio::streambuf output_buf;
+    std::ostream output_stream(&output_buf);
+    std::string line;
+    
+    LSIC_Packet_A a_packet;
+    LSIC_Packet_B b_packet = lsic->setupRound();
+    Protobuf::LSIC_A_Message a_message;
+    Protobuf::LSIC_B_Message b_message;
+    
+    b_message = convert_to_message(b_packet);
+    sendMessageToSocket(socket_, b_message);
+    
+    cout << "LSIC setup sent" << endl;
+    
+    // wait for packets
+    
+    for (;b_packet.index < lsic->bitLength()-1; ) {
+        a_message = readMessageFromSocket<Protobuf::LSIC_A_Message>(socket_);
+        a_packet = convert_from_message(a_message);
+        
+        b_packet = lsic->answerRound(a_packet);
+        
+        b_message = convert_to_message(b_packet);
+        sendMessageToSocket(socket_, b_message);
+    }
+    
+    cout << "LSIC B Done" << endl;
+}
+
+void Client::run_priv_compare_B(Compare_B *comparator)
+{
+//    boost::asio::streambuf output_buf;
+//    std::ostream output_stream(&output_buf);
+//    std::istream input_stream(&input_buf_);
+//    std::string line;
+    
+    vector<mpz_class> c(comparator->bit_length());
+    
+    
+    // send the encrypted bits
+    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits_fast());
+    sendMessageToSocket(socket_, c_b_message);
+    
+    // wait for the answer from the client
+    Protobuf::BigIntArray c_message = readMessageFromSocket<Protobuf::BigIntArray>(socket_);
+    c = convert_from_message(c_message);
+    
+    
+    //    input_stream >> c;
+    
+    mpz_class c_t_prime = comparator->search_zero(c);
+    
+    // send the blinded result
+    Protobuf::BigInt c_t_prime_message = convert_to_message(c_t_prime);
+    sendMessageToSocket(socket_, c_t_prime_message);
     
 }
 

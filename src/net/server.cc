@@ -303,6 +303,90 @@ void Server_session::run_priv_compare_B(Compare_B *comparator)
     
 }
 
+mpz_class Server_session::run_comparison_protocol_A(Comparison_protocol_A *comparator)
+{
+    if(typeid(*comparator) == typeid(LSIC_A)) {
+        run_lsic_A(reinterpret_cast<LSIC_A*>(comparator));
+    }else if(typeid(*comparator) == typeid(Compare_A)){
+        run_priv_compare_A(reinterpret_cast<Compare_A*>(comparator));
+    }
+    
+    return comparator->output();
+}
+
+mpz_class Server_session::run_lsic_A(LSIC_A *lsic)
+{
+    
+    LSIC_Packet_A a_packet;
+    LSIC_Packet_B b_packet;
+    Protobuf::LSIC_A_Message a_message;
+    Protobuf::LSIC_B_Message b_message;
+    
+    bool state;
+    
+    
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    
+    
+    // response-request
+    for (; ; ) {
+        b_message = readMessageFromSocket<Protobuf::LSIC_B_Message>(*socket_);
+        b_packet = convert_from_message(b_message);
+        
+        state = lsic->answerRound(b_packet,&a_packet);
+        
+        if (state) {
+            return lsic->output();
+        }
+        
+        a_message = convert_to_message(a_packet);
+        sendMessageToSocket(*socket_, a_message);
+    }
+}
+
+mpz_class Server_session::run_priv_compare_A(Compare_A *comparator)
+{
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    std::istream input_stream(&input_buf_);
+    
+    vector<mpz_class> c_b(comparator->bit_length());
+    
+    // first get encrypted bits
+    
+    Protobuf::BigIntArray c_b_message = readMessageFromSocket<Protobuf::BigIntArray>(*socket_);
+    c_b = convert_from_message(c_b_message);
+    
+    vector<mpz_class> c_w = comparator->compute_w(c_b);
+    vector<mpz_class> c_sums = comparator->compute_sums(c_w);
+    vector<mpz_class> c = comparator->compute_c(c_b,c_sums);
+    vector<mpz_class> c_rand = comparator->rerandomize(c);
+    
+    // we have to suffle
+    random_shuffle(c_rand.begin(),c_rand.end(),[this](int n){ return gmp_urandomm_ui(rand_state_,n); });
+    
+    // send the result
+    
+    Protobuf::BigIntArray c_rand_message = convert_to_message(c_rand);
+    sendMessageToSocket(*socket_, c_rand_message);
+    
+    // wait for the encrypted result
+    mpz_class c_t_prime;
+    
+    Protobuf::BigInt c_t_prime_message = readMessageFromSocket<Protobuf::BigInt>(*socket_);
+    c_t_prime = convert_from_message(c_t_prime_message);
+    
+    comparator->unblind(c_t_prime);
+    
+    return comparator->output();
+    
+    
+}
+
+
 bool Server_session::run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm)
 {
     LSIC_B lsic(0,l,server_->gm());

@@ -58,6 +58,10 @@ public:
     void send_gm_pk();
     void send_fhe_pk();
     
+    mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
+    mpz_class run_lsic_A(LSIC_A *lsic);
+    mpz_class run_priv_compare_A(Compare_A *comparator);
+
     void run_comparison_protocol_B(Comparison_protocol_B *comparator);
     void test_lsic(const mpz_class &b,size_t l);
     void run_lsic_B(LSIC_B *lsic);
