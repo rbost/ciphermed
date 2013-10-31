@@ -11,3 +11,21 @@ message GM_PK {
     required BigInt N = 1;
     required BigInt y = 2;
 }
+
+
+
+message PK_Status {
+    enum Key_Type {
+        GM = 0;
+        PAILLIER = 1;
+    }
+    required Key_Type type = 1;
+
+    enum Key_Status {
+        NEED_PK = 0;
+        NO_NEED_PK = 1;
+        HAS_PK = 1;
+    }
+    
+    required Key_Status state = 2;
+}

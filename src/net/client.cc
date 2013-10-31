@@ -143,6 +143,20 @@ void Client::get_server_pk_fhe()
     input_stream >> *server_fhe_pk_;
 }
 
+void Client::answer_server_pk_request()
+{
+    // we need to send the GM public key to the server if needed
+    // wait for the server to tell us about that:
+    Protobuf::PK_Status status_message = readMessageFromSocket<Protobuf::PK_Status>(socket_);
+    
+    if (status_message.type() == Protobuf::PK_Status_Key_Type_GM && status_message.state() == Protobuf::PK_Status_Key_Status_NEED_PK) {
+        // send PK
+        cout << "Send GM PK" << endl;
+        Protobuf::GM_PK pk_message = get_pk_message(&gm());
+        
+        sendMessageToSocket<Protobuf::GM_PK>(socket_,pk_message);
+    }
+}
 
 mpz_class Client::run_comparison_protocol_A(Comparison_protocol_A *comparator)
 {
