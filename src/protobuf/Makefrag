@@ -17,16 +17,15 @@ $(PROTO_OBJ_DIR)/%.pb.o: $(PROTO_SRC_DIR)/%.pb.cc
 
 
 OBJDIRS     += protobuf
-SRC  := protobuf_conversion.cc # bigint.pb.cc
+SRC  := protobuf_conversion.cc 
 OBJ  := $(patsubst %.cc,$(OBJDIR)/protobuf/%.o,$(SRC))
 
 PROTO_FILE = bigint.proto keys.proto lsic_messages.proto
-PROTO_H = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.h,$(PROTO_FILE))
+PROTO_H = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.h,$(PROTO_FILE)) $(PROTO_SRC_DIR)/proto_headers.hh
 PROTO_CC = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.cc,$(PROTO_FILE))
 PROTO_OBJ = $(patsubst %.proto, $(PROTO_OBJ_DIR)/%.pb.o,$(PROTO_FILE))
 
-
-$(OBJDIR)/protobuf/protobuf_conversion.o : $(PROTO_H)
+$(OBJ) : $(PROTO_H)
 
 all:    $(OBJDIR)/libprotobuf_defs.so
 $(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(OBJ)  $(OBJDIR)/libcrypto.so
