@@ -414,6 +414,33 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
     sendMessageToSocket(socket_, c_t_message);
 }
 
+void Client::run_enc_comparison(EncCompare_Owner &owner)
+{
+    assert(has_paillier_pk());
+    
+    // now run the protocol itself
+    size_t l = owner.bit_length();
+    mpz_class c_z(owner.setup(lambda_));
+    cout << "l = " << l << endl;
+
+    Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
+    sendMessageToSocket(socket_, setup_message);
+
+    // the server does some computation, we just have to run the lsic
+    
+    run_comparison_protocol_B(owner.comparator());
+
+    mpz_class c_r_l(owner.get_c_r_l());
+    Protobuf::BigInt c_r_l_message = convert_to_message(c_r_l);
+    sendMessageToSocket(socket_, c_r_l_message);
+
+    // wait for the answer of the owner
+    Protobuf::BigInt c_t_message = readMessageFromSocket<Protobuf::BigInt>(socket_);
+    mpz_class c_t = convert_from_message(c_t_message);
+    
+    owner.decryptResult(c_t);
+}
+
 void Client::disconnect()
 {
     cout << "Disconnect" << endl;

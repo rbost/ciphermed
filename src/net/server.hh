@@ -69,6 +69,7 @@ public:
     void test_compare(const mpz_class &a,size_t l);
     void run_priv_compare_B(Compare_B *comparator);
 
+    void run_enc_comparison(EncCompare_Helper &helper);
     bool run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm);
     bool run_rev_enc_comparison(Rev_EncCompare_Helper &helper);
 

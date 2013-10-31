@@ -13,6 +13,7 @@
 #include <crypto/paillier.hh>
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
+#include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 
 #include <net/server.hh>
@@ -428,6 +429,38 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     helper.decryptResult(c_t);
     return helper.output();
 
+}
+
+void Server_session::run_enc_comparison(EncCompare_Helper &helper)
+{
+    boost::asio::streambuf output_buf;
+    std::ostream output_stream(&output_buf);
+    std::istream input_stream(&input_buf_);
+    std::string line;
+    
+    
+    // setup the helper if necessary
+    if (!helper.is_set_up()) {
+        Protobuf::Enc_Compare_Setup_Message setup_message = readMessageFromSocket<Protobuf::Enc_Compare_Setup_Message>(*socket_);
+        if (setup_message.has_bit_length()) {
+            helper.set_bit_length(setup_message.bit_length());
+        }
+        mpz_class c_z = convert_from_message(setup_message);
+        
+        helper.setup(c_z);
+    }
+    
+    // now, we need to run the comparison protocol
+    run_comparison_protocol_A(helper.comparator());
+    
+    Protobuf::BigInt c_r_l_message = readMessageFromSocket<Protobuf::BigInt>(*socket_);
+    mpz_class c_r_l = convert_from_message(c_r_l_message);
+
+    mpz_class c_t = helper.concludeProtocol(c_r_l);
+
+    // send the last message to the server
+    Protobuf::BigInt c_t_message = convert_to_message(c_t);
+    sendMessageToSocket(*socket_, c_t_message);
 }
 
 void Server_session::decrypt_gm(const mpz_class &c)

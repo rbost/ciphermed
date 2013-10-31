@@ -27,6 +27,9 @@ public:
     
     mpz_class get_c_r_l() const { return c_r_l_; };
     
+    bool is_set_up() const { return is_set_up_; }
+    size_t bit_length() const { return bit_length_; }
+
 protected:
     mpz_class a_,b_;
     size_t bit_length_;
@@ -39,7 +42,8 @@ protected:
 
     /* cached values */
     mpz_class two_l_; // 2^l = 1 << bit_length_
-    
+    bool is_set_up_;
+
     /* final output */
     bool is_protocol_done_;
     bool t_;
@@ -55,6 +59,9 @@ public:
     Paillier_priv paillier() const { return paillier_; }
     Comparison_protocol_A* comparator() { return comparator_; };
     
+    bool is_set_up() const { return is_set_up_; }
+    void set_bit_length(size_t l);
+
 protected:
     size_t bit_length_;
     Paillier_priv paillier_;
@@ -65,6 +72,7 @@ protected:
     
     /* cached values */
     mpz_class two_l_; // 2^l = 1 << bit_length_
+    bool is_set_up_;
 };
 
 void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, gmp_randstate_t state, unsigned int lambda = 100);
