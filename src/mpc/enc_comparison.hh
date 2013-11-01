@@ -15,7 +15,7 @@
 
 class EncCompare_Owner {
 public:
-    EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, GM_priv &gm, Comparison_protocol_B *comparator, gmp_randstate_t state);
+    EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, Comparison_protocol_B *comparator, gmp_randstate_t state);
     
     mpz_class setup(unsigned int lambda); // lambda is the parameter for statistical security. r <- [0, 2^{l+lambda}[ \cap \Z 
     void decryptResult(const mpz_class &c_t);
@@ -51,7 +51,7 @@ protected:
 
 class EncCompare_Helper {
 public:
-    EncCompare_Helper(const size_t &l, Paillier_priv &pp, GM &gm, Comparison_protocol_A *comparator);
+    EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_A *comparator);
 
     void setup(const mpz_class &c_z);
     mpz_class concludeProtocol(const mpz_class &c_r_l_);

@@ -223,8 +223,8 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     LSIC_A party_a(0, nbits, gm);
     LSIC_B party_b(0, nbits, gm_priv);
 
-    EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p,gm_priv, &party_b, randstate);
-    EncCompare_Helper server(nbits,pp,gm, &party_a);
+    EncCompare_Owner client(pp.encrypt(a),pp.encrypt(b), nbits, p, &party_b, randstate);
+    EncCompare_Helper server(nbits,pp, &party_a);
     
     delete t;
     
