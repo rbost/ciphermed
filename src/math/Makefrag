@@ -1,5 +1,5 @@
 OBJDIRS     += math
-MATHSRC   :=  field.cc matrix.cc poly.cc math_util.cc num_th_alg.cc
+MATHSRC   :=  field.cc matrix.cc poly.cc math_util.cc num_th_alg.cc prime_seq.cc
 MATHOBJ   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC))
 
 all:    $(OBJDIR)/libfhemath.so
@@ -12,7 +12,7 @@ $(OBJDIR)/math/r: $(OBJDIR)/math/r.o $(OBJDIR)/libfhemath.so
 
 all:    $(OBJDIR)/math/test_algo
 $(OBJDIR)/math/test_algo: $(OBJDIR)/math/test_algo.o 
-	$(CXX) $< -o $@ $(LDFLAGS) -lfhemath -lfheutil
+	$(CXX) $< -o $@ $(LDFLAGS) -lfhemath -lfheutil -lntl
 
 install: install_math
 

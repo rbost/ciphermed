@@ -1,10 +1,11 @@
 #include <iostream>
 #include <math/num_th_alg.hh>
 #include <util/util.hh>
+#include <NTL/ZZ.h>
 
 using namespace std;
 
-static void test_algo(size_t m_bits)
+static void test_fact_generation(size_t m_bits)
 {
     mpz_class m = 0;
     mpz_setbit(m.get_mpz_t(),m_bits);
@@ -16,7 +17,7 @@ static void test_algo(size_t m_bits)
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
 
-    ScopedTimer *t = new ScopedTimer("Test algo");
+    ScopedTimer *t = new ScopedTimer("Test factorization generation");
     std::vector<mpz_class> fact = gen_rand_prime_with_factorization(m,&p,randstate,25);
     delete t;
     
@@ -31,10 +32,43 @@ static void test_algo(size_t m_bits)
     cout << "p is " << mpz_sizeinbase(p.get_mpz_t(),2) << " bits" << endl;
 }
 
+static void test_simple_safe_prime(size_t n_bits)
+{
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    ScopedTimer *t;
+
+    /*
+    t = new ScopedTimer("Test simple safe prime");
+    mpz_class p = simple_safe_prime_gen(n_bits,randstate,25);
+    delete t;
+    
+    cout << "Prime generated is \n" << 2*p+1 << endl;
+    cout << "\n" << n_bits << " bits queried\n";
+    cout << "p is " << mpz_sizeinbase(p.get_mpz_t(),2) << " bits" << endl;
+*/
+    cout << "\n\nWith NTL:" << endl;
+    
+    t = new ScopedTimer("NTL safe prime");
+    NTL::ZZ q = NTL::GenGermainPrime_ZZ(n_bits+1);
+    delete t;
+    cout << "Prime generated is \n" << q << endl;
+    cout << "q is " << NTL::NumBits(q) << " bits" << endl;
+
+    mpz_class r;
+    t = new ScopedTimer("Our safe prime");
+    GenGermainPrime(r,n_bits,randstate);
+    delete t;
+    cout << "Prime generated is \n" << r << endl;
+    cout << "q is " <<mpz_sizeinbase(r.get_mpz_t(),2) << " bits" << endl;
+
+}
 
 int main()
 {
-    test_algo(512);
+//    test_fact_generation(512);
+    test_simple_safe_prime(512);
     
     return 0;
 }
