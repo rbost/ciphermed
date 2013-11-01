@@ -58,7 +58,7 @@ static void test_simple_safe_prime(size_t n_bits)
 
     mpz_class r;
     t = new ScopedTimer("Our safe prime");
-    GenGermainPrime(r,n_bits,randstate);
+    gen_germain_prime(r,n_bits,randstate);
     delete t;
     cout << "Prime generated is \n" << r << endl;
     cout << "q is " <<mpz_sizeinbase(r.get_mpz_t(),2) << " bits" << endl;

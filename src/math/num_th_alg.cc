@@ -104,7 +104,7 @@ mpz_class simple_safe_prime_gen(size_t n_bits, gmp_randstate_t state, int reps)
 }
 
 
-static long NumBits(long a)
+static long bit_count(long a)
 {
     unsigned long aa;
     if (a < 0)
@@ -121,13 +121,15 @@ static long NumBits(long a)
     return k;
 }
 
-// ComputePrimeBound computes a reasonable bound for trial
+/* The following code is just NTL's code for generating Germain primes using GMP */
+
+// prime_bound computes a reasonable bound for trial
 // division in the Miller-Rabin test.
 // It is computed a bit on the "low" side, since being a bit
 // low doesn't hurt much, but being too high can hurt a lot.
 
 static
-long ComputePrimeBound(long bn)
+long prime_bound(long bn)
 {
     long wn = (bn+NBITS_MAX-1)/NBITS_MAX;
     
@@ -140,7 +142,7 @@ long ComputePrimeBound(long bn)
     
     long prime_bnd;
     
-    if (NumBits(bn) + NumBits(fn) > NBITS_MAX)
+    if (bit_count(bn) + bit_count(fn) > NBITS_MAX)
         prime_bnd = (1L << NBITS_MAX);
     else
         prime_bnd = bn*fn;
@@ -149,20 +151,13 @@ long ComputePrimeBound(long bn)
 }
 
 static
-double Log2(double x)
-{
-    static double log2 = log(2.0);
-    return log(x)/log2;
-}
-
-static
 long ErrBoundTest(long kk, long tt, long nn)
 
 {
     const double fudge = (1.0 + 1024.0/NTL_FDOUBLE_PRECISION);
-    const double log2_3 = Log2(3.0);
-    const double log2_7 = Log2(7.0);
-    const double log2_20 = Log2(20.0);
+    const double log2_3 = log2(3.0);
+    const double log2_7 = log2(7.0);
+    const double log2_20 = log2(20.0);
     
     double k = kk;
     double t = tt;
@@ -172,9 +167,9 @@ long ErrBoundTest(long kk, long tt, long nn)
     if (n < 1) return 1;
     
     // the following test is largely academic
-//    if (9*t > NTL_FDOUBLE_PRECISION) Error("ErrBoundTest: t too big");
+    assert(9*t < NTL_FDOUBLE_PRECISION);
     
-    double log2_k = Log2(k);
+    double log2_k = log2(k);
     
     if ((n + log2_k)*fudge <= 2*t)
     return 1;
@@ -183,7 +178,7 @@ long ErrBoundTest(long kk, long tt, long nn)
     return 2;
     
     if ((t == 2 && k >= 88) || (3 <= t && 9*t <= k && k >= 21)) {
-        if ((1.5*log2_k + t + 4.0 + n)*fudge <= 0.5*Log2(t) + 2*(sqrt(t*k)))
+        if ((1.5*log2_k + t + 4.0 + n)*fudge <= 0.5*log2(t) + 2*(sqrt(t*k)))
         return 3;
     }
     
@@ -202,7 +197,7 @@ long ErrBoundTest(long kk, long tt, long nn)
     return 0;
 }
 
-static long MakeOdd(mpz_class &n)
+static long make_odd(mpz_class &n)
 {
     long k = 0;
     
@@ -214,7 +209,7 @@ static long MakeOdd(mpz_class &n)
     return k;
 }
 
-static long MillerWitness(const mpz_class& n, const mpz_class& x)
+static long is_Miller_witness(const mpz_class& n, const mpz_class& x)
 {
     mpz_class m(0), y(0), z(0);
     long j, k;
@@ -222,7 +217,7 @@ static long MillerWitness(const mpz_class& n, const mpz_class& x)
     if (x == 0) return 0;
     
     m = n-1;
-    k = MakeOdd(m);
+    k = make_odd(m);
     
     z = mpz_class_powm(x,m,n);
 
@@ -241,11 +236,9 @@ static long MillerWitness(const mpz_class& n, const mpz_class& x)
     return 0;
 }
 
-void GenGermainPrime(mpz_class& n, long k, gmp_randstate_t state, long err)
+void gen_germain_prime(mpz_class& n, long k, gmp_randstate_t state, long err)
 {
-//    if (k <= 1) Error("GenGermainPrime: bad length");
     assert(k > 1);
-//    if (k > (1L << 20)) Error("GenGermainPrime: length too large");
     assert(k <= (1L << 20));
     
     if (err < 1) err = 1;
@@ -261,9 +254,9 @@ void GenGermainPrime(mpz_class& n, long k, gmp_randstate_t state, long err)
     }
     
     
-    long prime_bnd = ComputePrimeBound(k);
+    long prime_bnd = prime_bound(k);
     
-    if (NumBits(prime_bnd) >= k/2)
+    if (bit_count(prime_bnd) >= k/2)
     prime_bnd = (1L << (k/2-1));
     
     
@@ -315,11 +308,11 @@ void GenGermainPrime(mpz_class& n, long k, gmp_randstate_t state, long err)
         if (!sieve_passed) continue;
         
         
-        if (MillerWitness(n, two)) continue;
+        if (is_Miller_witness(n, two)) continue;
         
         n1 = 2*n+1;
         
-        if (MillerWitness(n1, two)) continue;
+        if (is_Miller_witness(n1, two)) continue;
         
         // now do t M-R iterations...just to make sure
         
@@ -330,7 +323,7 @@ void GenGermainPrime(mpz_class& n, long k, gmp_randstate_t state, long err)
         // Note that this method has the advantage of not requiring
         // any assumptions on the density of Germain primes.
         long iter_n_bits = mpz_sizeinbase(iter.get_mpz_t(),2);
-        long err1 = std::max(1L, err + 7 + (5*iter_n_bits + 3)/4 - NumBits(k));
+        long err1 = std::max(1L, err + 7 + (5*iter_n_bits + 3)/4 - bit_count(k));
         long t;
         t = 1;
         while (!ErrBoundTest(k, t, err1))
