@@ -4,6 +4,11 @@
 
 #include <gmpxx.h>
 
+inline int mpz_class_probab_prime_p(const mpz_class &n, int reps)
+{
+    return mpz_probab_prime_p(n.get_mpz_t(),reps);
+}
+
 // v: residues, m: moduli, s: number of elements
 void mpz_t_crt(mpz_t x, const mpz_ptr *v, const mpz_ptr *m, size_t s);
 
