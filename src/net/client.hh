@@ -19,7 +19,8 @@ public:
     ~Client();
     
     void connect(boost::asio::io_service& io_service, const string& hostname);
-    
+    void disconnect();
+
     tcp::socket& socket() { return socket_; }
     
     const GM_priv& gm() { return gm_; };
@@ -32,6 +33,7 @@ public:
     void get_server_pk_gm();
     void get_server_pk_paillier();
     void get_server_pk_fhe();
+    
     void answer_server_pk_request();
 
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
@@ -42,21 +44,23 @@ public:
     void run_lsic_B(LSIC_B *lsic);
     void run_priv_compare_B(Compare_B *comparator);
 
-    mpz_class test_lsic(const mpz_class &a, size_t l);
-    mpz_class test_compare(const mpz_class &b, size_t l);
-
-    void test_enc_compare(size_t l);
     bool run_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l);
-    void run_enc_comparison(EncCompare_Owner &owner);
+    bool run_enc_comparison(EncCompare_Owner &owner);
 
-    void test_rev_enc_compare(size_t l);
     void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
     void run_rev_enc_comparison(Rev_EncCompare_Owner &owner);
 
+    
+    
+    /* test functions */
+    mpz_class test_lsic(const mpz_class &a, size_t l);
+    mpz_class test_compare(const mpz_class &b, size_t l);
+    void test_rev_enc_compare(size_t l);
+    void test_enc_compare(size_t l);
     void test_decrypt_gm(const mpz_class &c);
     void test_fhe();
-
-    void disconnect();
+    
+    
 protected:
     tcp::socket socket_;
     

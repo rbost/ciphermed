@@ -42,9 +42,7 @@ Server::Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p
 : paillier_(Paillier_priv::keygen(state,nbits_p,abits_p),state), gm_(GM_priv::keygen(state,nbits_gm),state), n_clients_(0), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
-//    cout << "SK GM\np = " << gm_.privkey()[0] << "\nq = " << gm_.privkey()[1] << endl;
-//    cout << "PK Paillier\nn" << paillier_.pubkey()[0] << "\ng" << paillier_.pubkey()[1] << endl;
-    
+
     // generate an FHE private key
     // first generate a context. This one should be consisten with the server's one
     // i.e. m, p, r must be the same
@@ -167,7 +165,7 @@ void Server_session::run_session()
                 decrypt_fhe(c);
             }else if(line == START_REV_ENC_COMPARE){
                 // get the bit length and launch the helper
-                bool b = run_rev_enc_comparison(0,server_->paillier_sk(),server_->gm_sk());
+                bool b = run_rev_enc_comparison(0);
                 
                 cout << id_ << ": Rev Enc Compare result: " << b << endl;
             }else if(line == START_ENC_COMPARE){
@@ -258,12 +256,6 @@ void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator
     }
 }
 
-void Server_session::test_lsic(const mpz_class &b,size_t l)
-{
-    cout << id_ << ": Start LSIC" << endl;
-    LSIC_B lsic(b,l, server_->gm());
-    run_lsic_B(&lsic);
-}
 void Server_session::run_lsic_B(LSIC_B *lsic)
 {
     cout << id_ << ": Start LSIC B" << endl;
@@ -295,13 +287,6 @@ void Server_session::run_lsic_B(LSIC_B *lsic)
     
     cout << id_ << ": LSIC B Done" << endl;
 
-}
-
-void Server_session::test_compare(const mpz_class &a,size_t l)
-{
-    cout << id_ << ": Test compare" << endl;
-    Compare_B comparator(a,l,server_->paillier(),server_->gm());
-    run_priv_compare_B(&comparator);
 }
 
 void Server_session::run_priv_compare_B(Compare_B *comparator)
@@ -412,12 +397,10 @@ mpz_class Server_session::run_priv_compare_A(Compare_A *comparator)
     comparator->unblind(c_t_prime);
     
     return comparator->output();
-    
-    
 }
 
 
-bool Server_session::run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm)
+bool Server_session::run_rev_enc_comparison(const size_t &l)
 {
     LSIC_B lsic(0,l,server_->gm());
     Rev_EncCompare_Helper helper(l,server_->paillier(),&lsic);
@@ -513,6 +496,23 @@ void Server_session::decrypt_fhe(const Ctxt &c)
     cout << id_ << ": Decryption result = " << endl;
     pp0.print(cout);
 }
+
+#pragma mark TESTS
+
+void Server_session::test_lsic(const mpz_class &b,size_t l)
+{
+    cout << id_ << ": Start LSIC" << endl;
+    LSIC_B lsic(b,l, server_->gm());
+    run_lsic_B(&lsic);
+}
+
+void Server_session::test_compare(const mpz_class &a,size_t l)
+{
+    cout << id_ << ": Test compare" << endl;
+    Compare_B comparator(a,l,server_->paillier(),server_->gm());
+    run_priv_compare_B(&comparator);
+}
+
 
 int main()
 {

@@ -313,58 +313,6 @@ void Client::run_priv_compare_B(Compare_B *comparator)
     
 }
 
-mpz_class Client::test_lsic(const mpz_class &a, size_t l)
-{
-    if (!has_gm_pk()) {
-        get_server_pk_gm();
-    }
-    // send the start message
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << START_LSIC << "\n\r\n";
-    boost::asio::write(socket_, out_buff);
-    
-    LSIC_A lsic(a,l,*server_gm_);
-    return run_lsic_A(&lsic);
-}
-
-mpz_class Client::test_compare(const mpz_class &b, size_t l)
-{
-    if (!has_gm_pk()) {
-        get_server_pk_gm();
-    }
-    if (!has_paillier_pk()) {
-        get_server_pk_paillier();
-    }
-    // send the start message
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << START_PRIV_COMP << "\n\r\n";
-    boost::asio::write(socket_, out_buff);
-    
-    Compare_A comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
-    return run_priv_compare_A(&comparator);
-}
-
-
-void Client::test_rev_enc_compare(size_t l)
-{
-    mpz_class a, b;
-    mpz_urandom_len(a.get_mpz_t(), rand_state_, l);
-    mpz_urandom_len(b.get_mpz_t(), rand_state_, l);
-    
-//    cout << "a = " << a << endl;
-//    cout << "b = " << b << endl;
-
-    get_server_pk_gm();
-    get_server_pk_paillier();
-    
-    mpz_class c_a, c_b;
-
-    run_rev_enc_compare(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
-    
-    cout << "\nResult should be " << (a < b) << endl;
-}
 
 // we suppose that the client already has the server's public key for Paillier
 void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l)
@@ -414,39 +362,6 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
     sendMessageToSocket(socket_, c_t_message);
 }
 
-void Client::test_enc_compare(size_t l)
-{
-    mpz_class a, b;
-    mpz_urandom_len(a.get_mpz_t(), rand_state_, l);
-    mpz_urandom_len(b.get_mpz_t(), rand_state_, l);
-    
-    //    cout << "a = " << a << endl;
-    //    cout << "b = " << b << endl;
-    
-    get_server_pk_gm();
-    get_server_pk_paillier();
-    
-    
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    string line;
-    // send the start message
-    output_stream << START_ENC_COMPARE << "\n";
-    output_stream << "\r\n";
-    
-    boost::asio::write(socket_, out_buff);
-
-    
-    // wait for the pk request from the server
-    answer_server_pk_request();
-    
-    mpz_class c_a, c_b;
-    
-    bool res = run_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
-    cout<< "\nResult is " << res << endl;
-    cout << "Result should be " << (a < b) << endl;
-}
-
 // we suppose that the client already has the server's public key for Paillier
 bool Client::run_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l)
 {
@@ -455,12 +370,10 @@ bool Client::run_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l
     
     LSIC_B lsic(0,l,gm_);
     EncCompare_Owner owner(a,b,l,*server_paillier_,&lsic,rand_state_);
-    run_enc_comparison(owner);
-    
-    return owner.output();
+    return run_enc_comparison(owner);
 }
 
-void Client::run_enc_comparison(EncCompare_Owner &owner)
+bool Client::run_enc_comparison(EncCompare_Owner &owner)
 {
     assert(has_paillier_pk());
     
@@ -485,6 +398,7 @@ void Client::run_enc_comparison(EncCompare_Owner &owner)
     mpz_class c_t = convert_from_message(c_t_message);
     
     owner.decryptResult(c_t);
+    return owner.output();
 }
 
 void Client::disconnect()
@@ -497,7 +411,92 @@ void Client::disconnect()
     boost::asio::write(socket_, buff);
 }
 
+#pragma mark TESTS
 
+mpz_class Client::test_lsic(const mpz_class &a, size_t l)
+{
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    // send the start message
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    output_stream << START_LSIC << "\n\r\n";
+    boost::asio::write(socket_, out_buff);
+    
+    LSIC_A lsic(a,l,*server_gm_);
+    return run_lsic_A(&lsic);
+}
+
+mpz_class Client::test_compare(const mpz_class &b, size_t l)
+{
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    if (!has_paillier_pk()) {
+        get_server_pk_paillier();
+    }
+    // send the start message
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    output_stream << START_PRIV_COMP << "\n\r\n";
+    boost::asio::write(socket_, out_buff);
+    
+    Compare_A comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
+    return run_priv_compare_A(&comparator);
+}
+
+void Client::test_enc_compare(size_t l)
+{
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), rand_state_, l);
+    mpz_urandom_len(b.get_mpz_t(), rand_state_, l);
+    
+    //    cout << "a = " << a << endl;
+    //    cout << "b = " << b << endl;
+    
+    get_server_pk_gm();
+    get_server_pk_paillier();
+    
+    
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    // send the start message
+    output_stream << START_ENC_COMPARE << "\n";
+    output_stream << "\r\n";
+    
+    boost::asio::write(socket_, out_buff);
+    
+    
+    // wait for the pk request from the server
+    answer_server_pk_request();
+    
+    mpz_class c_a, c_b;
+    
+    bool res = run_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    cout<< "\nResult is " << res << endl;
+    cout << "Result should be " << (a < b) << endl;
+}
+
+void Client::test_rev_enc_compare(size_t l)
+{
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), rand_state_, l);
+    mpz_urandom_len(b.get_mpz_t(), rand_state_, l);
+    
+    //    cout << "a = " << a << endl;
+    //    cout << "b = " << b << endl;
+    
+    get_server_pk_gm();
+    get_server_pk_paillier();
+    
+    mpz_class c_a, c_b;
+    
+    run_rev_enc_compare(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    
+    cout << "\nResult should be " << (a < b) << endl;
+}
 
 void Client::test_decrypt_gm(const mpz_class &c)
 {
