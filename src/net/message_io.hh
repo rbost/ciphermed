@@ -19,7 +19,7 @@ std::string show_hex(const CharContainer& c)
     return hex;
 }
 
-unsigned decode_header(const vector<byte>& buf)
+static unsigned decode_header(const vector<byte>& buf)
 {
     if (buf.size() < HEADER_SIZE)
     return 0;
@@ -29,7 +29,7 @@ unsigned decode_header(const vector<byte>& buf)
     return msg_size;
 }
 
-void encode_header(vector<byte>& buf, unsigned size)
+static void encode_header(vector<byte>& buf, unsigned size)
 {
     assert(buf.size() >= HEADER_SIZE);
     buf[0] = static_cast<boost::uint8_t>((size >> 24) & 0xFF);

@@ -365,7 +365,7 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     assert(real_argmax == mpc_argmax);
 }
 
-void usage(char *prog)
+static void usage(char *prog)
 {
     cerr << "Usage: "<<prog<<" [ optional parameters ]...\n";
     cerr << "  optional parameters have the form 'attr1=val1 attr2=val2 ...'\n";

@@ -53,7 +53,7 @@ mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
 }
 
 Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_B *comparator)
-: bit_length_(l), paillier_(pp), comparator_(comparator), two_l_(0), is_protocol_done_(false), is_set_up_(false)
+: bit_length_(l), paillier_(pp), comparator_(comparator), is_set_up_(false),two_l_(0), is_protocol_done_(false)
 {
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }

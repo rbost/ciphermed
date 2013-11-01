@@ -103,7 +103,7 @@ void Server::run()
 
 
 Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
-: server_(server), socket_(socket), id_(id), client_gm_(NULL)
+: server_(server), socket_(socket), client_gm_(NULL), id_(id)
 {
     gmp_randinit_set(rand_state_, state);
 }
@@ -497,7 +497,7 @@ void Server_session::decrypt_fhe(const Ctxt &c)
     pp0.print(cout);
 }
 
-#pragma mark TESTS
+/* TESTS */
 
 void Server_session::test_lsic(const mpz_class &b,size_t l)
 {

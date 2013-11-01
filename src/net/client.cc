@@ -52,7 +52,7 @@ Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsig
     long d = FHE_d;
     long c = FHE_c;
     long L = FHE_L;
-    long w = FHE_w;
+//    long w = FHE_w;
     long s = FHE_s;
     long k = FHE_k;
     long chosen_m = FHE_m;
@@ -411,7 +411,7 @@ void Client::disconnect()
     boost::asio::write(socket_, buff);
 }
 
-#pragma mark TESTS
+/* TESTS */
 
 mpz_class Client::test_lsic(const mpz_class &a, size_t l)
 {

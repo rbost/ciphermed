@@ -321,7 +321,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     assert(query == res);
 }
 
-void usage(char *prog)
+static void usage(char *prog)
 {
     cerr << "Usage: "<<prog<<" [ optional parameters ]...\n";
     cerr << "  optional parameters have the form 'attr1=val1 attr2=val2 ...'\n";

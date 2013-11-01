@@ -7,7 +7,7 @@ using namespace std;
 
 
 EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, Comparison_protocol_B *comparator, gmp_randstate_t state)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(p), two_l_(0), is_protocol_done_(false), comparator_(comparator), is_set_up_(false)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(p),  comparator_(comparator), two_l_(0), is_set_up_(false), is_protocol_done_(false)
 {
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
@@ -50,7 +50,7 @@ void EncCompare_Owner::decryptResult(const mpz_class &c_t)
 
 
 EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_A *comparator)
-: bit_length_(l), paillier_(pp), two_l_(0), comparator_(comparator), is_set_up_(false)
+: bit_length_(l), paillier_(pp), comparator_(comparator), two_l_(0), is_set_up_(false)
 {
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
