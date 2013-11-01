@@ -3,17 +3,12 @@ PROTO_OBJ_DIR = proto_obj
 
 $(PROTO_SRC_DIR)/%.pb.h $(PROTO_SRC_DIR)/%.pb.cc: protobuf/%.proto
 	@mkdir -p $(@D)
-	cd protobuf; \
-    $(PROTOC) -I. --cpp_out=../$(PROTO_SRC_DIR) $(*F).proto ;\
-	cd ..
-    
+	cd protobuf;\
+	$(PROTOC) -I. --cpp_out=../$(PROTO_SRC_DIR) $(*F).proto;
+
 $(PROTO_OBJ_DIR)/%.pb.o: $(PROTO_SRC_DIR)/%.pb.cc
 	@mkdir -p $(@D)
 	$(CXX) -MD $(CXXFLAGS) -c $< -o $@
-
-
-
-
 
 
 OBJDIRS     += protobuf
@@ -27,6 +22,9 @@ PROTO_OBJ = $(patsubst %.proto, $(PROTO_OBJ_DIR)/%.pb.o,$(PROTO_FILE))
 
 $(OBJ) : $(PROTO_H)
 
+.PRECIOUS: $(PROTO_H)
+.PRECIOUS: $(PROTO_CC)
+
 all:    $(OBJDIR)/libprotobuf_defs.so
 $(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(OBJ)  $(OBJDIR)/libcrypto.so
 	$(CXX) -shared -o $@ $^ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf -lgmp -lgmpxx -lcrypto
@@ -36,9 +34,5 @@ all:	$(OBJDIR)/protobuf/test_protobuf
 $(OBJDIR)/protobuf/test_protobuf: $(OBJDIR)/protobuf/test_protobuf.o $(OBJ) $(PROTO_OBJ) $(OBJDIR)/libcrypto.so
 	$(CXX) $^ -o $@ $(LDFLAGS) -lgmp -lprotobuf -lcrypto -lntl
 
-
-#clean: clean-proto
-#clean-proto:
-#	rm -f protobuf/*.pb.h
 
 # vim: set noexpandtab:
