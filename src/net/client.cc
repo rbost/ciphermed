@@ -414,6 +414,52 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
     sendMessageToSocket(socket_, c_t_message);
 }
 
+void Client::test_enc_compare(size_t l)
+{
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), rand_state_, l);
+    mpz_urandom_len(b.get_mpz_t(), rand_state_, l);
+    
+    //    cout << "a = " << a << endl;
+    //    cout << "b = " << b << endl;
+    
+    get_server_pk_gm();
+    get_server_pk_paillier();
+    
+    
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    // send the start message
+    output_stream << START_ENC_COMPARE << "\n";
+    output_stream << "\r\n";
+    
+    boost::asio::write(socket_, out_buff);
+
+    
+    // wait for the pk request from the server
+    answer_server_pk_request();
+    
+    mpz_class c_a, c_b;
+    
+    bool res = run_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    cout<< "\nResult is " << res << endl;
+    cout << "Result should be " << (a < b) << endl;
+}
+
+// we suppose that the client already has the server's public key for Paillier
+bool Client::run_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l)
+{
+    assert(has_paillier_pk());
+    assert(has_gm_pk());
+    
+    LSIC_B lsic(0,l,gm_);
+    EncCompare_Owner owner(a,b,l,*server_paillier_,&lsic,rand_state_);
+    run_enc_comparison(owner);
+    
+    return owner.output();
+}
+
 void Client::run_enc_comparison(EncCompare_Owner &owner)
 {
     assert(has_paillier_pk());
@@ -521,9 +567,11 @@ int main(int argc, char* argv[])
         
         
         
-        client.test_rev_enc_compare(5);
+//        client.test_rev_enc_compare(5);
+        client.test_enc_compare(5);
         
 //        client.test_fhe();
+        
         
         client.disconnect();
     

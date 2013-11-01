@@ -45,6 +45,8 @@ public:
     mpz_class test_lsic(const mpz_class &a, size_t l);
     mpz_class test_compare(const mpz_class &b, size_t l);
 
+    void test_enc_compare(size_t l);
+    bool run_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l);
     void run_enc_comparison(EncCompare_Owner &owner);
 
     void test_rev_enc_compare(size_t l);

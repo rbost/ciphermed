@@ -170,6 +170,9 @@ void Server_session::run_session()
                 bool b = run_rev_enc_comparison(0,server_->paillier_sk(),server_->gm_sk());
                 
                 cout << id_ << ": Rev Enc Compare result: " << b << endl;
+            }else if(line == START_ENC_COMPARE){
+                get_client_gm_pk();
+                run_enc_comparison(0, client_gm_);
             }else if(line == DISCONNECT){
                 should_exit = true;
                 break;
@@ -233,13 +236,17 @@ void Server_session::get_client_gm_pk()
     
     if (client_gm_) {
         m.set_state(Protobuf::PK_Status_Key_Status_HAS_PK);
+        
+        cout << id_ << ": Alread has client's PK" << endl;
     }else{
         m.set_state(Protobuf::PK_Status_Key_Status_NEED_PK);
+        
+        sendMessageToSocket<Protobuf::PK_Status>(*socket_,m);
+        
+        Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
+        client_gm_ = create_from_pk_message(pk,rand_state_);
+        cout << id_ << ": Received client's PK" << endl;
     }
-    sendMessageToSocket<Protobuf::PK_Status>(*socket_,m);
-    
-    Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
-    client_gm_ = create_from_pk_message(pk,rand_state_);
 }
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)

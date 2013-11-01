@@ -51,6 +51,7 @@ const std::string DISCONNECT = "DISCONNECT";
 const std::string DECRYPT_GM = "DECRYPT GM";
 const std::string DECRYPT_FHE = "DECRYPT FHE";
 
+const std::string START_ENC_COMPARE = "START ENC COMPARE";
 const std::string START_REV_ENC_COMPARE = "START REV ENC COMPARE";
 const std::string REV_ENC_COMPARE_CONCLUDE = "REV ENC COMPARE CONCLUDE";
 const std::string REV_ENC_COMPARE_RESULT = "REV ENC COMPARE RESULT";
