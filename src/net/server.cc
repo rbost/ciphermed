@@ -105,9 +105,16 @@ void Server::run()
 
 
 Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
-: server_(server), socket_(socket), id_(id)
+: server_(server), socket_(socket), id_(id), client_gm_(NULL)
 {
     gmp_randinit_set(rand_state_, state);
+}
+
+Server_session::~Server_session()
+{
+    if (client_gm_) {
+        delete client_gm_;
+    }
 }
 
 void Server_session::run_session()
@@ -219,6 +226,21 @@ void Server_session::send_fhe_pk()
     boost::asio::write(*socket_, buff);
 }
 
+void Server_session::get_client_gm_pk()
+{
+    Protobuf::PK_Status m;
+    m.set_type(Protobuf::PK_Status_Key_Type_GM);
+    
+    if (client_gm_) {
+        m.set_state(Protobuf::PK_Status_Key_Status_HAS_PK);
+    }else{
+        m.set_state(Protobuf::PK_Status_Key_Status_NEED_PK);
+    }
+    sendMessageToSocket<Protobuf::PK_Status>(*socket_,m);
+    
+    Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
+    client_gm_ = create_from_pk_message(pk,rand_state_);
+}
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
@@ -429,6 +451,13 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     helper.decryptResult(c_t);
     return helper.output();
 
+}
+
+void Server_session::run_enc_comparison(const size_t &l, GM *gm)
+{
+    LSIC_A lsic(0,l,*gm);
+    EncCompare_Helper helper(l,server_->paillier(),&lsic);
+    run_enc_comparison(helper);
 }
 
 void Server_session::run_enc_comparison(EncCompare_Helper &helper)

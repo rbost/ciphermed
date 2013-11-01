@@ -51,13 +51,15 @@ protected:
 class Server_session {
 public:
     Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket);
+    ~Server_session();
     
     void run_session();
     
     void send_paillier_pk();
     void send_gm_pk();
     void send_fhe_pk();
-    
+    void get_client_gm_pk();
+
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
     mpz_class run_lsic_A(LSIC_A *lsic);
     mpz_class run_priv_compare_A(Compare_A *comparator);
@@ -69,7 +71,9 @@ public:
     void test_compare(const mpz_class &a,size_t l);
     void run_priv_compare_B(Compare_B *comparator);
 
+    void run_enc_comparison(const size_t &l, GM *gm);
     void run_enc_comparison(EncCompare_Helper &helper);
+    
     bool run_rev_enc_comparison(const size_t &l, const std::vector<mpz_class> sk_p, const std::vector<mpz_class> &sk_gm);
     bool run_rev_enc_comparison(Rev_EncCompare_Helper &helper);
 
@@ -83,8 +87,7 @@ protected:
     tcp::socket *socket_;
     boost::asio::streambuf input_buf_;
 
-    
-    std::vector<mpz_class> gm_pk_;
+    GM *client_gm_;
     gmp_randstate_t rand_state_;
     
     unsigned int id_;
