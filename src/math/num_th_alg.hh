@@ -10,3 +10,7 @@ std::vector<mpz_class> gen_rand_number_factorization(const mpz_class &m, mpz_cla
 std::vector<mpz_class> gen_rand_prime_with_factorization(const mpz_class &m, mpz_class *p, gmp_randstate_t state, int reps = 25);
 mpz_class simple_safe_prime_gen(size_t n_bits, gmp_randstate_t state, int reps = 25);
 void gen_germain_prime(mpz_class& n, long k,gmp_randstate_t state, long err = 80);
+
+// Constructs a generator for the cyclic group \Z^*_p where p is a Sophie Germain prime
+mpz_class get_generator_for_cyclic_group(const mpz_class &p, gmp_randstate_t state)
+;

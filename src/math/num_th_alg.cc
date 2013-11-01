@@ -334,4 +334,33 @@ void gen_germain_prime(mpz_class& n, long k, gmp_randstate_t state, long err)
     }
 }
 
+// Constructs a generator for the cyclic group \Z^*_p where p is a Sophie Germain prime
+mpz_class get_generator_for_cyclic_group(const mpz_class &p, gmp_randstate_t state)
+{
+    mpz_class q = (p >> 1);
+    mpz_class g;
+    
+    
+    // find a generator for ZZ*_p
+    // Shoup's algorithm
+    
+    mpz_class alpha, beta;
+    do {
+        mpz_urandomm(alpha.get_mpz_t(),state,p.get_mpz_t());
+
+        beta = mpz_class_powm(alpha,q,p);
+    } while (beta == 1);
+    
+    g = beta;
+
+    do {
+        mpz_urandomm(alpha.get_mpz_t(),state,p.get_mpz_t());
+        beta = (alpha*alpha) %p;
+        
+    } while (beta == 1);
+    
+    g = (g*beta) %p;
+
+    return g;
+}
 
