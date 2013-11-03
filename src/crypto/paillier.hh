@@ -52,7 +52,7 @@ class Paillier_priv : public Paillier {
     static std::vector<mpz_class> keygen(gmp_randstate_t state, uint nbits = 1024, uint abits = 256);
 
 
- private:
+ protected:
     /* Private key, including g from public part; n=pq */
     const mpz_class p, q;
     const mpz_class a;      /* non-zero for fast mode */
@@ -64,4 +64,21 @@ class Paillier_priv : public Paillier {
     const mpz_class two_p, two_q;
     const mpz_class pinv, qinv;
     const mpz_class hp, hq;
+};
+
+class Paillier_priv_fast : public Paillier_priv {
+public:
+    Paillier_priv_fast(const std::vector<mpz_class> &sk, gmp_randstate_t state);
+    void precompute_powers();
+    mpz_class compute_g_star_power(const mpz_class &x);
+    static std::vector<mpz_class> keygen(gmp_randstate_t state, uint nbits = 1024);
+    
+    mpz_class fast_encrypt(const mpz_class &plaintext);
+private:
+    const mpz_class g_star_;
+    const mpz_class phi_n;
+    const mpz_class phi_n2;
+    const uint phi_n2_bits;
+    std::vector<mpz_class> g_star_powers_p_;
+    std::vector<mpz_class> g_star_powers_q_;
 };

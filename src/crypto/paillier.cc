@@ -2,6 +2,7 @@
 #include <crypto/paillier.hh>
 #include <math/util_gmp_rand.h>
 #include <math/math_util.hh>
+#include <math/num_th_alg.hh>
 
 using namespace std;
 using namespace NTL;
@@ -320,4 +321,94 @@ Paillier_priv::decrypt(const mpz_class &ciphertext) const
         return (m + n);
     
     return m;
+}
+
+Paillier_priv_fast::Paillier_priv_fast(const std::vector<mpz_class> &sk, gmp_randstate_t state)
+: Paillier_priv({sk[0],sk[1],sk[2],0},state), g_star_(sk[3]), phi_n((p-1)*(q-1)), phi_n2(phi_n*n), phi_n2_bits(mpz_sizeinbase(phi_n2.get_mpz_t(),2))
+{
+    assert(sk.size() == 4);
+    precompute_powers();
+}
+
+void Paillier_priv_fast::precompute_powers()
+{
+    // find the number of elements to precompute
+    unsigned int bits = max(mpz_sizeinbase(p2.get_mpz_t(),2),mpz_sizeinbase(q2.get_mpz_t(),2));
+    g_star_powers_p_ = vector<mpz_class>(phi_n2_bits);
+    g_star_powers_p_[0] = g_star_ % p2;
+    g_star_powers_q_ = vector<mpz_class>(phi_n2_bits);
+    g_star_powers_q_[0] = g_star_ % q2;
+    
+    for (size_t i = 1; i < bits; i++) {
+        g_star_powers_p_[i] = (g_star_powers_p_[i-1]*g_star_powers_p_[i-1]) %p2;
+        g_star_powers_q_[i] = (g_star_powers_q_[i-1]*g_star_powers_q_[i-1]) %q2;
+    }
+    
+}
+
+mpz_class Paillier_priv_fast::compute_g_star_power(const mpz_class &x)
+{
+    mpz_class y_p = x % ((p-1)*p);
+    mpz_class y_q = x % ((q-1)*q);
+    mpz_class v_p = 1, v_q = 1;
+
+    unsigned int bits = max(mpz_sizeinbase(p2.get_mpz_t(),2),mpz_sizeinbase(q2.get_mpz_t(),2));
+
+    for (size_t i = 0; i < bits; i++) {
+        if (mpz_tstbit(y_p.get_mpz_t(), i)) {
+            v_p = (v_p * g_star_powers_p_[i]) %p2;
+        }
+        if (mpz_tstbit(y_q.get_mpz_t(), i)) {
+            v_q = (v_q * g_star_powers_q_[i]) %q2;
+        }
+
+    }
+    
+    return mpz_class_crt_2(v_p,v_q,p2,q2);
+}
+
+mpz_class Paillier_priv_fast::fast_encrypt(const mpz_class &plaintext)
+{
+    mpz_class r_prime;
+    mpz_urandomm(r_prime.get_mpz_t(),_randstate,phi_n.get_mpz_t());
+    
+    mpz_class r = compute_g_star_power(r_prime*n);
+    
+    mpz_class c_p;
+    mpz_class c_q;
+    
+    // g = n+1 -> we can avoid an exponentiation
+    c_p = ((1+plaintext*n)) % p2;
+    c_q = ((1+plaintext*n)) % q2;
+        
+    mpz_class c =  mpz_class_crt_2(c_p,c_q,p2,q2);
+    
+    return (c*r %n2);
+}
+
+
+vector<mpz_class> Paillier_priv_fast::keygen(gmp_randstate_t state, uint nbits)
+{
+    mpz_class p, q, n, g, g_star;
+    int error = 40;
+    do {
+        gen_germain_prime(p,nbits/2,state, error);
+        gen_germain_prime(q,nbits/2,state, error);
+        n = p*q;
+    } while ((nbits != (uint) mpz_sizeinbase(n.get_mpz_t(),2)) || p == q);
+    
+    if (p > q)
+        swap(p, q);
+    
+    mpz_class lambda = LCM(p-1, q-1);
+    g = n+1;
+    
+    // find a generator for Z^*_n
+    mpz_class g_p, g_q;
+    g_p = get_generator_for_cyclic_group(p,state);
+    g_q = get_generator_for_cyclic_group(q,state);
+    
+    g_star = mpz_class_crt_2(g_p,g_q,p,q);
+    
+    return {p, q, g, g_star};
 }
