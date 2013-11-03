@@ -23,7 +23,7 @@ public:
     
     void run();
     
-    Paillier_priv& paillier() { return paillier_; };
+    Paillier_priv_fast& paillier() { return paillier_; };
     vector<mpz_class> paillier_pk() const { return paillier_.pubkey(); }
     vector<mpz_class> paillier_sk() const { return paillier_.privkey(); }
     GM_priv& gm() { return gm_; };
@@ -34,7 +34,7 @@ public:
     const ZZX& fhe_G() const { return fhe_G_; }
     
 protected:
-    Paillier_priv paillier_;
+    Paillier_priv_fast paillier_;
     GM_priv gm_;
     FHEcontext *fhe_context_;
     FHESecKey *fhe_sk_;

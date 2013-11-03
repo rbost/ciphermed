@@ -39,7 +39,7 @@ static ZZX makeIrredPoly(long p, long d)
 }
 
 Server::Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda)
-: paillier_(Paillier_priv::keygen(state,nbits_p,abits_p),state), gm_(GM_priv::keygen(state,nbits_gm),state), n_clients_(0), lambda_(lambda)
+: paillier_(Paillier_priv_fast::keygen(state,nbits_p),state), gm_(GM_priv::keygen(state,nbits_gm),state), n_clients_(0), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
 
@@ -300,7 +300,7 @@ void Server_session::run_priv_compare_B(Compare_B *comparator)
     
     
     // send the encrypted bits
-    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits_fast());
+    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits());
     sendMessageToSocket(*socket_, c_b_message);
 
     // wait for the answer from the client

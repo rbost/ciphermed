@@ -44,14 +44,14 @@ protected:
 
 class Rev_EncCompare_Helper {
 public:
-    Rev_EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_B *comparator);
+    Rev_EncCompare_Helper(const size_t &l, Paillier_priv_fast &pp, Comparison_protocol_B *comparator);
 
     void setup(const mpz_class &c_z);
     void decryptResult(const mpz_class &c_t);
     inline bool protocol_done() { return is_protocol_done_; }
     inline bool output() const { assert(is_protocol_done_);  return t_; }
 
-    Paillier_priv paillier() const { return paillier_; }
+    Paillier_priv_fast paillier() const { return paillier_; }
     Comparison_protocol_B* comparator() { return comparator_; };
     mpz_class get_c_z_l() const { return c_z_l_; };
     bool is_set_up() const { return is_set_up_; }
@@ -60,7 +60,7 @@ public:
     
 protected:
     size_t bit_length_;
-    Paillier_priv paillier_;
+    Paillier_priv_fast paillier_;
     Comparison_protocol_B *comparator_;
     
     /* intermediate values */

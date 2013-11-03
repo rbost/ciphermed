@@ -104,8 +104,8 @@ test_paillier_fast()
     mpz_urandomm(pt1.get_mpz_t(),randstate,n.get_mpz_t());
     mpz_urandomm(m.get_mpz_t(),randstate,n.get_mpz_t());
     
-    mpz_class ct0 = pp.fast_encrypt(pt0);
-    mpz_class ct1 = pp.fast_encrypt(pt1);
+    mpz_class ct0 = pp.encrypt(pt0);
+    mpz_class ct1 = pp.encrypt(pt1);
     mpz_class sum = p.add(ct0, ct1);
     mpz_class prod = p.constMult(m,ct0);
     //    mpz_class diff = p.constMult(-1, ct0);
@@ -180,7 +180,7 @@ static void paillier_perf(unsigned int k, unsigned int a_bits, size_t n_iteratio
     for (size_t i = 0; i < n_iteration; i++) {
         mpz_class pt;
         mpz_urandomm(pt.get_mpz_t(),randstate,n.get_mpz_t());
-        pp.fast_encrypt(pt);
+        pp.encrypt(pt);
     }
     clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t1);
     t = (((uint64_t)t1.tv_sec) - ((uint64_t)t0.tv_sec) )* 1000000000 + (t1.tv_nsec - t0.tv_nsec);
@@ -238,7 +238,7 @@ static void paillier_fast_perf(unsigned int k, size_t n_iteration)
     for (size_t i = 0; i < n_iteration; i++) {
         mpz_class pt;
         mpz_urandomm(pt.get_mpz_t(),randstate,n.get_mpz_t());
-        ct[i] = pp.fast_encrypt(pt);
+        ct[i] = pp.encrypt(pt);
     }
     clock_gettime(CLOCK_THREAD_CPUTIME_ID,&t1);
     t = (((uint64_t)t1.tv_sec) - ((uint64_t)t0.tv_sec) )* 1000000000 + (t1.tv_nsec - t0.tv_nsec);

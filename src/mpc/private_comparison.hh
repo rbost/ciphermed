@@ -37,13 +37,11 @@ protected:
 
 class Compare_B : public Comparison_protocol_B {
 public:
-    Compare_B(const mpz_class &y, const size_t &l, Paillier_priv &paillier, GM_priv &gm);
+    Compare_B(const mpz_class &y, const size_t &l, Paillier_priv_fast &paillier, GM_priv &gm);
     
     virtual void set_value(const mpz_class &x) { b_ = x; };
 
     std::vector<mpz_class> encrypt_bits();
-    std::vector<mpz_class> encrypt_bits_fast();
-    std::vector<mpz_class> encrypt_bits_fast_precompute();
     mpz_class search_zero(const std::vector<mpz_class> &c);
     
     GM_priv gm() const { return gm_; };
@@ -53,7 +51,7 @@ public:
 protected:
     mpz_class b_;
     size_t bit_length_; // bit length of the numbers to compare
-    Paillier_priv paillier_;
+    Paillier_priv_fast paillier_;
     GM_priv gm_;
 };
 

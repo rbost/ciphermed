@@ -46,7 +46,7 @@ void EncArgmax_Owner::unpermuteResult(size_t argmax_perm)
 
 
 
-EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv &pp, function<Comparison_protocol_B*()> comparator_creator)
+EncArgmax_Helper::EncArgmax_Helper(const size_t &l, const size_t &k,Paillier_priv_fast &pp, function<Comparison_protocol_B*()> comparator_creator)
 : k_(k)
 {
     comparators_ = vector< vector<Rev_EncCompare_Helper*> >(k_);

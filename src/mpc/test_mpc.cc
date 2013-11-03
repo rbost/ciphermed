@@ -163,8 +163,8 @@ static void test_compare(unsigned int nbits = 256)
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
-    Paillier_priv pp(sk_p,randstate);
+    auto sk_p = Paillier_priv_fast::keygen(randstate,1024);
+    Paillier_priv_fast pp(sk_p,randstate);
     Paillier p(pp.pubkey(),randstate);
     
     auto sk_gm = GM_priv::keygen(randstate);
@@ -208,8 +208,8 @@ static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
-    Paillier_priv pp(sk_p,randstate);
+    auto sk_p = Paillier_priv_fast::keygen(randstate,1024);
+    Paillier_priv_fast pp(sk_p,randstate);
     Paillier p(pp.pubkey(),randstate);
     
     auto sk_gm = GM_priv::keygen(randstate);
@@ -253,8 +253,8 @@ static void test_rev_enc_compare(unsigned int nbits = 256,unsigned int lambda = 
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
-    Paillier_priv pp(sk_p,randstate);
+    auto sk_p = Paillier_priv_fast::keygen(randstate,1024);
+    Paillier_priv_fast pp(sk_p,randstate);
     Paillier p(pp.pubkey(),randstate);
     
     auto sk_gm = GM_priv::keygen(randstate);
@@ -301,8 +301,8 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
 
-    auto sk_p = Paillier_priv::keygen(randstate,1024,0);
-    Paillier_priv pp(sk_p,randstate);
+    auto sk_p = Paillier_priv_fast::keygen(randstate,1024);
+    Paillier_priv_fast pp(sk_p,randstate);
     Paillier p(pp.pubkey(),randstate);
     
     auto sk_gm = GM_priv::keygen(randstate);
@@ -323,7 +323,7 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     GM *gm_ptr = &gm;
     GM_priv *gm_priv_ptr = &gm_priv;
     Paillier *p_ptr = &p;
-    Paillier_priv *pp_ptr = &pp;
+    Paillier_priv_fast *pp_ptr = &pp;
     gmp_randstate_t *randstate_ptr = &randstate;
 
     auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
@@ -399,7 +399,7 @@ int main(int ac, char **av)
     
 
     test_lsic(l);
-//    test_compare(l);
+    test_compare(l);
 
     cout << "\n\n";
     
@@ -408,8 +408,8 @@ int main(int ac, char **av)
     cout << "\n\n";
     test_rev_enc_compare(l,lambda);
 
-    cout << "\n\n";
-    test_enc_argmax(n,l,lambda,t);
+//    cout << "\n\n";
+//    test_enc_argmax(n,l,lambda,t);
 
 	return 0;
 }

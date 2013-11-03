@@ -44,7 +44,7 @@ class Paillier_priv : public Paillier {
     
     // if a !=0, and if you are encrypting using the private key, use this function
     // 75% speedup
-    mpz_class fast_encrypt(const mpz_class &plaintext);
+    mpz_class encrypt(const mpz_class &plaintext);
     // no speedup compared to the fast_encrypt
     mpz_class fast_encrypt_precompute(const mpz_class &plaintext);
 
@@ -73,7 +73,7 @@ public:
     mpz_class compute_g_star_power(const mpz_class &x);
     static std::vector<mpz_class> keygen(gmp_randstate_t state, uint nbits = 1024);
     
-    mpz_class fast_encrypt(const mpz_class &plaintext);
+    mpz_class encrypt(const mpz_class &plaintext);
 private:
     const mpz_class g_star_;
     const mpz_class phi_n;

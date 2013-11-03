@@ -49,7 +49,7 @@ void EncCompare_Owner::decryptResult(const mpz_class &c_t)
 }
 
 
-EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_A *comparator)
+EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv_fast &pp, Comparison_protocol_A *comparator)
 : bit_length_(l), paillier_(pp), comparator_(comparator), two_l_(0), is_set_up_(false)
 {
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l

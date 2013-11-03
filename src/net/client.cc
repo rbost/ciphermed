@@ -295,7 +295,7 @@ void Client::run_priv_compare_B(Compare_B *comparator)
     
     
     // send the encrypted bits
-    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits_fast());
+    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits());
     sendMessageToSocket(socket_, c_b_message);
     
     // wait for the answer from the client
@@ -551,7 +551,7 @@ int main(int argc, char* argv[])
         client.connect(io_service, hostname);
 
         // server has b = 20
-/*
+
         ScopedTimer *t_lsic = new ScopedTimer("LSIC");
         mpz_class res_lsic = client.test_lsic(40,100);
         delete t_lsic;
@@ -562,7 +562,7 @@ int main(int argc, char* argv[])
         delete t_comp;
         client.test_decrypt_gm(res_comp);
         
-*/
+
         
         
         

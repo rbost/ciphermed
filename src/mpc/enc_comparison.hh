@@ -51,12 +51,12 @@ protected:
 
 class EncCompare_Helper {
 public:
-    EncCompare_Helper(const size_t &l, Paillier_priv &pp, Comparison_protocol_A *comparator);
+    EncCompare_Helper(const size_t &l, Paillier_priv_fast &pp, Comparison_protocol_A *comparator);
 
     void setup(const mpz_class &c_z);
     mpz_class concludeProtocol(const mpz_class &c_r_l_);
 
-    Paillier_priv paillier() const { return paillier_; }
+    Paillier_priv_fast paillier() const { return paillier_; }
     Comparison_protocol_A* comparator() { return comparator_; };
     
     bool is_set_up() const { return is_set_up_; }
@@ -64,7 +64,7 @@ public:
 
 protected:
     size_t bit_length_;
-    Paillier_priv paillier_;
+    Paillier_priv_fast paillier_;
     Comparison_protocol_A *comparator_;
     
     /* intermediate values */

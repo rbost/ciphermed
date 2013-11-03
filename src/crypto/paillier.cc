@@ -194,7 +194,7 @@ Paillier_priv::keygen(gmp_randstate_t state, uint nbits, uint abits)
 }
 
 mpz_class
-Paillier_priv::fast_encrypt(const mpz_class &plaintext)
+Paillier_priv::encrypt(const mpz_class &plaintext)
 {
     if (fast) {
         // a != 0
@@ -367,7 +367,7 @@ mpz_class Paillier_priv_fast::compute_g_star_power(const mpz_class &x)
     return mpz_class_crt_2(v_p,v_q,p2,q2);
 }
 
-mpz_class Paillier_priv_fast::fast_encrypt(const mpz_class &plaintext)
+mpz_class Paillier_priv_fast::encrypt(const mpz_class &plaintext)
 {
     mpz_class r_prime;
     mpz_urandomm(r_prime.get_mpz_t(),_randstate,phi_n.get_mpz_t());
