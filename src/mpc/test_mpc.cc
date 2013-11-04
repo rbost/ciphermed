@@ -5,6 +5,8 @@
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_argmax.hh>
+#include <mpc/linear_enc_argmax.hh>
+
 #include <crypto/gm.hh>
 #include <mpc/svm_classifier.hh>
 #include <NTL/ZZ.h>
@@ -294,7 +296,7 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
 
     vector<mpz_class> v(k);
     
-    ScopedTimer *t;
+    ScopedTimer *t, *timer_exec;
     t = new ScopedTimer("Protocol init");
 
     gmp_randstate_t randstate;
@@ -326,11 +328,13 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     Paillier_priv_fast *pp_ptr = &pp;
     gmp_randstate_t *randstate_ptr = &randstate;
 
-    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
-    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
-//    auto party_a_creator = [gm_ptr,nbits](){ return new LSIC_A(0,nbits,*gm_ptr); };
-//    auto party_b_creator = [gm_priv_ptr,nbits](){ return new LSIC_B(0,nbits,*gm_priv_ptr); };
+//    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
+//    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
+    auto party_a_creator = [gm_ptr,nbits](){ return new LSIC_A(0,nbits,*gm_ptr); };
+    auto party_b_creator = [gm_priv_ptr,nbits](){ return new LSIC_B(0,nbits,*gm_priv_ptr); };
    
+    timer_exec = new ScopedTimer("Protocol execution");
+
     EncArgmax_Owner client(v,nbits,p,party_a_creator,randstate);
     EncArgmax_Helper server(nbits,k,pp,party_b_creator);
     
@@ -357,11 +361,77 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
         runProtocol(client,server,randstate,lambda);
     }
     delete t;
-    
+    delete timer_exec;
     vector<mpz_class>::iterator argmax;
 
     size_t mpc_argmax = client.output();
 
+    assert(real_argmax == mpc_argmax);
+}
+
+static void test_linear_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigned int lambda = 100)
+{
+    cout << "Test linear argmax over encrypted data ..." << endl;
+    cout << k << " integers of " << nbits << " bits, " << lambda << " bits of security\n";
+    ScopedTimer timer("Linear Enc. Argmax");
+    
+    vector<mpz_class> v(k);
+    
+    ScopedTimer *t, *timer_exec;
+    t = new ScopedTimer("Protocol init");
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_p = Paillier_priv_fast::keygen(randstate,1024);
+    Paillier_priv_fast pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+    
+    size_t real_argmax = 0;
+    for (size_t i = 0; i < k; i++) {
+        mpz_urandom_len(v[i].get_mpz_t(), randstate, nbits);
+        if (v[i] > v[real_argmax]) {
+            real_argmax = i;
+        }
+    }
+    
+    for (size_t i = 0; i < k; i++) {
+        v[i] = pp.encrypt(v[i]);
+    }
+    GM *gm_ptr = &gm;
+    GM_priv *gm_priv_ptr = &gm_priv;
+    Paillier *p_ptr = &p;
+    Paillier_priv_fast *pp_ptr = &pp;
+    gmp_randstate_t *randstate_ptr = &randstate;
+    
+//    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
+//    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
+    auto party_a_creator = [gm_ptr,nbits](){ return new LSIC_A(0,nbits,*gm_ptr); };
+    auto party_b_creator = [gm_priv_ptr,nbits](){ return new LSIC_B(0,nbits,*gm_priv_ptr); };
+
+
+    Linear_EncArgmax_Owner client(v,nbits,p,randstate, lambda);
+    Linear_EncArgmax_Helper server(nbits,k,pp);
+    
+    delete t;
+    
+    timer_exec = new ScopedTimer("Protocol execution");
+
+    runProtocol(client,server,party_a_creator, party_b_creator, randstate,lambda);
+
+    delete timer_exec;
+    
+    vector<mpz_class>::iterator argmax;
+    
+    size_t mpc_argmax = client.output();
+    
+//    cout << "Real argmax = " << real_argmax;
+//    cout << "\nFound argmax = " << mpc_argmax << endl;
     assert(real_argmax == mpc_argmax);
 }
 
@@ -398,18 +468,20 @@ int main(int ac, char **av)
     srand(time(NULL));
     
 
-    test_lsic(l);
-    test_compare(l);
-
-    cout << "\n\n";
-    
-    
-    test_enc_compare(l,lambda);
-    cout << "\n\n";
-    test_rev_enc_compare(l,lambda);
+//    test_lsic(l);
+//    test_compare(l);
 
 //    cout << "\n\n";
-//    test_enc_argmax(n,l,lambda,t);
+    
+    
+//    test_enc_compare(l,lambda);
+//    cout << "\n\n";
+//    test_rev_enc_compare(l,lambda);
+
+    cout << "\n\n";
+    test_enc_argmax(n,l,lambda,t);
+    cout << "\n\n";
+    test_linear_enc_argmax(n,l,lambda);
 
 	return 0;
 }
