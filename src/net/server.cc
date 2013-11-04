@@ -406,8 +406,10 @@ mpz_class Server_session::run_priv_compare_A(Compare_A *comparator)
 
 bool Server_session::run_rev_enc_comparison(const size_t &l)
 {
-    LSIC_B lsic(0,l,server_->gm());
-    Rev_EncCompare_Helper helper(l,server_->paillier(),&lsic);
+//    LSIC_B comparator(0,l,server_->gm());
+    Compare_B comparator(0,l,server_->paillier(),server_->gm());
+    
+    Rev_EncCompare_Helper helper(l,server_->paillier(),&comparator);
     return run_rev_enc_comparison(helper);
 }
 
@@ -495,8 +497,8 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
     
     for (size_t i = 0; i < k - 1; i++) {
 //        cout << "Round " << i << endl;
-//        Compare_B comparator(0,nbits,server_->paillier(),server_->gm());
-        LSIC_B comparator(0,nbits,server_->gm());
+        Compare_B comparator(0,nbits,server_->paillier(),server_->gm());
+//        LSIC_B comparator(0,nbits,server_->gm());
 
         Rev_EncCompare_Helper rev_enc_helper = helper.rev_enc_compare_helper(&comparator);
         

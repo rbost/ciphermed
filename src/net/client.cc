@@ -321,8 +321,10 @@ void Client::run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t 
     assert(has_paillier_pk());
     assert(has_gm_pk());
     
-    LSIC_A lsic(0,l,*server_gm_);
-    Rev_EncCompare_Owner owner(a,b,l,*server_paillier_,&lsic,rand_state_);
+//    LSIC_A comparator(0,l,*server_gm_);
+    Compare_A comparator(0,l,*server_paillier_,*server_gm_,rand_state_);
+
+    Rev_EncCompare_Owner owner(a,b,l,*server_paillier_,&comparator,rand_state_);
     run_rev_enc_comparison(owner);
 }
 
@@ -414,8 +416,8 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
     cout << "Number of elements " << k << endl;
     for (size_t i = 0; i < (k-1); i++) {
 //        cout << "Round " << i << endl;
-//        Compare_A comparator(0,nbits,*server_paillier_,*server_gm_,rand_state_);
-        LSIC_A comparator(0,nbits,*server_gm_);
+        Compare_A comparator(0,nbits,*server_paillier_,*server_gm_,rand_state_);
+//        LSIC_A comparator(0,nbits,*server_gm_);
         
         Rev_EncCompare_Owner rev_enc_owner = owner.create_current_round_rev_enc_compare_owner(&comparator);
         
