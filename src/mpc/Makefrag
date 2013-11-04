@@ -8,5 +8,5 @@ $(OBJDIR)/libmpc.so: $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC)) $(OBJDIR)/libc
 all:	$(OBJDIR)/mpc/test_mpc 
 $(OBJDIR)/mpc/test_mpc: $(OBJDIR)/mpc/test_mpc.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so
 	$(CXX) $< -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto\
-	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x 
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_THREAD) 
 # vim: set noexpandtab:

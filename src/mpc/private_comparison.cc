@@ -1,5 +1,6 @@
 #include <mpc/private_comparison.hh>
 
+#include <util/threadpool.hh>
 #include <util/util.hh>
 
 using namespace std;
@@ -20,6 +21,31 @@ vector<mpz_class> Compare_B::encrypt_bits()
         c_b[i] = paillier_.encrypt(mpz_tstbit(b_.get_mpz_t(),i));
     }
     
+    return c_b;
+}
+
+vector<mpz_class> Compare_B::encrypt_bits_parallel(unsigned int n_threads)
+{
+    ScopedTimer timer("encrypt_bits_parallel");
+    ThreadPool pool(n_threads);
+
+    vector<mpz_class> c_b(bit_length_);
+    
+    for (size_t i = 0; i < bit_length_; i++) {
+        c_b[i] = paillier_.encrypt(mpz_tstbit(b_.get_mpz_t(),i));
+    }
+    
+    Paillier_priv_fast *paillier_ptr = &paillier_;
+    vector<mpz_class> *c_b_ptr = &c_b;
+    
+    for (size_t i = 0; i < bit_length_; i++) {
+        auto job =[this,paillier_ptr,i,c_b_ptr]
+        {
+            (*c_b_ptr)[i] = paillier_ptr->encrypt(mpz_tstbit(b_.get_mpz_t(),i));
+        };
+        pool.enqueue(job);
+    }
+
     return c_b;
 }
 
@@ -78,31 +104,31 @@ vector<mpz_class> Compare_A::compute_sums(const std::vector<mpz_class> &c_w)
 vector<mpz_class> Compare_A::compute_c(const std::vector<mpz_class> &c_b,const std::vector<mpz_class> &c_sums)
 {
     ScopedTimer timer("compute_c");
-
+    
     vector<mpz_class> c(bit_length_);
-
+    
     for (size_t i = 0; i < bit_length_; i++) {
         c[i] = paillier_.constMult(3,c_sums[i]);
-    
+        
         c[i] = paillier_.sub(c[i], c_b[i]);
-      
+        
         long a_i = mpz_tstbit(a_.get_mpz_t(),i);
         
         switch (a_i+s_) {
             case 1:
-                c[i] = paillier_.add(c[i], paillier_one_);
-                break;
-
+            c[i] = paillier_.add(c[i], paillier_one_);
+            break;
+            
             case 2:
-                c[i] = paillier_.add(c[i], paillier_one_*paillier_one_);
-                break;
-                
+            c[i] = paillier_.add(c[i], paillier_one_*paillier_one_);
+            break;
+            
             case -1:
-                c[i] = paillier_.sub(c[i], paillier_one_);
-                break;
-                
+            c[i] = paillier_.sub(c[i], paillier_one_);
+            break;
+            
             default:
-                break;
+            break;
         }
         
     }
@@ -123,6 +149,28 @@ vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c)
     return c_rand;
 }
 
+vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, unsigned int n_threads)
+{
+    ScopedTimer timer("rerandomize parallel");
+ 
+    ThreadPool pool(n_threads);
+    vector<mpz_class> c_rand(c);
+    
+    Paillier *paillier_ptr = &paillier_;
+    vector<mpz_class> *c_rand_ptr = &c_rand;
+    
+    for (size_t i = 0; i < c_rand.size(); i++) {
+        auto job =[paillier_ptr,i,c_rand_ptr]
+        {
+            (*c_rand_ptr)[i] = paillier_ptr->scalarize((*c_rand_ptr)[i]);
+        };
+        pool.enqueue(job);
+    }
+
+    
+    return c_rand;
+}
+
 void Compare_A::unblind(const mpz_class &t_prime)
 {
     ScopedTimer timer("unblind");
@@ -137,12 +185,13 @@ void Compare_A::unblind(const mpz_class &t_prime)
 void runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state)
 {
     vector<mpz_class> c_b;
-    c_b = party_b.encrypt_bits();
+    c_b = party_b.encrypt_bits_parallel(2);
     
     vector<mpz_class> c_w = party_a.compute_w(c_b);
     vector<mpz_class> c_sums = party_a.compute_sums(c_w);
     vector<mpz_class> c = party_a.compute_c(c_b,c_sums);
-    vector<mpz_class> c_rand = party_a.rerandomize(c);
+//    vector<mpz_class> c_rand = party_a.rerandomize(c);
+    vector<mpz_class> c_rand = party_a.rerandomize_parallel(c,2);
     
     // we have to suffle
     ScopedTimer *timer = new ScopedTimer("shuffle");

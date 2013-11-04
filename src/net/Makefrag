@@ -5,9 +5,6 @@ CLIENT_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(CLIENT_SRC))
 SERVER_SRC := server.cc $(NETSRC)
 SERVER_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(SERVER_SRC))
 
-L_BOOST_SYSTEM ?= -lboost_system
-
-L_BOOST_THREAD ?= -lboost_thread
 
 all:    $(OBJDIR)/libnet.so
 $(OBJDIR)/libnet.so: $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
@@ -16,14 +13,14 @@ $(OBJDIR)/libnet.so: $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
 all:	$(OBJDIR)/net/client
 $(OBJDIR)/net/client: $(CLIENT_OBJ) $(PROTO_H) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
-	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) $(L_BOOST_THREAD)\
        -lprotobuf -lprotobuf_defs
 
 
 all:	$(OBJDIR)/net/server
 $(OBJDIR)/net/server: $(SERVER_OBJ) $(PROTO_H) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libfhemath.so $(OBJDIR)/libprotobuf_defs.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lfhemath -lfheutil\
-	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) $(L_BOOST_THREAD)\
        -lprotobuf -lprotobuf_defs
 
 # vim: set noexpandtab:

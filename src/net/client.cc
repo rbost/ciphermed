@@ -41,7 +41,7 @@ static ZZX makeIrredPoly(long p, long d)
 }
 
 Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int nbits_gm, unsigned int lambda)
-: socket_(io_service), gm_(GM_priv::keygen(state,nbits_gm),state), server_paillier_(NULL), server_gm_(NULL), server_fhe_pk_(NULL), lambda_(lambda)
+: socket_(io_service), gm_(GM_priv::keygen(state,nbits_gm),state), server_paillier_(NULL), server_gm_(NULL), server_fhe_pk_(NULL),n_threads_(2), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
     
@@ -218,7 +218,7 @@ mpz_class Client::run_priv_compare_A(Compare_A *comparator)
     vector<mpz_class> c_w = comparator->compute_w(c_b);
     vector<mpz_class> c_sums = comparator->compute_sums(c_w);
     vector<mpz_class> c = comparator->compute_c(c_b,c_sums);
-    vector<mpz_class> c_rand = comparator->rerandomize(c);
+    vector<mpz_class> c_rand = comparator->rerandomize_parallel(c,n_threads_);
     
     // we have to suffle
     random_shuffle(c_rand.begin(),c_rand.end(),[this](int n){ return gmp_urandomm_ui(rand_state_,n); });

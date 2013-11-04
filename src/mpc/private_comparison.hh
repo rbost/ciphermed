@@ -15,8 +15,12 @@ public:
 
     std::vector<mpz_class> compute_w(const std::vector<mpz_class> &c_b);
     std::vector<mpz_class> compute_sums(const std::vector<mpz_class> &c_w);
+    
     std::vector<mpz_class> compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums);
+    
     std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c);
+    std::vector<mpz_class> rerandomize_parallel(const std::vector<mpz_class> &c, unsigned int n_threads = 4);
+    
     void unblind(const mpz_class &t_prime);
     
     GM gm() const { return gm_; }
@@ -42,6 +46,8 @@ public:
     virtual void set_value(const mpz_class &x) { b_ = x; };
 
     std::vector<mpz_class> encrypt_bits();
+    std::vector<mpz_class> encrypt_bits_parallel(unsigned int n_threads = 4);
+    
     mpz_class search_zero(const std::vector<mpz_class> &c);
     
     GM_priv gm() const { return gm_; };

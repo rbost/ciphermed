@@ -60,7 +60,8 @@ public:
     void test_decrypt_gm(const mpz_class &c);
     void test_fhe();
     
-    
+    unsigned int n_threads() const { return n_threads_; }
+    void set_n_thread(unsigned int n) { assert(n > 0); n_threads_ = n; }
 protected:
     tcp::socket socket_;
     
@@ -76,6 +77,8 @@ protected:
     gmp_randstate_t rand_state_;
     
     boost::asio::streambuf input_buf_;
+    
+    unsigned int n_threads_;
 
     /* statistical security */
     unsigned int lambda_;

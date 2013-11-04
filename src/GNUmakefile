@@ -5,6 +5,9 @@ NTLLIBPATH ?= $(HOME)/ntl-6.0.0-bin/lib
 NTLINCPATH ?= $(HOME)/ntl-6.0.0-bin/include
 GF2XLIBPATH ?= $(HOME)/gf2x-1.1-bin/lib
 
+L_BOOST_SYSTEM ?= -lboost_system
+L_BOOST_THREAD ?= -lboost_thread
+
 DEBUG ?= 0
 ifeq ($(strip $(DEBUG)),1)
 	CXXOPT :=
