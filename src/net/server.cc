@@ -15,6 +15,7 @@
 #include <mpc/private_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
+#include <mpc/linear_enc_argmax.hh>
 
 #include <net/server.hh>
 #include <net/net_utils.hh>
@@ -481,6 +482,40 @@ void Server_session::run_enc_comparison(EncCompare_Helper &helper)
     Protobuf::BigInt c_t_message = convert_to_message(c_t);
     sendMessageToSocket(*socket_, c_t_message);
 }
+
+
+void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
+{
+    size_t k = helper.elements_number();
+    size_t nbits = helper.bit_length();
+    //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
+    
+    for (size_t i = 0; i < k - 1; i++) {
+        Compare_B comparator(0,nbits,server_->paillier(),server_->gm());
+
+        Rev_EncCompare_Helper rev_enc_helper = helper.rev_enc_compare_helper(&comparator);
+        
+        run_rev_enc_comparison(rev_enc_helper);
+        
+        mpz_class randomized_enc_max, randomized_value;
+        
+        // read the values sent by the client
+        randomized_enc_max = readIntFromSocket(*socket_);
+        randomized_value = readIntFromSocket(*socket_);
+        
+        // and send the server's response
+        mpz_class new_enc_max, x, y;
+        helper.update_argmax(rev_enc_helper.output(), randomized_enc_max, randomized_value, i+1, new_enc_max, x, y);
+
+        sendIntToSocket(*socket_,new_enc_max);
+        sendIntToSocket(*socket_,x);
+        sendIntToSocket(*socket_,y);
+    }
+    
+    mpz_class permuted_argmax = helper.permuted_argmax();
+    sendIntToSocket(*socket_, permuted_argmax);
+}
+
 
 void Server_session::decrypt_gm(const mpz_class &c)
 {

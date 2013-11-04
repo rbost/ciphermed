@@ -19,10 +19,12 @@ public:
     size_t output() const { assert(is_protocol_done_); return i_0_;}
 
     Rev_EncCompare_Owner create_current_round_rev_enc_compare_owner(function<Comparison_protocol_A*()> comparator_creator);
+    Rev_EncCompare_Owner create_current_round_rev_enc_compare_owner(Comparison_protocol_A* comparator);
     void next_round(mpz_class &randomized_enc_max, mpz_class &randomized_value);
     void update_enc_max(const mpz_class &new_enc_max, const mpz_class &x, const mpz_class &y);
     
-    size_t elements_number() const { return a_.size(); }
+    size_t bit_length() const { return bit_length_; }
+    size_t elements_number() const { return k_; }
 protected:
     vector<mpz_class> a_;
     map<size_t,size_t> perm_; // the permutation used to hide the real order
@@ -53,9 +55,13 @@ public:
 //    ~Linear_EncArgmax_Helper();
     
     void update_argmax(bool comp, const mpz_class &old_enc_max, const mpz_class &v, size_t index, mpz_class &new_enc_max, mpz_class &x, mpz_class &y);
+    
     Rev_EncCompare_Helper rev_enc_compare_helper(function<Comparison_protocol_B*()> comparator_creator);
+    Rev_EncCompare_Helper rev_enc_compare_helper(Comparison_protocol_B* comparator);
 
     size_t permuted_argmax() const;
+    size_t elements_number() const { return k_; }
+    size_t bit_length() const { return bit_length_; }
 protected:
     size_t k_; // number of elements
     size_t round_count_;

@@ -5,6 +5,11 @@
 
 #include <net/defs.hh>
 
+#include <boost/asio.hpp>
+#include <net/message_io.hh>
+
+#include <protobuf/protobuf_conversion.hh>
+
 using namespace std;
 
 ostream& operator<<(ostream& out, const LSIC_Packet_A& p)
@@ -82,4 +87,16 @@ istream& parseInt(istream& in, mpz_class &i, int base)
     in >> line;
     i.set_str(line,base);
     return in;
+}
+
+void sendIntToSocket(boost::asio::ip::tcp::socket &socket, const mpz_class& m)
+{
+    Protobuf::BigInt msg = convert_to_message(m);
+    sendMessageToSocket(socket,msg);
+}
+
+mpz_class readIntFromSocket(boost::asio::ip::tcp::socket &socket)
+{
+    Protobuf::BigInt msg = readMessageFromSocket<Protobuf::BigInt>(socket);
+    return convert_from_message(msg);
 }

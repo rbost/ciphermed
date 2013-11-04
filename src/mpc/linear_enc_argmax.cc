@@ -23,6 +23,11 @@ Rev_EncCompare_Owner Linear_EncArgmax_Owner::create_current_round_rev_enc_compar
     return Rev_EncCompare_Owner(enc_max_, a_[perm_[round_count_+1]],bit_length_,paillier_,comparator_creator(),randstate_);
 }
 
+Rev_EncCompare_Owner Linear_EncArgmax_Owner::create_current_round_rev_enc_compare_owner(Comparison_protocol_A* comparator)
+{
+    return Rev_EncCompare_Owner(enc_max_, a_[perm_[round_count_+1]],bit_length_,paillier_,comparator,randstate_);
+
+}
 void Linear_EncArgmax_Owner::next_round(mpz_class &randomized_enc_max, mpz_class &randomized_value)
 {
     assert(round_count_ < (k_-1));
@@ -92,6 +97,11 @@ void Linear_EncArgmax_Helper::update_argmax(bool comp, const mpz_class &old_enc_
 Rev_EncCompare_Helper Linear_EncArgmax_Helper::rev_enc_compare_helper(function<Comparison_protocol_B*()> comparator_creator)
 {
     return Rev_EncCompare_Helper(bit_length_,paillier_,comparator_creator());
+}
+
+Rev_EncCompare_Helper Linear_EncArgmax_Helper::rev_enc_compare_helper(Comparison_protocol_B* comparator)
+{
+    return Rev_EncCompare_Helper(bit_length_,paillier_,comparator);
 }
 
 void runProtocol(Linear_EncArgmax_Owner &owner, Linear_EncArgmax_Helper &helper,function<Comparison_protocol_A*()> comparator_creator_A, function<Comparison_protocol_B*()> comparator_creator_B, gmp_randstate_t state, unsigned int lambda)

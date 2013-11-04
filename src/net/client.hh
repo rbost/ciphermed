@@ -50,6 +50,7 @@ public:
     void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
     void run_rev_enc_comparison(Rev_EncCompare_Owner &owner);
 
+    size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner);
     
     
     /* test functions */

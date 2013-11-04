@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <boost/asio.hpp>
 
 #include <mpc/lsic.hh>
 #include <gmpxx.h>
@@ -18,3 +19,7 @@ ostream& operator<<(ostream& out, const vector<mpz_class> &v);
 istream& operator>>(istream& in, vector<mpz_class> &v);
 
 istream& parseInt(istream& in, mpz_class &i, int base);
+
+
+void sendIntToSocket(boost::asio::ip::tcp::socket &socket, const mpz_class& m);
+mpz_class readIntFromSocket(boost::asio::ip::tcp::socket &socket);

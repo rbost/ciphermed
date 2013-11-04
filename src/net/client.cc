@@ -13,6 +13,7 @@
 #include <mpc/private_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_comparison.hh>
+#include <mpc/linear_enc_argmax.hh>
 
 #include <math/util_gmp_rand.h>
 
@@ -398,6 +399,43 @@ bool Client::run_enc_comparison(EncCompare_Owner &owner)
     mpz_class c_t = convert_from_message(c_t_message);
     
     owner.decryptResult(c_t);
+    return owner.output();
+}
+
+size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
+{
+    size_t k = owner.elements_number();
+    size_t nbits = owner.bit_length();
+    //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
+
+    for (size_t i = 0; i < k - 1; i++) {
+        Compare_A comparator(0,nbits,*server_paillier_,*server_gm_,rand_state_);
+        
+        Rev_EncCompare_Owner rev_enc_owner = owner.create_current_round_rev_enc_compare_owner(&comparator);
+        
+        run_rev_enc_comparison(rev_enc_owner);
+
+        mpz_class randomized_enc_max, randomized_value;
+        owner.next_round(randomized_enc_max, randomized_value);
+        
+        // send the randomizations to the server
+        sendIntToSocket(socket_,randomized_enc_max);
+        sendIntToSocket(socket_,randomized_value);
+        
+        // get the server's response
+        mpz_class new_enc_max, x, y;
+        new_enc_max = readIntFromSocket(socket_);
+        x = readIntFromSocket(socket_);
+        y = readIntFromSocket(socket_);
+        
+        owner.update_enc_max(new_enc_max, x, y);
+    }
+    
+    mpz_class permuted_argmax;
+    permuted_argmax = readIntFromSocket(socket_);
+    
+    owner.unpermuteResult(permuted_argmax.get_ui());
+    
     return owner.output();
 }
 

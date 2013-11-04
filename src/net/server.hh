@@ -74,6 +74,8 @@ public:
     bool run_rev_enc_comparison(const size_t &l);
     bool run_rev_enc_comparison(Rev_EncCompare_Helper &helper);
 
+    void run_linear_enc_argmax(Linear_EncArgmax_Helper &helper);
+
     void decrypt_gm(const mpz_class &c);
     void decrypt_fhe(const Ctxt &c);
 
