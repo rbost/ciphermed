@@ -98,6 +98,22 @@ Paillier::scalarize(const mpz_class &c)
     return constMult(r,c);
 }
 
+void Paillier::refresh(mpz_class &c)
+{
+    mpz_class rn;
+    auto i = rqueue.begin();
+    if (i != rqueue.end()) {
+        rn = *i;
+        rqueue.pop_front();
+        
+    } else {
+        mpz_class r;
+        mpz_urandomm(r.get_mpz_t(),_randstate,n.get_mpz_t());
+        rn = mpz_class_powm(r,n,n2);
+    }
+    c = c*rn %n2;
+}
+
 /*
  * Private-key operations
  */

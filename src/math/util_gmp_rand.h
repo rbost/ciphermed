@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gmp.h>
 
 extern "C"
