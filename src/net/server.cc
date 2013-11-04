@@ -172,6 +172,9 @@ void Server_session::run_session()
             }else if(line == START_ENC_COMPARE){
                 get_client_gm_pk();
                 run_enc_comparison(0, client_gm_);
+            }else if(line == TEST_ENC_ARGMAX){
+                Linear_EncArgmax_Helper helper(100,5,server_->paillier());
+                run_linear_enc_argmax(helper);
             }else if(line == DISCONNECT){
                 should_exit = true;
                 break;
@@ -491,7 +494,9 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
     //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
     
     for (size_t i = 0; i < k - 1; i++) {
-        Compare_B comparator(0,nbits,server_->paillier(),server_->gm());
+//        cout << "Round " << i << endl;
+//        Compare_B comparator(0,nbits,server_->paillier(),server_->gm());
+        LSIC_B comparator(0,nbits,server_->gm());
 
         Rev_EncCompare_Helper rev_enc_helper = helper.rev_enc_compare_helper(&comparator);
         
@@ -512,6 +517,7 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
         sendIntToSocket(*socket_,y);
     }
     
+    cout << "Send result" << endl;
     mpz_class permuted_argmax = helper.permuted_argmax();
     sendIntToSocket(*socket_, permuted_argmax);
 }

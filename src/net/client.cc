@@ -333,7 +333,7 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
  
     size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda_));
-    cout << "l = " << l << endl;
+//    cout << "l = " << l << endl;
 
     
     boost::asio::streambuf out_buff;
@@ -341,10 +341,10 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
     string line;
     
     // send the start message
-    output_stream << START_REV_ENC_COMPARE << "\n";
-    output_stream << "\r\n";
-
-    boost::asio::write(socket_, out_buff);
+//    output_stream << START_REV_ENC_COMPARE << "\n";
+//    output_stream << "\r\n";
+//
+//    boost::asio::write(socket_, out_buff);
     Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
     sendMessageToSocket(socket_, setup_message);
 
@@ -381,7 +381,7 @@ bool Client::run_enc_comparison(EncCompare_Owner &owner)
     // now run the protocol itself
     size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda_));
-    cout << "l = " << l << endl;
+//    cout << "l = " << l << endl;
 
     Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
     sendMessageToSocket(socket_, setup_message);
@@ -404,12 +404,18 @@ bool Client::run_enc_comparison(EncCompare_Owner &owner)
 
 size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
 {
+    assert(has_paillier_pk());
+    assert(has_gm_pk());
+
     size_t k = owner.elements_number();
     size_t nbits = owner.bit_length();
     //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
 
-    for (size_t i = 0; i < k - 1; i++) {
-        Compare_A comparator(0,nbits,*server_paillier_,*server_gm_,rand_state_);
+    cout << "Number of elements " << k << endl;
+    for (size_t i = 0; i < (k-1); i++) {
+//        cout << "Round " << i << endl;
+//        Compare_A comparator(0,nbits,*server_paillier_,*server_gm_,rand_state_);
+        LSIC_A comparator(0,nbits,*server_gm_);
         
         Rev_EncCompare_Owner rev_enc_owner = owner.create_current_round_rev_enc_compare_owner(&comparator);
         
@@ -529,6 +535,13 @@ void Client::test_rev_enc_compare(size_t l)
     get_server_pk_gm();
     get_server_pk_paillier();
     
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    output_stream << START_REV_ENC_COMPARE << "\n";
+    output_stream << "\r\n";
+    
+    boost::asio::write(socket_, out_buff);
+
     mpz_class c_a, c_b;
     
     run_rev_enc_compare(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
@@ -536,6 +549,46 @@ void Client::test_rev_enc_compare(size_t l)
     cout << "\nResult should be " << (a < b) << endl;
 }
 
+
+void Client::test_linear_enc_argmax()
+{
+    get_server_pk_gm();
+    get_server_pk_paillier();
+
+    size_t k = 5;
+    size_t nbits = 100;
+    
+    vector<mpz_class> v(k);
+    size_t real_argmax = 0;
+    for (size_t i = 0; i < k; i++) {
+        mpz_urandom_len(v[i].get_mpz_t(), rand_state_, nbits);
+//        v[i] = i;
+        if (v[i] > v[real_argmax]) {
+            real_argmax = i;
+        }
+    }
+    for (size_t i = 0; i < k; i++) {
+        v[i] = server_paillier_->encrypt(v[i]);
+    }
+    
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    output_stream << TEST_ENC_ARGMAX << "\n";
+    output_stream << "\r\n";
+    
+    boost::asio::write(socket_, out_buff);
+
+    
+    Linear_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
+    
+    run_linear_enc_argmax(owner);
+    
+    size_t mpc_argmax = owner.output();
+    assert(real_argmax == mpc_argmax);
+
+    cout << "Real argmax = " << real_argmax;
+    cout << "\nFound argmax = " << mpc_argmax << endl;
+}
 void Client::test_decrypt_gm(const mpz_class &c)
 {
     boost::asio::streambuf buff;
@@ -583,14 +636,14 @@ int main(int argc, char* argv[])
         gmp_randseed_ui(randstate,time(NULL));
         
 
-        Client client(io_service, randstate,1024,100);
+        Client client(io_service, randstate,1024,80);
 
         string hostname(argv[1]);
         client.connect(io_service, hostname);
 
         // server has b = 20
 
-        ScopedTimer *t_lsic = new ScopedTimer("LSIC");
+/*        ScopedTimer *t_lsic = new ScopedTimer("LSIC");
         mpz_class res_lsic = client.test_lsic(40,100);
         delete t_lsic;
         client.test_decrypt_gm(res_lsic);
@@ -599,14 +652,14 @@ int main(int argc, char* argv[])
         mpz_class res_comp = client.test_compare(40,100);
         delete t_comp;
         client.test_decrypt_gm(res_comp);
-        
+  */
 
         
         
         
 //        client.test_rev_enc_compare(5);
-        client.test_enc_compare(5);
-        
+//        client.test_enc_compare(5);
+        client.test_linear_enc_argmax();
 //        client.test_fhe();
         
         

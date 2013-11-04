@@ -46,6 +46,9 @@ const std::string PRIV_COMP_RESULT = "PRIVATE COMPARE RESULT";
 
 const std::string PRIV_COMP_PACKET = "PRIVATE COMPARE PACKET";
 
+const std::string TEST_ENC_ARGMAX = "TEST ENC ARGMAX";
+
+
 const std::string DISCONNECT = "DISCONNECT";
 
 const std::string DECRYPT_GM = "DECRYPT GM";

@@ -58,6 +58,7 @@ public:
     mpz_class test_compare(const mpz_class &b, size_t l);
     void test_rev_enc_compare(size_t l);
     void test_enc_compare(size_t l);
+    void test_linear_enc_argmax();
     void test_decrypt_gm(const mpz_class &c);
     void test_fhe();
     
