@@ -6,6 +6,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_argmax.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/change_encryption_scheme.hh>
 
 #include <crypto/gm.hh>
 #include <mpc/svm_classifier.hh>
@@ -16,6 +17,7 @@
 #include <functional>
 
 #include <FHE.h>
+#include <EncryptedArray.h>
 
 #include<iostream>
 
@@ -435,6 +437,84 @@ static void test_linear_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,
     assert(real_argmax == mpc_argmax);
 }
 
+static ZZX makeIrredPoly(long p, long d)
+{
+    assert(d >= 1);
+    assert(ProbPrime(p));
+    
+    if (d == 1) return ZZX(1, 1); // the monomial X
+    
+    zz_pBak bak; bak.save();
+    zz_p::init(p);
+    return to_ZZX(BuildIrred_zz_pX(d));
+}
+
+static void test_change_ES()
+{
+    long n_levels = 3;
+    
+    long p = 2;
+    long r = 1;
+    long d = 1;
+    long c = 2;
+    
+    long L = 2;
+    
+    
+    long w = 64;
+    long s = 1;
+    long k = 80;
+    long chosen_m = 0; // XXX: check?
+    
+    long m = FindM(k, L, c, p, d, s, chosen_m, true);
+
+    FHEcontext context(m, p, r);
+    buildModChain(context, L, c);
+    FHESecKey secretKey(context);
+    const FHEPubKey& publicKey = secretKey;
+    secretKey.GenSecKey(w); // A Hamming-weight-w secret key
+
+    ZZX G;
+    if (d == 0)
+    G = context.alMod.getFactorsOverZZ()[0];
+    else
+    G = makeIrredPoly(p, d);
+    
+    EncryptedArray ea(context, G);
+
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+
+    size_t n_slots = ea.size();
+    vector<long> bits_query(n_slots);
+    
+    vector<mpz_class> c_gm(bits_query.size());
+    
+    for (size_t i = 0; i < c_gm.size(); i++) {
+        bits_query[i] = gmp_urandomb_ui(randstate,1);
+        c_gm[i] = gm.encrypt(bits_query[i]);
+    }
+    
+    Change_ES_FHE_to_GM_slots_A switcher;
+    vector<mpz_class> c_gm_blinded = switcher.blind(c_gm,gm,randstate, ea.size());
+    
+    Ctxt c_blinded_fhe = Change_ES_FHE_to_GM_slots_B::decrypt_encrypt(c_gm_blinded,gm_priv,publicKey,ea);
+    
+    Ctxt c_fhe = switcher.unblind(c_blinded_fhe,publicKey,ea);
+    
+    vector<long> result;
+    ea.decrypt(c_fhe, secretKey, result);
+    
+    for (size_t i = 0; i < bits_query.size(); i++) {
+        assert(bits_query[i] == result[i]);
+    }
+}
+
 static void usage(char *prog)
 {
     cerr << "Usage: "<<prog<<" [ optional parameters ]...\n";
@@ -478,10 +558,12 @@ int main(int ac, char **av)
 //    cout << "\n\n";
 //    test_rev_enc_compare(l,lambda);
 
+//    cout << "\n\n";
+//    test_enc_argmax(n,l,lambda,t);
+//    cout << "\n\n";
+//    test_linear_enc_argmax(n,l,lambda);
+   
     cout << "\n\n";
-    test_enc_argmax(n,l,lambda,t);
-    cout << "\n\n";
-    test_linear_enc_argmax(n,l,lambda);
-
+    test_change_ES();
 	return 0;
 }
