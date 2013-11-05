@@ -219,72 +219,17 @@ mpz_class Client::run_priv_compare_A(Compare_A *comparator)
 
 void Client::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
-    if(typeid(*comparator) == typeid(LSIC_B)) {
-        run_lsic_B(reinterpret_cast<LSIC_B*>(comparator));
-    }else if(typeid(*comparator) == typeid(Compare_B)){
-        run_priv_compare_B(reinterpret_cast<Compare_B*>(comparator));
-    }
+    exec_comparison_protocol_B(socket_,comparator);
 }
 
 void Client::run_lsic_B(LSIC_B *lsic)
 {
-    cout << "Start LSIC B" << endl;
-    boost::asio::streambuf output_buf;
-    std::ostream output_stream(&output_buf);
-    std::string line;
-    
-    LSIC_Packet_A a_packet;
-    LSIC_Packet_B b_packet = lsic->setupRound();
-    Protobuf::LSIC_A_Message a_message;
-    Protobuf::LSIC_B_Message b_message;
-    
-    b_message = convert_to_message(b_packet);
-    sendMessageToSocket(socket_, b_message);
-    
-    cout << "LSIC setup sent" << endl;
-    
-    // wait for packets
-    
-    for (;b_packet.index < lsic->bitLength()-1; ) {
-        a_message = readMessageFromSocket<Protobuf::LSIC_A_Message>(socket_);
-        a_packet = convert_from_message(a_message);
-        
-        b_packet = lsic->answerRound(a_packet);
-        
-        b_message = convert_to_message(b_packet);
-        sendMessageToSocket(socket_, b_message);
-    }
-    
-    cout << "LSIC B Done" << endl;
+    exec_lsic_B(socket_,lsic);
 }
 
 void Client::run_priv_compare_B(Compare_B *comparator)
 {
-//    boost::asio::streambuf output_buf;
-//    std::ostream output_stream(&output_buf);
-//    std::istream input_stream(&input_buf_);
-//    std::string line;
-    
-    vector<mpz_class> c(comparator->bit_length());
-    
-    
-    // send the encrypted bits
-    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits());
-    sendMessageToSocket(socket_, c_b_message);
-    
-    // wait for the answer from the client
-    Protobuf::BigIntArray c_message = readMessageFromSocket<Protobuf::BigIntArray>(socket_);
-    c = convert_from_message(c_message);
-    
-    
-    //    input_stream >> c;
-    
-    mpz_class c_t_prime = comparator->search_zero(c);
-    
-    // send the blinded result
-    Protobuf::BigInt c_t_prime_message = convert_to_message(c_t_prime);
-    sendMessageToSocket(socket_, c_t_prime_message);
-    
+    exec_priv_compare_B(socket_,comparator);
 }
 
 
@@ -303,33 +248,7 @@ void Client::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b
 
 void Client::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 {
-    assert(has_paillier_pk());
-    assert(has_gm_pk());
- 
-    size_t l = owner.bit_length();
-    mpz_class c_z(owner.setup(lambda_));
-
-    
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    string line;
-    
-    Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
-    sendMessageToSocket(socket_, setup_message);
-
-    // the server does some computation, we just have to run the lsic
-    
-    run_comparison_protocol_A(owner.comparator());
-    
-    Protobuf::BigInt c_z_l_message = readMessageFromSocket<Protobuf::BigInt>(socket_);
-    mpz_class c_z_l = convert_from_message(c_z_l_message);
-
-
-    mpz_class c_t = owner.concludeProtocol(c_z_l);
-    
-    // send the last message to the server
-    Protobuf::BigInt c_t_message = convert_to_message(c_t);
-    sendMessageToSocket(socket_, c_t_message);
+    exec_rev_enc_comparison_owner(socket_, owner, lambda_);
 }
 
 
@@ -347,39 +266,8 @@ bool Client::run_rev_enc_comparison_helper(const size_t &l)
 
 bool Client::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 {
-    boost::asio::streambuf output_buf;
-    std::ostream output_stream(&output_buf);
-    std::istream input_stream(&input_buf_);
-    std::string line;
-    
-    
-    // setup the helper if necessary
-    if (!helper.is_set_up()) {
-        cout << "Have to setup" << endl;
-        Protobuf::Enc_Compare_Setup_Message setup_message = readMessageFromSocket<Protobuf::Enc_Compare_Setup_Message>(socket_);
-        if (setup_message.has_bit_length()) {
-            helper.set_bit_length(setup_message.bit_length());
-        }
-        mpz_class c_z = convert_from_message(setup_message);
-        
-        helper.setup(c_z);
-    }
-    
-    // now, we need to run the comparison protocol
-    run_comparison_protocol_B(helper.comparator());
-    
-    
-    mpz_class c_z_l(helper.get_c_z_l());
-    
-    Protobuf::BigInt c_z_l_message = convert_to_message(c_z_l);
-    sendMessageToSocket(socket_, c_z_l_message);
-    
-    // wait for the answer of the owner
-    Protobuf::BigInt c_t_message = readMessageFromSocket<Protobuf::BigInt>(socket_);
-    mpz_class c_t = convert_from_message(c_t_message);
-    helper.decryptResult(c_t);
+    exec_rev_enc_comparison_helper(socket_, helper);
     return helper.output();
-    
 }
 
 // we suppose that the client already has the server's public key for Paillier
@@ -396,28 +284,7 @@ bool Client::run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, si
 
 bool Client::run_enc_comparison_owner(EncCompare_Owner &owner)
 {
-    assert(has_paillier_pk());
-    
-    // now run the protocol itself
-    size_t l = owner.bit_length();
-    mpz_class c_z(owner.setup(lambda_));
-
-    Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
-    sendMessageToSocket(socket_, setup_message);
-
-    // the server does some computation, we just have to run the lsic
-    
-    run_comparison_protocol_B(owner.comparator());
-
-    mpz_class c_r_l(owner.get_c_r_l());
-    Protobuf::BigInt c_r_l_message = convert_to_message(c_r_l);
-    sendMessageToSocket(socket_, c_r_l_message);
-
-    // wait for the answer of the owner
-    Protobuf::BigInt c_t_message = readMessageFromSocket<Protobuf::BigInt>(socket_);
-    mpz_class c_t = convert_from_message(c_t_message);
-    
-    owner.decryptResult(c_t);
+    exec_enc_comparison_owner(socket_, owner, lambda_);
     return owner.output();
 }
 
@@ -432,33 +299,7 @@ void Client::run_enc_comparison_helper(const size_t &l)
 
 void Client::run_enc_comparison_helper(EncCompare_Helper &helper)
 {
-    boost::asio::streambuf output_buf;
-    std::ostream output_stream(&output_buf);
-    std::istream input_stream(&input_buf_);
-    std::string line;
-    
-    // setup the helper if necessary
-    if (!helper.is_set_up()) {
-        Protobuf::Enc_Compare_Setup_Message setup_message = readMessageFromSocket<Protobuf::Enc_Compare_Setup_Message>(socket_);
-        if (setup_message.has_bit_length()) {
-            helper.set_bit_length(setup_message.bit_length());
-        }
-        mpz_class c_z = convert_from_message(setup_message);
-        
-        helper.setup(c_z);
-    }
-    
-    // now, we need to run the comparison protocol
-    run_comparison_protocol_A(helper.comparator());
-    
-    Protobuf::BigInt c_r_l_message = readMessageFromSocket<Protobuf::BigInt>(socket_);
-    mpz_class c_r_l = convert_from_message(c_r_l_message);
-    
-    mpz_class c_t = helper.concludeProtocol(c_r_l);
-    
-    // send the last message to the server
-    Protobuf::BigInt c_t_message = convert_to_message(c_t);
-    sendMessageToSocket(socket_, c_t_message);
+    exec_enc_comparison_helper(socket_,helper);
 }
 
 
@@ -467,41 +308,11 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
 {
     assert(has_paillier_pk());
     assert(has_gm_pk());
-
-    size_t k = owner.elements_number();
+    
     size_t nbits = owner.bit_length();
-    //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
+    auto comparator_creator = [this,nbits](){ return new Compare_A(0,nbits,*server_paillier_,*server_gm_,rand_state_); };
 
-    cout << "Number of elements " << k << endl;
-    for (size_t i = 0; i < (k-1); i++) {
-//        cout << "Round " << i << endl;
-        Compare_A comparator(0,nbits,*server_paillier_,*server_gm_,rand_state_);
-//        LSIC_A comparator(0,nbits,*server_gm_);
-        
-        Rev_EncCompare_Owner rev_enc_owner = owner.create_current_round_rev_enc_compare_owner(&comparator);
-        
-        run_rev_enc_comparison_owner(rev_enc_owner);
-
-        mpz_class randomized_enc_max, randomized_value;
-        owner.next_round(randomized_enc_max, randomized_value);
-        
-        // send the randomizations to the server
-        sendIntToSocket(socket_,randomized_enc_max);
-        sendIntToSocket(socket_,randomized_value);
-        
-        // get the server's response
-        mpz_class new_enc_max, x, y;
-        new_enc_max = readIntFromSocket(socket_);
-        x = readIntFromSocket(socket_);
-        y = readIntFromSocket(socket_);
-        
-        owner.update_enc_max(new_enc_max, x, y);
-    }
-    
-    mpz_class permuted_argmax;
-    permuted_argmax = readIntFromSocket(socket_);
-    
-    owner.unpermuteResult(permuted_argmax.get_ui());
+    exec_linear_enc_argmax(socket_,owner, comparator_creator, lambda_);
     
     return owner.output();
 }

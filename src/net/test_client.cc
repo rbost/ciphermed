@@ -44,8 +44,8 @@ static void test_basic_client(const string &hostname)
         
         
 //        client.test_rev_enc_compare(64);
-        client.test_enc_compare(64);
-//        client.test_linear_enc_argmax();
+//        client.test_enc_compare(64);
+        client.test_linear_enc_argmax();
 //        client.test_fhe();
         
         
@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
     }
     string hostname(argv[1]);
 
-//    test_basic_client(hostname);
-    test_linear_classifier_client(hostname);
+    test_basic_client(hostname);
+//    test_linear_classifier_client(hostname);
     
     return 0;
 }
