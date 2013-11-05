@@ -16,12 +16,18 @@ Server_session* Linear_Classifier_Server::create_new_server_session(tcp::socket 
 
 void Linear_Classifier_Server_session::run_session()
 {
-    exchange_all_keys();
-    
-    send_model();
-    
-    EncCompare_Helper helper = create_enc_comparator_helper(linear_server_->bit_size(), false);
-    run_enc_comparison(helper);
+    try {
+        exchange_all_keys();
+        
+        send_model();
+        
+        EncCompare_Helper helper = create_enc_comparator_helper(linear_server_->bit_size(), false);
+        run_enc_comparison(helper);
+    } catch (std::exception& e) {
+        std::cout << "Exception: " << e.what() << std::endl;
+    }
+
+    delete this;
 }
 
 
