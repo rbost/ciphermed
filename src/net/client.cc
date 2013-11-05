@@ -472,6 +472,20 @@ EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, bool use_l
     return EncCompare_Owner(0,0,bit_size,*server_paillier_,comparator,rand_state_);
 }
 
+EncCompare_Helper Client::create_enc_comparator_helper(size_t bit_size, bool use_lsic)
+{
+    
+    Comparison_protocol_A *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_A(0,bit_size,*server_gm_);
+    }else{
+        comparator = new Compare_A(0,bit_size,*server_paillier_,*server_gm_,rand_state_);
+    }
+    
+    return EncCompare_Helper(bit_size,paillier_,comparator);
+}
+
 Rev_EncCompare_Owner Client::create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic)
 {
     assert(has_paillier_pk());
@@ -486,6 +500,19 @@ Rev_EncCompare_Owner Client::create_rev_enc_comparator_owner(size_t bit_size, bo
     }
     
     return Rev_EncCompare_Owner(0,0,bit_size,*server_paillier_,comparator,rand_state_);
+}
+
+Rev_EncCompare_Helper Client::create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic)
+{
+    Comparison_protocol_B *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_B(0,bit_size,gm_);
+    }else{
+        comparator = new Compare_B(0,bit_size,paillier_,gm_);
+    }
+    
+    return Rev_EncCompare_Helper(bit_size,paillier_,comparator);
 }
 
 

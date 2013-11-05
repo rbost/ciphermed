@@ -480,6 +480,19 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
 }
 
 
+EncCompare_Owner Server_session::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
+{
+    Comparison_protocol_B *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_B(0,bit_size,server_->gm());
+    }else{
+        comparator = new Compare_B(0,bit_size,server_->paillier(),server_->gm());
+    }
+    
+    return EncCompare_Owner(0,0,bit_size,*client_paillier_,comparator,rand_state_);
+}
+
 EncCompare_Helper Server_session::create_enc_comparator_helper(size_t bit_size, bool use_lsic)
 {
 
@@ -493,6 +506,20 @@ EncCompare_Helper Server_session::create_enc_comparator_helper(size_t bit_size, 
     
     return EncCompare_Helper(bit_size,server_->paillier(),comparator);
 }
+
+Rev_EncCompare_Owner Server_session::create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic)
+{
+    Comparison_protocol_A *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_A(0,bit_size,*client_gm_);
+    }else{
+        comparator = new Compare_A(0,bit_size,*client_paillier_,*client_gm_,rand_state_);
+    }
+    
+    return Rev_EncCompare_Owner(0,0,bit_size,*client_paillier_,comparator,rand_state_);
+}
+
 
 Rev_EncCompare_Helper Server_session::create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic)
 {

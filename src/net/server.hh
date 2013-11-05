@@ -79,7 +79,9 @@ public:
     void run_linear_enc_argmax(Linear_EncArgmax_Helper &helper);
 
     
+    EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
     EncCompare_Helper create_enc_comparator_helper(size_t bit_size, bool use_lsic);
+    Rev_EncCompare_Owner create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic);
     Rev_EncCompare_Helper create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic);
 
     void decrypt_gm(const mpz_class &c);

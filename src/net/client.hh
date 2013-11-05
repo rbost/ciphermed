@@ -58,8 +58,10 @@ public:
     
     /* to build comparators */
     EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
+    EncCompare_Helper create_enc_comparator_helper(size_t bit_size, bool use_lsic);
     Rev_EncCompare_Owner create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic);
-    
+    Rev_EncCompare_Helper create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic);
+
     unsigned int n_threads() const { return n_threads_; }
     void set_n_thread(unsigned int n) { assert(n > 0); n_threads_ = n; }
 protected:
