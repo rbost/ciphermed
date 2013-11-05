@@ -44,9 +44,9 @@ static void test_linear_classifier_server()
 
 int main()
 {
-    test_basic_server();
+//    test_basic_server();
     
-//    test_linear_classifier_server();
+    test_linear_classifier_server();
     
     return 0;
 }

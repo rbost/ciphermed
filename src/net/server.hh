@@ -27,6 +27,9 @@ public:
     
     /* Keys management */
 
+    void init_needed_keys(unsigned int keysize);
+    void init_GM(unsigned int keysize);
+    void init_Paillier(unsigned int keysize);
     void init_FHE_context();
     void init_FHE_key();
 

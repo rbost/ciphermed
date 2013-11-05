@@ -35,11 +35,7 @@ Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state,Key_de
 {
     gmp_randinit_set(rand_state_, state);
     
-    gm_ = new GM_priv(GM_priv::keygen(rand_state_,keysize),state);
-    paillier_ = new Paillier_priv_fast(Paillier_priv_fast::keygen(rand_state_,keysize), state);
-    
-    init_FHE_context();
-    init_FHE_key();
+    init_needed_keys(keysize);
 }
 
 Client::~Client()
@@ -57,6 +53,41 @@ void Client::connect(boost::asio::io_service& io_service, const string& hostname
     tcp::resolver::query query(hostname, to_string( PORT ));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     boost::asio::connect(socket_, endpoint_iterator);
+}
+
+void Client::init_needed_keys(unsigned int keysize)
+{
+    if (key_deps_desc_.need_client_gm) {
+        init_GM(keysize);
+    }
+    if (key_deps_desc_.need_client_paillier) {
+        init_Paillier(keysize);
+    }
+    if (key_deps_desc_.need_client_fhe) {
+        init_FHE_context();
+        init_FHE_key();
+    }
+    
+    if (key_deps_desc_.need_server_fhe) {
+        init_FHE_context();
+    }
+}
+
+void Client::init_GM(unsigned int keysize)
+{
+    if (gm_ != NULL) {
+        return;
+    }
+    gm_ = new GM_priv(GM_priv::keygen(rand_state_,keysize),rand_state_);
+}
+
+void Client::init_Paillier(unsigned int keysize)
+{
+    if (paillier_ != NULL) {
+        return;
+    }
+    paillier_ = new Paillier_priv_fast(Paillier_priv_fast::keygen(rand_state_,keysize), rand_state_);
+
 }
 
 void Client::init_FHE_context()

@@ -101,8 +101,8 @@ int main(int argc, char* argv[])
     }
     string hostname(argv[1]);
 
-    test_basic_client(hostname);
-//    test_linear_classifier_client(hostname);
+//    test_basic_client(hostname);
+    test_linear_classifier_client(hostname);
     
     return 0;
 }

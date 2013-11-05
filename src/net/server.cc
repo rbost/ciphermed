@@ -33,18 +33,51 @@ Server::Server(gmp_randstate_t state, Key_dependencies_descriptor key_deps_desc,
 {
     gmp_randinit_set(rand_state_, state);
 
-    gm_ = new GM_priv(GM_priv::keygen(rand_state_,keysize),state);
-    paillier_ = new Paillier_priv_fast(Paillier_priv_fast::keygen(rand_state_,keysize), state);
-
-    // generate an FHE private key
-    init_FHE_context();
-    init_FHE_key();
+    init_needed_keys(keysize);
 }
 
 Server::~Server()
 {
     delete fhe_sk_;
     delete fhe_context_;
+}
+
+void Server::init_needed_keys(unsigned int keysize)
+{
+    if (key_deps_desc_.need_server_gm) {
+        init_GM(keysize);
+    }
+    if (key_deps_desc_.need_server_paillier) {
+        init_Paillier(keysize);
+    }
+    if (key_deps_desc_.need_server_fhe) {
+        init_FHE_context();
+        init_FHE_key();
+    }
+    
+    
+    if (key_deps_desc_.need_client_fhe) {
+        init_FHE_context();
+    }
+
+}
+
+void Server::init_GM(unsigned int keysize)
+{
+    if (gm_ != NULL) {
+        return;
+    }
+    gm_ = new GM_priv(GM_priv::keygen(rand_state_,keysize),rand_state_);
+}
+
+void Server::init_Paillier(unsigned int keysize)
+{
+    if (paillier_ != NULL) {
+        return;
+    }
+    
+    paillier_ = new Paillier_priv_fast(Paillier_priv_fast::keygen(rand_state_,keysize), rand_state_);
+        
 }
 
 void Server::init_FHE_context()
