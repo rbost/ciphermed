@@ -39,8 +39,8 @@ static ZZX makeIrredPoly(long p, long d)
     return to_ZZX(BuildIrred_zz_pX(d));
 }
 
-Server::Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda)
-: paillier_(Paillier_priv_fast::keygen(state,nbits_p),state), gm_(GM_priv::keygen(state,nbits_gm),state), n_clients_(0), lambda_(lambda)
+Server::Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
+: paillier_(Paillier_priv_fast::keygen(state,keysize),state), gm_(GM_priv::keygen(state,keysize),state), n_clients_(0), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
 

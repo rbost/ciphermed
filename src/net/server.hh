@@ -17,7 +17,7 @@ class Server_session;
 
 class Server {
 public:  
-    Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda);
+    Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda);
     virtual ~Server();
     
     virtual Server_session* create_new_server_session(tcp::socket *socket);

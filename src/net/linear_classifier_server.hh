@@ -14,7 +14,7 @@ using namespace std;
 
 class  Linear_Classifier_Server : public Server{
 public:
-    Linear_Classifier_Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size);
+    Linear_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size);
     
     Server_session* create_new_server_session(tcp::socket *socket);
 

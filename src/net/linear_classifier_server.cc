@@ -3,8 +3,8 @@
 #include <net/message_io.hh>
 
 
-Linear_Classifier_Server::Linear_Classifier_Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size)
-: Server(state, nbits_p, abits_p, nbits_gm, lambda), model_(model), bit_size_(bit_size)
+Linear_Classifier_Server::Linear_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size)
+: Server(state, keysize, lambda), model_(model), bit_size_(bit_size)
 {
 
 }
