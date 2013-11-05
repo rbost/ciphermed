@@ -20,7 +20,6 @@ static void test_basic_client(const string &hostname)
         gmp_randinit_default(randstate);
         gmp_randseed_ui(randstate,time(NULL));
         
-        
         Tester_Client client(io_service, randstate,1024,100);
         
         client.connect(io_service, hostname);
@@ -76,7 +75,6 @@ static void test_linear_classifier_client(const string &hostname)
         values[1] = -1;
         values[2] = -1;
 
-        
         Linear_Classifier_Client client(io_service, randstate,1024,100,values,64);
         
         client.connect(io_service, hostname);

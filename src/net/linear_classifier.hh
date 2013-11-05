@@ -12,7 +12,6 @@
 
 using namespace std;
 
-
 class  Linear_Classifier_Server : public Server{
     public:
     Linear_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size);
@@ -22,6 +21,11 @@ class  Linear_Classifier_Server : public Server{
     vector<mpz_class> model() const { return model_; }
     size_t bit_size() const { return bit_size_; }
     
+    static Key_dependencies_descriptor key_deps_descriptor()
+    {
+        return Key_dependencies_descriptor(true,true,true,true,true,true);
+    }
+
     protected:
     vector<mpz_class> model_;
     size_t bit_size_;
@@ -44,7 +48,7 @@ class  Linear_Classifier_Server_session : public Server_session{
 
 class Linear_Classifier_Client : public Client{
 public:
-    Linear_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int nbits_gm, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size);
+    Linear_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size);
 
     void get_model();
     bool run();

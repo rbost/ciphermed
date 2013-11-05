@@ -16,10 +16,25 @@
 using namespace std;
 
 
+
+class  Tester_Server : public Server{
+    public:
+    Tester_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
+    : Server(state,Tester_Server::key_deps_descriptor(), keysize, lambda) {};
+    
+    Server_session* create_new_server_session(tcp::socket *socket);
+    
+    static Key_dependencies_descriptor key_deps_descriptor()
+    {
+        return Key_dependencies_descriptor(true,true,true,true,true,true);
+    }
+    
+};
+
 class Tester_Client : public Client{
     public:
     Tester_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
-    : Client(io_service,state,keysize,lambda) {};
+    : Client(io_service,state,Tester_Server::key_deps_descriptor(),keysize,lambda) {};
     
     mpz_class test_lsic(const mpz_class &a, size_t l);
     mpz_class test_compare(const mpz_class &b, size_t l);
@@ -35,16 +50,6 @@ class Tester_Client : public Client{
     vector<mpz_class> values_;
     vector<mpz_class> model_;
 };
-
-
-class  Tester_Server : public Server{
-    public:
-    Tester_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
-    : Server(state, keysize, lambda) {};
-    
-    Server_session* create_new_server_session(tcp::socket *socket);
-};
-
 
 class  Tester_Server_session : public Server_session{
     public:

@@ -12,7 +12,7 @@
 
 
 Linear_Classifier_Server::Linear_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size)
-: Server(state, keysize, lambda), model_(model), bit_size_(bit_size)
+: Server(state, Linear_Classifier_Server::key_deps_descriptor(), keysize, lambda), model_(model), bit_size_(bit_size)
 {
     
 }
@@ -46,8 +46,8 @@ void Linear_Classifier_Server_session::send_model()
 }
 
 
-Linear_Classifier_Client::Linear_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int nbits_gm, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size)
-: Client(io_service,state,nbits_gm,lambda), bit_size_(bit_size),values_(vals)
+Linear_Classifier_Client::Linear_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size)
+: Client(io_service,state,Linear_Classifier_Server::key_deps_descriptor(),keysize,lambda), bit_size_(bit_size),values_(vals)
 {
     
 }

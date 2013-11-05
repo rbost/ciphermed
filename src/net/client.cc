@@ -30,8 +30,8 @@ using boost::asio::ip::tcp;
 
 using namespace std;
 
-Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
-: socket_(io_service), gm_(GM_priv::keygen(state,keysize),state), paillier_(Paillier_priv_fast::keygen(state,keysize), state), server_paillier_(NULL), server_gm_(NULL), fhe_context_(NULL), server_fhe_pk_(NULL), fhe_sk_(NULL), n_threads_(2), lambda_(lambda)
+Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state,Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda)
+: socket_(io_service),key_deps_desc_(key_deps_desc), gm_(GM_priv::keygen(state,keysize),state), paillier_(Paillier_priv_fast::keygen(state,keysize), state), server_paillier_(NULL), server_gm_(NULL), fhe_context_(NULL), server_fhe_pk_(NULL), fhe_sk_(NULL), n_threads_(2), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
     

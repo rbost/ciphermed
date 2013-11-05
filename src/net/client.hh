@@ -9,18 +9,22 @@
 #include <crypto/paillier.hh>
 #include <crypto/gm.hh>
 
+#include <net/key_deps_descriptor.hh>
+
 using boost::asio::ip::tcp;
 
 using namespace std;
 
 class Client {
 public:
-    Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda);
+    Client(boost::asio::io_service& io_service, gmp_randstate_t state,Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda);
     ~Client();
     
     void connect(boost::asio::io_service& io_service, const string& hostname);
 
     tcp::socket& socket() { return socket_; }
+    
+    /* Keys management */
     
     void init_FHE_context();
     void init_FHE_key();
@@ -69,6 +73,7 @@ public:
 protected:
     tcp::socket socket_;
     
+    const Key_dependencies_descriptor key_deps_desc_;
     GM_priv gm_;
     Paillier_priv_fast paillier_;
     

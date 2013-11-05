@@ -14,7 +14,6 @@ static void test_basic_server()
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
-    
     cout << "Init server" << endl;
     Tester_Server server(randstate,1024,100);
     

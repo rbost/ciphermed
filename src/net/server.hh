@@ -9,6 +9,8 @@
 #include <crypto/paillier.hh>
 #include <crypto/gm.hh>
 
+#include <net/key_deps_descriptor.hh>
+
 using boost::asio::ip::tcp;
 
 using namespace std;
@@ -17,12 +19,14 @@ class Server_session;
 
 class Server {
 public:  
-    Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda);
+    Server(gmp_randstate_t state, Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda);
     virtual ~Server();
     
     virtual Server_session* create_new_server_session(tcp::socket *socket) = 0;
     void run();
     
+    /* Keys management */
+
     void init_FHE_context();
     void init_FHE_key();
 
@@ -38,6 +42,8 @@ public:
     const ZZX& fhe_G() const { return fhe_G_; }
     
 protected:
+    const Key_dependencies_descriptor key_deps_desc_;
+
     Paillier_priv_fast paillier_;
     GM_priv gm_;
     FHEcontext *fhe_context_;
