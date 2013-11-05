@@ -124,12 +124,25 @@ void Client::send_paillier_pk()
     sendMessageToSocket<Protobuf::Paillier_PK>(socket_,pk_message);
 }
 
-void Client::exchange_all_keys()
+void Client::exchange_keys()
 {
-    get_server_pk_gm();
-    get_server_pk_paillier();
-    send_gm_pk();
-    send_paillier_pk();
+    if (key_deps_desc_.need_server_gm) {
+        get_server_pk_gm();
+    }
+    if (key_deps_desc_.need_server_paillier) {
+        get_server_pk_paillier();
+    }
+    if (key_deps_desc_.need_server_fhe) {
+        get_server_pk_fhe();
+    }
+
+    
+    if (key_deps_desc_.need_client_gm) {
+        send_gm_pk();
+    }
+    if (key_deps_desc_.need_client_paillier) {
+        send_paillier_pk();
+    }
 }
 
 void Client::answer_server_pk_request()

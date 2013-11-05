@@ -44,7 +44,7 @@ public:
     void send_paillier_pk();
     void answer_server_pk_request();
 
-    void exchange_all_keys();
+    void exchange_keys();
 
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
     mpz_class run_lsic_A(LSIC_A *lsic);

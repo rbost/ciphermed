@@ -41,6 +41,7 @@ public:
     const FHESecKey& fhe_sk() const { return *fhe_sk_; } // I don't want anyone to modify the secret key
     const ZZX& fhe_G() const { return fhe_G_; }
     
+    Key_dependencies_descriptor key_deps_desc() const { return key_deps_desc_; }
 protected:
     const Key_dependencies_descriptor key_deps_desc_;
 
@@ -70,7 +71,7 @@ public:
     void send_fhe_pk();
     void get_client_pk_gm();
     void get_client_pk_paillier();
-    void exchange_all_keys();
+    void exchange_keys();
 
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
     mpz_class run_lsic_A(LSIC_A *lsic);

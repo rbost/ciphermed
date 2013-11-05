@@ -216,8 +216,7 @@ void Tester_Server_session::run_session()
     cout << id_ << ": Start session" << endl;
     
     // exchange keys
-    exchange_all_keys();
-    send_fhe_pk();
+    exchange_keys();
     
     // main loop to catch requests
     bool should_exit = false;

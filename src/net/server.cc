@@ -163,12 +163,27 @@ void Server_session::get_client_pk_paillier()
 }
 
 
-void Server_session::exchange_all_keys()
+void Server_session::exchange_keys()
 {
-    send_gm_pk();
-    send_paillier_pk();
-    get_client_pk_gm();
-    get_client_pk_paillier();
+    Key_dependencies_descriptor key_deps_desc = server_->key_deps_desc();
+    if (key_deps_desc.need_server_gm) {
+        send_gm_pk();
+    }
+    if (key_deps_desc.need_server_paillier) {
+        send_paillier_pk();
+    }
+    if (key_deps_desc.need_server_fhe) {
+        send_fhe_pk();
+    }
+
+    
+    if (key_deps_desc.need_client_gm) {
+        get_client_pk_gm();
+    }
+    if (key_deps_desc.need_client_paillier) {
+        get_client_pk_paillier();
+    }
+
 }
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)

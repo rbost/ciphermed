@@ -25,7 +25,7 @@ Server_session* Linear_Classifier_Server::create_new_server_session(tcp::socket 
 void Linear_Classifier_Server_session::run_session()
 {
     try {
-        exchange_all_keys();
+        exchange_keys();
         
         send_model();
         
@@ -61,7 +61,7 @@ void Linear_Classifier_Client::get_model()
 bool Linear_Classifier_Client::run()
 {
     // get public keys
-    exchange_all_keys();
+    exchange_keys();
     
     // get the model
     get_model();

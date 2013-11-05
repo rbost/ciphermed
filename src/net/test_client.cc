@@ -24,8 +24,8 @@ static void test_basic_client(const string &hostname)
         
         client.connect(io_service, hostname);
         
-        client.exchange_all_keys();
-        client.get_server_pk_fhe();
+        client.exchange_keys();
+//        client.get_server_pk_fhe();
         
         // server has b = 20
         
