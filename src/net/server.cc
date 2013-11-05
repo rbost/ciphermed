@@ -344,10 +344,17 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
     exec_linear_enc_argmax(*socket_, helper, comparator_creator);
 }
 
+Ctxt Server_session::change_encryption_scheme(const vector<mpz_class> &c_gm)
+{
+    EncryptedArray ea(server_->fhe_context(), server_->fhe_G());
+    
+    return exec_change_encryption_scheme_slots(*socket_, c_gm, *client_gm_ ,*client_fhe_pk_, ea, rand_state_);
+}
+
+
 void Server_session::run_change_encryption_scheme_slots_helper()
 {
-    cout << "Run change ES helper" << endl;
-    EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
+    EncryptedArray ea(server_->fhe_context(), server_->fhe_G());
     exec_change_encryption_scheme_slots_helper(*socket_, server_->gm(), server_->fhe_sk(), ea);
 }
 

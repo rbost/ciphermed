@@ -100,6 +100,7 @@ public:
 
     void run_linear_enc_argmax(Linear_EncArgmax_Helper &helper);
 
+    Ctxt change_encryption_scheme(const vector<mpz_class> &c_gm);
     void run_change_encryption_scheme_slots_helper();
     
     EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);

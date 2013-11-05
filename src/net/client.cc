@@ -319,9 +319,15 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
 
 Ctxt Client::change_encryption_scheme(const vector<mpz_class> &c_gm)
 {
-    EncryptedArray ea(server_fhe_pk_->getContext(), fhe_G_);
+    EncryptedArray ea(*fhe_context_, fhe_G_);
 
     return exec_change_encryption_scheme_slots(socket_, c_gm, *server_gm_ ,*server_fhe_pk_, ea, rand_state_);
+}
+
+void Client::run_change_encryption_scheme_slots_helper()
+{
+    EncryptedArray ea(*fhe_context_, fhe_G_);
+    exec_change_encryption_scheme_slots_helper(socket_, *gm_, *fhe_sk_, ea);
 }
 
 EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
