@@ -67,7 +67,7 @@ void Tester_Client::test_enc_compare(size_t l)
 
     send_test_query(Test_Request_Request_Type_TEST_ENC_COMPARE);
 
-    bool res = run_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    bool res = run_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
     cout<< "\nResult is " << res << endl;
     cout << "Result should be " << (a < b) << endl;
 }
@@ -88,7 +88,7 @@ void Tester_Client::test_rev_enc_compare(size_t l)
 
     send_test_query(Test_Request_Request_Type_TEST_REV_ENC_COMPARE);
 
-    run_rev_enc_compare(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    run_rev_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
     
     cout << "\nResult should be " << (a < b) << endl;
 }
@@ -215,14 +215,14 @@ void Tester_Server_session::run_session()
                 case Test_Request_Request_Type_TEST_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Enc Compare" << endl;
-                    run_enc_comparison(0, client_gm_);
+                    run_enc_comparison_helper(0);
                 }
                     break;
                     
                 case Test_Request_Request_Type_TEST_REV_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Rev Enc Compare" << endl;
-                    bool b = run_rev_enc_comparison(0);
+                    bool b = run_rev_enc_comparison_helper(0);
                     cout << id_ << ": Rev Enc Compare result: " << b << endl;
                 }
                     break;

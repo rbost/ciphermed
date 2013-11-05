@@ -46,6 +46,8 @@ public:
     const ZZX& fhe_G() const { return fhe_G_; }
     
     Key_dependencies_descriptor key_deps_desc() const { return key_deps_desc_; }
+    
+    unsigned int lambda() const { return lambda_; }
 protected:
     const Key_dependencies_descriptor key_deps_desc_;
 
@@ -86,11 +88,15 @@ public:
     void run_lsic_B(LSIC_B *lsic);
     void run_priv_compare_B(Compare_B *comparator);
 
-    void run_enc_comparison(const size_t &l, GM *gm);
-    void run_enc_comparison(EncCompare_Helper &helper);
+    bool run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l);
+    bool run_enc_comparison_owner(EncCompare_Owner &owner);
+    void run_enc_comparison_helper(const size_t &l);
+    void run_enc_comparison_helper(EncCompare_Helper &helper);
     
-    bool run_rev_enc_comparison(const size_t &l);
-    bool run_rev_enc_comparison(Rev_EncCompare_Helper &helper);
+    void run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l);
+    void run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner);
+    bool run_rev_enc_comparison_helper(const size_t &l);
+    bool run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper);
 
     void run_linear_enc_argmax(Linear_EncArgmax_Helper &helper);
 

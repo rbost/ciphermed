@@ -32,7 +32,7 @@ void Linear_Classifier_Server_session::run_session()
         send_model();
         
         EncCompare_Helper helper = create_enc_comparator_helper(linear_server_->bit_size(), false);
-        run_enc_comparison(helper);
+        run_enc_comparison_helper(helper);
     } catch (std::exception& e) {
         std::cout << "Exception: " << e.what() << std::endl;
     }
@@ -81,7 +81,7 @@ bool Linear_Classifier_Client::run()
     EncCompare_Owner owner = create_enc_comparator_owner(bit_size_,false);
     owner.set_input(v, w);
     
-    bool result = run_enc_comparison(owner);
+    bool result = run_enc_comparison_owner(owner);
     
     return result;
 }

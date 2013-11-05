@@ -56,11 +56,15 @@ public:
     void run_lsic_B(LSIC_B *lsic);
     void run_priv_compare_B(Compare_B *comparator);
 
-    bool run_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l);
-    bool run_enc_comparison(EncCompare_Owner &owner);
+    bool run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l);
+    bool run_enc_comparison_owner(EncCompare_Owner &owner);
+    void run_enc_comparison_helper(const size_t &l);
+    void run_enc_comparison_helper(EncCompare_Helper &helper);
 
-    void run_rev_enc_compare(const mpz_class &a, const mpz_class &b, size_t l);
-    void run_rev_enc_comparison(Rev_EncCompare_Owner &owner);
+    void run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l);
+    void run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner);
+    bool run_rev_enc_comparison_helper(const size_t &l);
+    bool run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper);
 
     size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner);
     

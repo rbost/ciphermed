@@ -389,17 +389,54 @@ mpz_class Server_session::run_priv_compare_A(Compare_A *comparator)
     return comparator->output();
 }
 
+// we suppose that the client already has the server's public key for Paillier
+void Server_session::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l)
+{
+    //    LSIC_A comparator(0,l,*server_gm_);
+    Compare_A comparator(0,l,*client_paillier_,*client_gm_,rand_state_);
+    
+    Rev_EncCompare_Owner owner(a,b,l,*client_paillier_,&comparator,rand_state_);
+    run_rev_enc_comparison_owner(owner);
+}
 
-bool Server_session::run_rev_enc_comparison(const size_t &l)
+void Server_session::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
+{
+    size_t l = owner.bit_length();
+    mpz_class c_z(owner.setup(server_->lambda()));
+    
+    
+    boost::asio::streambuf out_buff;
+    std::ostream output_stream(&out_buff);
+    string line;
+    
+    Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
+    sendMessageToSocket(*socket_, setup_message);
+    
+    // the server does some computation, we just have to run the lsic
+    
+    run_comparison_protocol_A(owner.comparator());
+    
+    Protobuf::BigInt c_z_l_message = readMessageFromSocket<Protobuf::BigInt>(*socket_);
+    mpz_class c_z_l = convert_from_message(c_z_l_message);
+    
+    
+    mpz_class c_t = owner.concludeProtocol(c_z_l);
+    
+    // send the last message to the server
+    Protobuf::BigInt c_t_message = convert_to_message(c_t);
+    sendMessageToSocket(*socket_, c_t_message);
+}
+
+bool Server_session::run_rev_enc_comparison_helper(const size_t &l)
 {
 //    LSIC_B comparator(0,l,server_->gm());
     Compare_B comparator(0,l,server_->paillier(),server_->gm());
     
     Rev_EncCompare_Helper helper(l,server_->paillier(),&comparator);
-    return run_rev_enc_comparison(helper);
+    return run_rev_enc_comparison_helper(helper);
 }
 
-bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
+bool Server_session::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 {
     boost::asio::streambuf output_buf;
     std::ostream output_stream(&output_buf);
@@ -436,27 +473,60 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
 
 }
 
-void Server_session::run_enc_comparison(const size_t &l, GM *gm)
+bool Server_session::run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l)
 {
-    LSIC_A lsic(0,l,*gm);
-    EncCompare_Helper helper(l,server_->paillier(),&lsic);
-    run_enc_comparison(helper);
+    assert(client_paillier_ != NULL);
+
+#warning WE MUST BE ABLE TO CHOOSE COMPARISON PROTOCOL
+
+    LSIC_B lsic(0,l,server_->gm());
+    EncCompare_Owner owner(a,b,l,*client_paillier_,&lsic,rand_state_);
+    return run_enc_comparison_owner(owner);
 }
 
-void Server_session::run_enc_comparison(EncCompare_Helper &helper)
+bool Server_session::run_enc_comparison_owner(EncCompare_Owner &owner)
+{
+    assert(client_paillier_ != NULL);
+    
+    // now run the protocol itself
+    size_t l = owner.bit_length();
+    mpz_class c_z(owner.setup(server_->lambda()));
+    
+    Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
+    sendMessageToSocket(*socket_, setup_message);
+    
+    // the server does some computation, we just have to run the lsic
+    
+    run_comparison_protocol_B(owner.comparator());
+    
+    mpz_class c_r_l(owner.get_c_r_l());
+    Protobuf::BigInt c_r_l_message = convert_to_message(c_r_l);
+    sendMessageToSocket(*socket_, c_r_l_message);
+    
+    // wait for the answer of the owner
+    Protobuf::BigInt c_t_message = readMessageFromSocket<Protobuf::BigInt>(*socket_);
+    mpz_class c_t = convert_from_message(c_t_message);
+    
+    owner.decryptResult(c_t);
+    return owner.output();
+}
+
+void Server_session::run_enc_comparison_helper(const size_t &l)
+{
+    assert(client_gm_ != NULL);
+    
+#warning WE MUST BE ABLE TO CHOOSE COMPARISON PROTOCOL
+    LSIC_A lsic(0,l,*client_gm_);
+    EncCompare_Helper helper(l,server_->paillier(),&lsic);
+    run_enc_comparison_helper(helper);
+}
+
+void Server_session::run_enc_comparison_helper(EncCompare_Helper &helper)
 {
     boost::asio::streambuf output_buf;
     std::ostream output_stream(&output_buf);
     std::istream input_stream(&input_buf_);
     std::string line;
-//    
-//    boost::asio::read_until(*socket_, input_buf_, "\r\n");
-//    std::string s( (std::istreambuf_iterator<char>( input_stream )),
-//                  (std::istreambuf_iterator<char>()) );
-//    cout << s << endl;
-//
-//    std::istream input_stream(&input_buf_);
-//    std::string line;
 
     // setup the helper if necessary
     if (!helper.is_set_up()) {
@@ -496,7 +566,7 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
 
         Rev_EncCompare_Helper rev_enc_helper = helper.rev_enc_compare_helper(&comparator);
         
-        run_rev_enc_comparison(rev_enc_helper);
+        run_rev_enc_comparison_helper(rev_enc_helper);
         
         mpz_class randomized_enc_max, randomized_value;
         
