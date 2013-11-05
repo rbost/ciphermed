@@ -178,3 +178,26 @@ Protobuf::FHE_PK get_pk_message(const FHEPubKey& pubKey)
     
     return pk_message;
 }
+
+
+Ctxt convert_from_message(const Protobuf::FHE_Ctxt &m, const FHEPubKey &pubkey)
+{
+    Ctxt c(pubkey);
+    
+    std::istringstream stream(m.content());
+    stream >> c;
+    
+    return c;
+}
+
+Protobuf::FHE_Ctxt convert_to_message(const Ctxt &c)
+{
+    Protobuf::FHE_Ctxt m;
+    std::ostringstream stream;
+    stream << c;
+    m.set_content(stream.str().c_str());
+    
+    return m;
+
+}
+

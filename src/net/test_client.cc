@@ -44,10 +44,10 @@ static void test_basic_client(const string &hostname)
         
         
         
-        //        client.test_rev_enc_compare(5);
-        //        client.test_enc_compare(5);
-        client.test_linear_enc_argmax();
-        //        client.test_fhe();
+//        client.test_rev_enc_compare(5);
+//        client.test_enc_compare(5);
+//        client.test_linear_enc_argmax();
+        client.test_fhe();
         
         
         client.disconnect();

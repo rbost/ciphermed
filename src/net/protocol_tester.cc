@@ -169,8 +169,14 @@ void Tester_Client::test_fhe()
     get_server_pk_fhe();
     
     EncryptedArray ea(server_fhe_pk_->getContext(), fhe_G_);
+    
+    vector<long> bits(ea.size());
+    for (size_t i = 0; i < bits.size(); i++) {
+        bits[i] = gmp_urandomb_ui(rand_state_,1);
+    }
+    
     PlaintextArray p0(ea);
-    p0.encode(0);
+    p0.encode(bits);
     p0.print(cout);
     
     Ctxt c0(*server_fhe_pk_);
@@ -178,9 +184,12 @@ void Tester_Client::test_fhe()
     
     boost::asio::streambuf buff;
     std::ostream buff_stream(&buff);
-    
-    buff_stream << DECRYPT_FHE << "\n"<< c0 << "\n\r\n";
+
+    buff_stream << DECRYPT_FHE << "\n\r\n";
     boost::asio::write(socket_, buff);
+
+    Protobuf::FHE_Ctxt m = convert_to_message(c0);
+    sendMessageToSocket<Protobuf::FHE_Ctxt>(socket_,m);
 }
 
 
@@ -251,9 +260,7 @@ void Tester_Server_session::run_session()
                     c.set_str(line,10);
                     decrypt_gm(c);
                 }else if(line == DECRYPT_FHE) {
-                    Ctxt c(server_->fhe_sk());
-                    input_stream >> c;
-                    decrypt_fhe(c);
+                    decrypt_fhe();
                 }else if(line == START_REV_ENC_COMPARE){
                     // get the bit length and launch the helper
                     bool b = run_rev_enc_comparison(0);

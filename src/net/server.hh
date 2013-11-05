@@ -85,7 +85,7 @@ public:
     Rev_EncCompare_Helper create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic);
 
     void decrypt_gm(const mpz_class &c);
-    void decrypt_fhe(const Ctxt &c);
+    void decrypt_fhe();
 
     unsigned int id() const {return id_;}
     

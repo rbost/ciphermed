@@ -33,3 +33,6 @@ Protobuf::Paillier_PK get_pk_message(const Paillier *paillier);
 
 FHEPubKey* create_from_pk_message(const Protobuf::FHE_PK &m_pk, const FHEcontext &fhe_context);
 Protobuf::FHE_PK get_pk_message(const FHEPubKey& pubKey);
+
+Ctxt convert_from_message(const Protobuf::FHE_Ctxt &m, const FHEPubKey &pubkey);
+Protobuf::FHE_Ctxt convert_to_message(const Ctxt &c);
