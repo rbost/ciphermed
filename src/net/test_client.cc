@@ -5,7 +5,7 @@
 #include <mpc/linear_enc_argmax.hh>
 
 #include <net/client.hh>
-#include <net/linear_classifier_client.hh>
+#include <net/linear_classifier.hh>
 #include <net/protocol_tester.hh>
 
 

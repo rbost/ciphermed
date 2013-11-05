@@ -4,7 +4,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
 
-#include <net/linear_classifier_client.hh>
+#include <net/protocol_tester.hh>
 
 #include <protobuf/protobuf_conversion.hh>
 #include <net/message_io.hh>
@@ -15,7 +15,6 @@
 #include <FHE.h>
 #include <EncryptedArray.h>
 
-#include <net/protocol_tester.hh>
 
 
 
