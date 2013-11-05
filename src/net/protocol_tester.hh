@@ -28,6 +28,7 @@ class Tester_Client : public Client{
     void test_linear_enc_argmax();
     void test_decrypt_gm(const mpz_class &c);
     void test_fhe();
+    void disconnect();
     
     protected:
     size_t bit_size_;

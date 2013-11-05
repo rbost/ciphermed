@@ -514,15 +514,3 @@ Rev_EncCompare_Helper Client::create_rev_enc_comparator_helper(size_t bit_size, 
     
     return Rev_EncCompare_Helper(bit_size,paillier_,comparator);
 }
-
-
-void Client::disconnect()
-{
-    cout << "Disconnect" << endl;
-    
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    buff_stream << DISCONNECT << "\n\r\n";
-    boost::asio::write(socket_, buff);
-}
-

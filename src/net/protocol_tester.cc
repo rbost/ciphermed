@@ -184,6 +184,18 @@ void Tester_Client::test_fhe()
 }
 
 
+void Tester_Client::disconnect()
+{
+    cout << "Disconnect" << endl;
+    
+    boost::asio::streambuf buff;
+    std::ostream buff_stream(&buff);
+    buff_stream << DISCONNECT << "\n\r\n";
+    boost::asio::write(socket_, buff);
+}
+
+
+
 Server_session* Tester_Server::create_new_server_session(tcp::socket *socket)
 {
     Tester_Server_session *s = new Tester_Server_session(this, rand_state_, n_clients_++, socket);

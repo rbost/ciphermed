@@ -19,7 +19,6 @@ public:
     ~Client();
     
     void connect(boost::asio::io_service& io_service, const string& hostname);
-    void disconnect();
 
     tcp::socket& socket() { return socket_; }
     
