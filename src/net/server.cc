@@ -409,6 +409,7 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
     
     // setup the helper if necessary
     if (!helper.is_set_up()) {
+        cout << "Have to setup" << endl;
         Protobuf::Enc_Compare_Setup_Message setup_message = readMessageFromSocket<Protobuf::Enc_Compare_Setup_Message>(*socket_);
         if (setup_message.has_bit_length()) {
             helper.set_bit_length(setup_message.bit_length());
@@ -418,7 +419,7 @@ bool Server_session::run_rev_enc_comparison(Rev_EncCompare_Helper &helper)
         helper.setup(c_z);
     }
 
-    // now, we need to run the LSIC protocol
+    // now, we need to run the comparison protocol
     run_comparison_protocol_B(helper.comparator());
     
     
@@ -448,8 +449,15 @@ void Server_session::run_enc_comparison(EncCompare_Helper &helper)
     std::ostream output_stream(&output_buf);
     std::istream input_stream(&input_buf_);
     std::string line;
-    
-    
+//    
+//    boost::asio::read_until(*socket_, input_buf_, "\r\n");
+//    std::string s( (std::istreambuf_iterator<char>( input_stream )),
+//                  (std::istreambuf_iterator<char>()) );
+//    cout << s << endl;
+//
+//    std::istream input_stream(&input_buf_);
+//    std::string line;
+
     // setup the helper if necessary
     if (!helper.is_set_up()) {
         Protobuf::Enc_Compare_Setup_Message setup_message = readMessageFromSocket<Protobuf::Enc_Compare_Setup_Message>(*socket_);

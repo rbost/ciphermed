@@ -12,6 +12,7 @@
 #include <net/client.hh>
 #include <net/server.hh>
 
+#include <proto_src/test_requests.pb.h>
 
 using namespace std;
 
@@ -36,12 +37,13 @@ class Tester_Client : public Client{
     Tester_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
     : Client(io_service,state,Tester_Server::key_deps_descriptor(),keysize,lambda) {};
     
+    void send_test_query(enum Test_Request_Request_Type type);
+
     mpz_class test_lsic(const mpz_class &a, size_t l);
     mpz_class test_compare(const mpz_class &b, size_t l);
     void test_rev_enc_compare(size_t l);
     void test_enc_compare(size_t l);
     void test_linear_enc_argmax();
-    void test_decrypt_gm(const mpz_class &c);
     void test_fhe();
     void disconnect();
     
@@ -58,7 +60,8 @@ class  Tester_Server_session : public Server_session{
     : Server_session(server,state,id,socket){};
     
     void run_session();
-    
+    enum Test_Request_Request_Type get_test_query();
+
     /* Test functions */
     void test_lsic(const mpz_class &b,size_t l);
     void test_compare(const mpz_class &a,size_t l);

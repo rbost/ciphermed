@@ -371,18 +371,12 @@ void Client::run_rev_enc_comparison(Rev_EncCompare_Owner &owner)
  
     size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda_));
-//    cout << "l = " << l << endl;
 
     
     boost::asio::streambuf out_buff;
     std::ostream output_stream(&out_buff);
     string line;
     
-    // send the start message
-//    output_stream << START_REV_ENC_COMPARE << "\n";
-//    output_stream << "\r\n";
-//
-//    boost::asio::write(socket_, out_buff);
     Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
     sendMessageToSocket(socket_, setup_message);
 
@@ -420,7 +414,6 @@ bool Client::run_enc_comparison(EncCompare_Owner &owner)
     // now run the protocol itself
     size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda_));
-//    cout << "l = " << l << endl;
 
     Protobuf::Enc_Compare_Setup_Message setup_message = convert_to_message(c_z,l);
     sendMessageToSocket(socket_, setup_message);
