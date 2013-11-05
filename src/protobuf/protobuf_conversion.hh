@@ -8,6 +8,8 @@
 #include <crypto/paillier.hh>
 #include <mpc/lsic.hh>
 
+#include <FHE.h>
+
 mpz_class convert_from_message(const Protobuf::BigInt &m);
 Protobuf::BigInt convert_to_message(const mpz_class &v);
 
@@ -28,3 +30,6 @@ Paillier* create_from_pk_message(const Protobuf::Paillier_PK &m_pk, gmp_randstat
 
 Protobuf::GM_PK get_pk_message(const GM *gm);
 Protobuf::Paillier_PK get_pk_message(const Paillier *paillier);
+
+FHEPubKey* create_from_pk_message(const Protobuf::FHE_PK &m_pk, const FHEcontext &fhe_context);
+Protobuf::FHE_PK get_pk_message(const FHEPubKey& pubKey);

@@ -1,5 +1,6 @@
 #include <gmpxx.h>
 #include <string>
+#include <sstream>
 
 #include <protobuf/protobuf_conversion.hh>
 
@@ -152,6 +153,28 @@ Protobuf::Paillier_PK get_pk_message(const Paillier *paillier)
     
     *(pk_message.mutable_n()) = convert_to_message(pk[0]);
     *(pk_message.mutable_g()) = convert_to_message(pk[1]);
+    
+    return pk_message;
+}
+
+FHEPubKey* create_from_pk_message(const Protobuf::FHE_PK &m_pk, const FHEcontext &fhe_context)
+{
+    FHEPubKey *fhe_pk = new FHEPubKey(fhe_context);
+    
+    std::istringstream stream(m_pk.content());
+    stream >> (*fhe_pk);
+    
+    return fhe_pk;
+}
+
+Protobuf::FHE_PK get_pk_message(const FHEPubKey& pubKey)
+{
+    Protobuf::FHE_PK pk_message;
+
+    std::ostringstream stream;
+    stream << pubKey;
+    
+    pk_message.set_content(stream.str().c_str());
     
     return pk_message;
 }
