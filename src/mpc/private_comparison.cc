@@ -68,6 +68,8 @@ Compare_A::Compare_A(const mpz_class &x, const size_t &l, Paillier &paillier, GM
 {
     s_ = 1 - 2*gmp_urandomb_ui(state,1);
     paillier_one_ = paillier_.pubkey()[1]; // g is an encryption of 1
+    gmp_randinit_set(randstate_, state);
+
 }
 
 vector<mpz_class> Compare_A::compute_w(const std::vector<mpz_class> &c_b)
@@ -170,6 +172,12 @@ vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, un
     
     return c_rand;
 }
+
+void Compare_A::shuffle(std::vector<mpz_class> &c)
+{
+    random_shuffle(c.begin(),c.end(),[this](int n){ return gmp_urandomm_ui(randstate_,n); });
+}
+
 
 void Compare_A::unblind(const mpz_class &t_prime)
 {

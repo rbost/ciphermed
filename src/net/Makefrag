@@ -1,5 +1,5 @@
 OBJDIRS     += net
-NETSRC  := net_utils.cc client.cc server.cc
+NETSRC  := net_utils.cc exec_protocol.cc client.cc server.cc
 NETOBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
 
 DEMO_SRC := linear_classifier.cc protocol_tester.cc

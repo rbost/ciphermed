@@ -21,6 +21,8 @@ public:
     std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c);
     std::vector<mpz_class> rerandomize_parallel(const std::vector<mpz_class> &c, unsigned int n_threads = 4);
     
+    void shuffle(std::vector<mpz_class> &c);
+
     void unblind(const mpz_class &t_prime);
     
     GM gm() const { return gm_; }
@@ -28,6 +30,7 @@ public:
     virtual void set_bit_length(size_t l) {bit_length_ = l;}
 
     mpz_class output() const { return res_; }
+    
 protected:
     mpz_class a_;
     long s_;
@@ -37,6 +40,8 @@ protected:
     
     mpz_class res_;
     mpz_class paillier_one_;
+    
+    gmp_randstate_t randstate_;
 };
 
 class Compare_B : public Comparison_protocol_B {
