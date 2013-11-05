@@ -92,7 +92,7 @@ void Client::get_server_pk_gm()
     }
 
     Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(socket_);
-    cout << "Received PK" << endl;
+    cout << "Received GM PK" << endl;
     server_gm_ = create_from_pk_message(pk,rand_state_);
 }
 
@@ -104,7 +104,7 @@ void Client::get_server_pk_paillier()
     }
 
     Protobuf::Paillier_PK pk = readMessageFromSocket<Protobuf::Paillier_PK>(socket_);
-    cout << "Received PK" << endl;
+    cout << "Received Paillier PK" << endl;
     server_paillier_ = create_from_pk_message(pk,rand_state_);
 }
 
@@ -113,25 +113,10 @@ void Client::get_server_pk_fhe()
     if (server_fhe_pk_) {
         return;
     }
-    cout << "Request server's pubkey for FHE" << endl;
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    buff_stream <<  GET_FHE_PK <<"\n\r\n";
-    boost::asio::write(socket_, buff);
-    string line;
-
-    boost::asio::read_until(socket_, input_buf_, END_FHE_PK);
-    std::istream input_stream(&input_buf_);
     
-    do {
-        getline(input_stream,line);
-    } while (line != FHE_PK);
-    // get the public key
-    
-
-
-    server_fhe_pk_ = new FHEPubKey(*fhe_context_);
-    input_stream >> *server_fhe_pk_;
+    Protobuf::FHE_PK pk = readMessageFromSocket<Protobuf::FHE_PK>(socket_);
+    cout << "Received FHE PK" << endl;
+    server_fhe_pk_ = create_from_pk_message(pk,*fhe_context_);
 }
 
 void Client::send_gm_pk()

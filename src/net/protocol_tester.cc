@@ -208,6 +208,7 @@ void Tester_Server_session::run_session()
     
     // exchange keys
     exchange_all_keys();
+    send_fhe_pk();
     
     // main loop to catch requests
     bool should_exit = false;

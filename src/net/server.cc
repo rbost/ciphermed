@@ -142,16 +142,10 @@ void Server_session::send_fhe_pk()
     const FHEPubKey& publicKey = server_->fhe_sk(); // cast so we only send the public informations
     cout << id_ << ": Send FHE PK" << endl;
 
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
- 
+    Protobuf::FHE_PK pk_message = get_pk_message(publicKey);
     
-    buff_stream << FHE_PK << "\n";
-    buff_stream << publicKey << "\n";
-    
-    buff_stream << END_FHE_PK << "\r\n";
+    sendMessageToSocket<Protobuf::FHE_PK>(*socket_,pk_message);
 
-    boost::asio::write(*socket_, buff);
 }
 
 void Server_session::get_client_pk_gm()
@@ -161,7 +155,7 @@ void Server_session::get_client_pk_gm()
     }
 
     Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
-    cout << id_ << ":Received GM PK" << endl;
+    cout << id_ << ": Received GM PK" << endl;
     client_gm_ = create_from_pk_message(pk,rand_state_);
 }
 
@@ -172,7 +166,7 @@ void Server_session::get_client_pk_paillier()
     }
 
     Protobuf::Paillier_PK pk = readMessageFromSocket<Protobuf::Paillier_PK>(*socket_);
-    cout << id_ << ":Received Paillier PK" << endl;
+    cout << id_ << ": Received Paillier PK" << endl;
     client_paillier_ = create_from_pk_message(pk,rand_state_);
 }
 
@@ -184,27 +178,6 @@ void Server_session::exchange_all_keys()
     get_client_pk_gm();
     get_client_pk_paillier();
 }
-
-//void Server_session::get_client_gm_pk()
-//{
-//    Protobuf::PK_Status m;
-//    m.set_type(Protobuf::PK_Status_Key_Type_GM);
-//    
-//    if (client_gm_) {
-//        m.set_state(Protobuf::PK_Status_Key_Status_HAS_PK);
-//        
-//        cout << id_ << ": Alread has client's PK" << endl;
-//    }else{
-//        m.set_state(Protobuf::PK_Status_Key_Status_NEED_PK);
-//        
-//        sendMessageToSocket<Protobuf::PK_Status>(*socket_,m);
-//        
-//        Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
-//        client_gm_ = create_from_pk_message(pk,rand_state_);
-//        cout << id_ << ": Received client's PK" << endl;
-//    }
-//}
-
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
