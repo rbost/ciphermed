@@ -31,9 +31,12 @@ using boost::asio::ip::tcp;
 using namespace std;
 
 Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state,Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda)
-: socket_(io_service),key_deps_desc_(key_deps_desc), gm_(GM_priv::keygen(state,keysize),state), paillier_(Paillier_priv_fast::keygen(state,keysize), state), server_paillier_(NULL), server_gm_(NULL), fhe_context_(NULL), server_fhe_pk_(NULL), fhe_sk_(NULL), n_threads_(2), lambda_(lambda)
+: socket_(io_service),key_deps_desc_(key_deps_desc), gm_(NULL), paillier_(NULL), server_paillier_(NULL), server_gm_(NULL), fhe_context_(NULL), server_fhe_pk_(NULL), fhe_sk_(NULL), n_threads_(2), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
+    
+    gm_ = new GM_priv(GM_priv::keygen(rand_state_,keysize),state);
+    paillier_ = new Paillier_priv_fast(Paillier_priv_fast::keygen(rand_state_,keysize), state);
     
     init_FHE_context();
     init_FHE_key();
@@ -115,13 +118,15 @@ void Client::get_server_pk_fhe()
 
 void Client::send_gm_pk()
 {
-    Protobuf::GM_PK pk_message = get_pk_message(&gm_);
+    assert(gm_!=NULL);
+    Protobuf::GM_PK pk_message = get_pk_message(gm_);
     sendMessageToSocket<Protobuf::GM_PK>(socket_,pk_message);
 }
 
 void Client::send_paillier_pk()
 {
-    Protobuf::Paillier_PK pk_message = get_pk_message(&paillier_);
+    assert(paillier_ != NULL);
+    Protobuf::Paillier_PK pk_message = get_pk_message(paillier_);
     sendMessageToSocket<Protobuf::Paillier_PK>(socket_,pk_message);
 }
 
@@ -370,8 +375,9 @@ bool Client::run_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l
 {
     assert(has_paillier_pk());
     assert(has_gm_pk());
-    
-    LSIC_B lsic(0,l,gm_);
+    assert(gm_!=NULL);
+
+    LSIC_B lsic(0,l,*gm_);
     EncCompare_Owner owner(a,b,l,*server_paillier_,&lsic,rand_state_);
     return run_enc_comparison(owner);
 }
@@ -450,13 +456,15 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
 EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
 {
     assert(has_paillier_pk());
+    assert(gm_!=NULL);
 
     Comparison_protocol_B *comparator;
     
     if (use_lsic) {
-        comparator = new LSIC_B(0,bit_size,gm_);
+        comparator = new LSIC_B(0,bit_size,*gm_);
     }else{
-        comparator = new Compare_B(0,bit_size,paillier_,gm_);
+        assert(paillier_ != NULL);
+        comparator = new Compare_B(0,bit_size,*paillier_,*gm_);
     }
 
     return EncCompare_Owner(0,0,bit_size,*server_paillier_,comparator,rand_state_);
@@ -464,7 +472,8 @@ EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, bool use_l
 
 EncCompare_Helper Client::create_enc_comparator_helper(size_t bit_size, bool use_lsic)
 {
-    
+    assert(paillier_ != NULL);
+
     Comparison_protocol_A *comparator;
     
     if (use_lsic) {
@@ -473,7 +482,7 @@ EncCompare_Helper Client::create_enc_comparator_helper(size_t bit_size, bool use
         comparator = new Compare_A(0,bit_size,*server_paillier_,*server_gm_,rand_state_);
     }
     
-    return EncCompare_Helper(bit_size,paillier_,comparator);
+    return EncCompare_Helper(bit_size,*paillier_,comparator);
 }
 
 Rev_EncCompare_Owner Client::create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic)
@@ -494,13 +503,16 @@ Rev_EncCompare_Owner Client::create_rev_enc_comparator_owner(size_t bit_size, bo
 
 Rev_EncCompare_Helper Client::create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic)
 {
+    assert(gm_!=NULL);
+    assert(paillier_ != NULL);
+
     Comparison_protocol_B *comparator;
     
     if (use_lsic) {
-        comparator = new LSIC_B(0,bit_size,gm_);
+        comparator = new LSIC_B(0,bit_size,*gm_);
     }else{
-        comparator = new Compare_B(0,bit_size,paillier_,gm_);
+        comparator = new Compare_B(0,bit_size,*paillier_,*gm_);
     }
     
-    return Rev_EncCompare_Helper(bit_size,paillier_,comparator);
+    return Rev_EncCompare_Helper(bit_size,*paillier_,comparator);
 }

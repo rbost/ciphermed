@@ -29,9 +29,9 @@ public:
     void init_FHE_context();
     void init_FHE_key();
 
-    const GM_priv& gm() { return gm_; };
-    vector<mpz_class> gm_pk() const { return gm_.pubkey(); }
-    vector<mpz_class> gm_sk() const { return {gm_.pubkey()[0],gm_.pubkey()[1],gm_.privkey()[0],gm_.privkey()[1]}; }
+    const GM_priv& gm() { assert(gm_!=NULL); return *gm_; };
+    vector<mpz_class> gm_pk() const { assert(gm_!=NULL); return gm_->pubkey(); }
+    vector<mpz_class> gm_sk() const { assert(gm_!=NULL); return {gm_->pubkey()[0],gm_->pubkey()[1],gm_->privkey()[0],gm_->privkey()[1]}; }
     
     bool has_paillier_pk() const { return (server_paillier_ != NULL); }
     bool has_gm_pk() const { return (server_gm_ != NULL); }
@@ -74,8 +74,8 @@ protected:
     tcp::socket socket_;
     
     const Key_dependencies_descriptor key_deps_desc_;
-    GM_priv gm_;
-    Paillier_priv_fast paillier_;
+    GM_priv *gm_;
+    Paillier_priv_fast *paillier_;
     
     Paillier *server_paillier_;
     GM *server_gm_;

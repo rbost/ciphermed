@@ -31,12 +31,12 @@ public:
     void init_FHE_key();
 
     
-    Paillier_priv_fast& paillier() { return paillier_; };
-    vector<mpz_class> paillier_pk() const { return paillier_.pubkey(); }
-    vector<mpz_class> paillier_sk() const { return paillier_.privkey(); }
-    GM_priv& gm() { return gm_; };
-    vector<mpz_class> gm_pk() const { return gm_.pubkey(); }
-    vector<mpz_class> gm_sk() const { return {gm_.pubkey()[0],gm_.pubkey()[1],gm_.privkey()[0],gm_.privkey()[1]}; }
+    Paillier_priv_fast& paillier() { assert(paillier_!=NULL); return *paillier_; };
+    vector<mpz_class> paillier_pk() const { assert(paillier_!=NULL); return paillier_->pubkey(); }
+    vector<mpz_class> paillier_sk() const { assert(paillier_!=NULL); return paillier_->privkey(); }
+    GM_priv& gm() { assert(gm_!=NULL); return *gm_; };
+    vector<mpz_class> gm_pk() const { assert(gm_!=NULL); return gm_->pubkey(); }
+    vector<mpz_class> gm_sk() const { assert(gm_!=NULL); return {gm_->pubkey()[0],gm_->pubkey()[1],gm_->privkey()[0],gm_->privkey()[1]}; }
     
     const FHESecKey& fhe_sk() const { return *fhe_sk_; } // I don't want anyone to modify the secret key
     const FHEcontext fhe_context() const { return *fhe_context_; }
@@ -46,8 +46,8 @@ public:
 protected:
     const Key_dependencies_descriptor key_deps_desc_;
 
-    Paillier_priv_fast paillier_;
-    GM_priv gm_;
+    Paillier_priv_fast *paillier_;
+    GM_priv *gm_;
     FHEcontext *fhe_context_;
     FHESecKey *fhe_sk_;
     ZZX fhe_G_;

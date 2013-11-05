@@ -29,9 +29,12 @@ using boost::asio::ip::tcp;
 using namespace std;
 
 Server::Server(gmp_randstate_t state, Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda)
-: key_deps_desc_(key_deps_desc), paillier_(Paillier_priv_fast::keygen(state,keysize),state), gm_(GM_priv::keygen(state,keysize),state), fhe_context_(NULL), fhe_sk_(NULL), n_clients_(0), lambda_(lambda)
+: key_deps_desc_(key_deps_desc), paillier_(NULL), gm_(NULL), fhe_context_(NULL), fhe_sk_(NULL), n_clients_(0), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
+
+    gm_ = new GM_priv(GM_priv::keygen(rand_state_,keysize),state);
+    paillier_ = new Paillier_priv_fast(Paillier_priv_fast::keygen(rand_state_,keysize), state);
 
     // generate an FHE private key
     init_FHE_context();
