@@ -95,7 +95,7 @@ void Server::run()
 
 
 Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
-: server_(server), socket_(socket), client_gm_(NULL), client_paillier_(NULL), id_(id)
+: server_(server), socket_(socket), client_gm_(NULL), client_paillier_(NULL), client_fhe_pk_(NULL), id_(id)
 {
     gmp_randinit_set(rand_state_, state);
 }
@@ -163,6 +163,18 @@ void Server_session::get_client_pk_paillier()
 }
 
 
+void Server_session::get_client_pk_fhe()
+{
+    if (client_fhe_pk_) {
+        return;
+    }
+    
+    Protobuf::FHE_PK pk = readMessageFromSocket<Protobuf::FHE_PK>(*socket_);
+    cout << id_ << ": Received FHE PK" << endl;
+    client_fhe_pk_ = create_from_pk_message(pk,server_->fhe_context());
+}
+
+
 void Server_session::exchange_keys()
 {
     Key_dependencies_descriptor key_deps_desc = server_->key_deps_desc();
@@ -182,6 +194,9 @@ void Server_session::exchange_keys()
     }
     if (key_deps_desc.need_client_paillier) {
         get_client_pk_paillier();
+    }
+    if (key_deps_desc.need_client_fhe) {
+        get_client_pk_fhe();
     }
 
 }

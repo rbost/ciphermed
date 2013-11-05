@@ -42,7 +42,7 @@ public:
     
     void send_gm_pk();
     void send_paillier_pk();
-    void answer_server_pk_request();
+    void send_fhe_pk();
 
     void exchange_keys();
 

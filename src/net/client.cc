@@ -36,6 +36,7 @@ Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state,Key_de
     gmp_randinit_set(rand_state_, state);
     
     init_FHE_context();
+    init_FHE_key();
 }
 
 Client::~Client()
@@ -124,6 +125,16 @@ void Client::send_paillier_pk()
     sendMessageToSocket<Protobuf::Paillier_PK>(socket_,pk_message);
 }
 
+void Client::send_fhe_pk()
+{
+    const FHEPubKey& publicKey = *fhe_sk_; // cast so we only send the public informations
+    
+    Protobuf::FHE_PK pk_message = get_pk_message(publicKey);
+    
+    sendMessageToSocket<Protobuf::FHE_PK>(socket_,pk_message);
+    
+}
+
 void Client::exchange_keys()
 {
     if (key_deps_desc_.need_server_gm) {
@@ -143,20 +154,8 @@ void Client::exchange_keys()
     if (key_deps_desc_.need_client_paillier) {
         send_paillier_pk();
     }
-}
-
-void Client::answer_server_pk_request()
-{
-    // we need to send the GM public key to the server if needed
-    // wait for the server to tell us about that:
-    Protobuf::PK_Status status_message = readMessageFromSocket<Protobuf::PK_Status>(socket_);
-    
-    if (status_message.type() == Protobuf::PK_Status_Key_Type_GM && status_message.state() == Protobuf::PK_Status_Key_Status_NEED_PK) {
-        // send PK
-        cout << "Send GM PK" << endl;
-        Protobuf::GM_PK pk_message = get_pk_message(&gm());
-        
-        sendMessageToSocket<Protobuf::GM_PK>(socket_,pk_message);
+    if (key_deps_desc_.need_client_fhe) {
+        send_fhe_pk();
     }
 }
 

@@ -73,10 +73,6 @@ void Tester_Client::test_enc_compare(size_t l)
     
     boost::asio::write(socket_, out_buff);
     
-    
-    // wait for the pk request from the server
-    answer_server_pk_request();
-    
     mpz_class c_a, c_b;
     
     bool res = run_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);

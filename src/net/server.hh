@@ -39,6 +39,7 @@ public:
     vector<mpz_class> gm_sk() const { return {gm_.pubkey()[0],gm_.pubkey()[1],gm_.privkey()[0],gm_.privkey()[1]}; }
     
     const FHESecKey& fhe_sk() const { return *fhe_sk_; } // I don't want anyone to modify the secret key
+    const FHEcontext fhe_context() const { return *fhe_context_; }
     const ZZX& fhe_G() const { return fhe_G_; }
     
     Key_dependencies_descriptor key_deps_desc() const { return key_deps_desc_; }
@@ -71,6 +72,7 @@ public:
     void send_fhe_pk();
     void get_client_pk_gm();
     void get_client_pk_paillier();
+    void get_client_pk_fhe();
     void exchange_keys();
 
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
@@ -107,6 +109,7 @@ protected:
 
     GM *client_gm_;
     Paillier *client_paillier_;
+    FHEPubKey *client_fhe_pk_;
     gmp_randstate_t rand_state_;
     
     unsigned int id_;
