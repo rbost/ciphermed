@@ -1,10 +1,14 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
+
 #include <boost/asio.hpp>
 
 #include <mpc/lsic.hh>
 #include <gmpxx.h>
+
+#include <FHE.h>
 
 using namespace std;
 
@@ -23,3 +27,11 @@ istream& parseInt(istream& in, mpz_class &i, int base);
 
 void sendIntToSocket(boost::asio::ip::tcp::socket &socket, const mpz_class& m);
 mpz_class readIntFromSocket(boost::asio::ip::tcp::socket &socket);
+
+
+void send_int_array_to_socket(boost::asio::ip::tcp::socket &socket, const vector<mpz_class>& m);
+vector<mpz_class> read_int_array_from_socket(boost::asio::ip::tcp::socket &socket);
+
+
+void send_fhe_ctxt_to_socket(boost::asio::ip::tcp::socket &socket, const Ctxt &c);
+Ctxt read_fhe_ctxt_from_socket(boost::asio::ip::tcp::socket &socket, const FHEPubKey &pubkey);

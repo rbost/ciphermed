@@ -344,6 +344,11 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
     exec_linear_enc_argmax(*socket_, helper, comparator_creator);
 }
 
+void Server_session::run_change_encryption_scheme_slots_helper()
+{
+    EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
+    exec_change_encryption_scheme_slots_helper(*socket_, server_->gm(), server_->fhe_sk(), ea);
+}
 
 EncCompare_Owner Server_session::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
 {

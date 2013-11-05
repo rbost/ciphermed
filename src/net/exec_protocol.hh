@@ -16,6 +16,9 @@
 
 #include <math/util_gmp_rand.h>
 
+#include <FHE.h>
+#include <EncryptedArray.h>
+
 #include <functional>
 
 using boost::asio::ip::tcp;
@@ -38,3 +41,7 @@ void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &
 
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda);
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator);
+
+
+Ctxt exec_change_encryption_scheme_slots(tcp::socket &socket, const vector<mpz_class> &c_gm, GM &gm, const FHEPubKey& publicKey, const EncryptedArray &ea, gmp_randstate_t randstate);
+void exec_change_encryption_scheme_slots_helper(tcp::socket &socket, GM_priv &gm, const FHEPubKey &publicKey, const EncryptedArray &ea);

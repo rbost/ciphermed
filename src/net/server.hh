@@ -100,6 +100,7 @@ public:
 
     void run_linear_enc_argmax(Linear_EncArgmax_Helper &helper);
 
+    void run_change_encryption_scheme_slots_helper();
     
     EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
     EncCompare_Helper create_enc_comparator_helper(size_t bit_size, bool use_lsic);

@@ -3,6 +3,9 @@
 #include <protobuf/protobuf_conversion.hh>
 #include <net/net_utils.hh>
 
+#include <mpc/change_encryption_scheme.hh>
+
+
 void exec_comparison_protocol_A(tcp::socket &socket, Comparison_protocol_A *comparator, unsigned int n_threads)
 {
     if(typeid(*comparator) == typeid(LSIC_A)) {
@@ -300,5 +303,25 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper
     sendIntToSocket(socket, permuted_argmax);
 }
 
+Ctxt exec_change_encryption_scheme_slots(tcp::socket &socket, const vector<mpz_class> &c_gm, GM &gm, const FHEPubKey& publicKey, const EncryptedArray &ea, gmp_randstate_t randstate)
+{
+    Change_ES_FHE_to_GM_slots_A switcher;
+    vector<mpz_class> c_gm_blinded = switcher.blind(c_gm,gm,randstate, ea.size());
+    
+    send_int_array_to_socket(socket, c_gm_blinded);
+    
+    Ctxt c_blinded_fhe = read_fhe_ctxt_from_socket(socket, publicKey);
+    
+    
+    Ctxt c_fhe = switcher.unblind(c_blinded_fhe,publicKey,ea);
 
+    return c_fhe;
+}
 
+void exec_change_encryption_scheme_slots_helper(tcp::socket &socket, GM_priv &gm, const FHEPubKey &publicKey, const EncryptedArray &ea)
+{
+    vector<mpz_class> c_gm_blinded = read_int_array_from_socket(socket);
+    Ctxt c_blinded_fhe = Change_ES_FHE_to_GM_slots_B::decrypt_encrypt(c_gm_blinded,gm,publicKey,ea);
+    
+    send_fhe_ctxt_to_socket(socket, c_blinded_fhe);
+}

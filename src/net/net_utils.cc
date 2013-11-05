@@ -100,3 +100,28 @@ mpz_class readIntFromSocket(boost::asio::ip::tcp::socket &socket)
     Protobuf::BigInt msg = readMessageFromSocket<Protobuf::BigInt>(socket);
     return convert_from_message(msg);
 }
+
+void send_int_array_to_socket(boost::asio::ip::tcp::socket &socket, const vector<mpz_class>& m)
+{
+    Protobuf::BigIntArray msg = convert_to_message(m);
+    sendMessageToSocket(socket,msg);
+}
+
+vector<mpz_class> read_int_array_from_socket(boost::asio::ip::tcp::socket &socket)
+{
+    Protobuf::BigIntArray msg = readMessageFromSocket<Protobuf::BigIntArray>(socket);
+    return convert_from_message(msg);
+}
+
+
+void send_fhe_ctxt_to_socket(boost::asio::ip::tcp::socket &socket, const Ctxt &c)
+{
+    Protobuf::FHE_Ctxt msg = convert_to_message(c);
+    sendMessageToSocket(socket,msg);
+}
+
+Ctxt read_fhe_ctxt_from_socket(boost::asio::ip::tcp::socket &socket, const FHEPubKey &pubkey)
+{
+    Protobuf::FHE_Ctxt msg = readMessageFromSocket<Protobuf::FHE_Ctxt>(socket);
+    return convert_from_message(msg,pubkey);
+}

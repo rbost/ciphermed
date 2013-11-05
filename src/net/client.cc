@@ -317,6 +317,13 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
     return owner.output();
 }
 
+Ctxt Client::change_encryption_scheme(const vector<mpz_class> &c_gm)
+{
+    EncryptedArray ea(server_fhe_pk_->getContext(), fhe_G_);
+
+    return exec_change_encryption_scheme_slots(socket_, c_gm, *server_gm_ ,*server_fhe_pk_, ea, rand_state_);
+}
+
 EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
 {
     assert(has_paillier_pk());
