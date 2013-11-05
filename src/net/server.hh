@@ -58,7 +58,9 @@ public:
     void send_paillier_pk();
     void send_gm_pk();
     void send_fhe_pk();
-    void get_client_gm_pk();
+    void get_client_pk_gm();
+    void get_client_pk_paillier();
+    void exchange_all_keys();
 
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
     mpz_class run_lsic_A(LSIC_A *lsic);
@@ -92,6 +94,7 @@ protected:
     boost::asio::streambuf input_buf_;
 
     GM *client_gm_;
+    Paillier *client_paillier_;
     gmp_randstate_t rand_state_;
     
     unsigned int id_;

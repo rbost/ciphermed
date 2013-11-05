@@ -41,8 +41,8 @@ static ZZX makeIrredPoly(long p, long d)
     return to_ZZX(BuildIrred_zz_pX(d));
 }
 
-Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int nbits_gm, unsigned int lambda)
-: socket_(io_service), gm_(GM_priv::keygen(state,nbits_gm),state), server_paillier_(NULL), server_gm_(NULL), server_fhe_pk_(NULL),n_threads_(2), lambda_(lambda)
+Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
+: socket_(io_service), gm_(GM_priv::keygen(state,keysize),state), paillier_(Paillier_priv_fast::keygen(state,keysize), state), server_paillier_(NULL), server_gm_(NULL), server_fhe_pk_(NULL),n_threads_(2), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
     
@@ -90,12 +90,7 @@ void Client::get_server_pk_gm()
     if (server_gm_) {
         return;
     }
-    cout << "Request server's pubkey for GM" << endl;
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    buff_stream << GET_GM_PK <<"\n\r\n";
-    boost::asio::write(socket_, buff);
-    
+
     Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(socket_);
     cout << "Received PK" << endl;
     server_gm_ = create_from_pk_message(pk,rand_state_);
@@ -107,12 +102,7 @@ void Client::get_server_pk_paillier()
     if (server_paillier_) {
         return;
     }
-    cout << "Request server's pubkey for Paillier" << endl;
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    buff_stream << GET_PAILLIER_PK <<"\n\r\n";
-    boost::asio::write(socket_, buff);
-    
+
     Protobuf::Paillier_PK pk = readMessageFromSocket<Protobuf::Paillier_PK>(socket_);
     cout << "Received PK" << endl;
     server_paillier_ = create_from_pk_message(pk,rand_state_);
@@ -142,6 +132,26 @@ void Client::get_server_pk_fhe()
 
     server_fhe_pk_ = new FHEPubKey(*fhe_context_);
     input_stream >> *server_fhe_pk_;
+}
+
+void Client::send_gm_pk()
+{
+    Protobuf::GM_PK pk_message = get_pk_message(&gm_);
+    sendMessageToSocket<Protobuf::GM_PK>(socket_,pk_message);
+}
+
+void Client::send_paillier_pk()
+{
+    Protobuf::Paillier_PK pk_message = get_pk_message(&paillier_);
+    sendMessageToSocket<Protobuf::Paillier_PK>(socket_,pk_message);
+}
+
+void Client::exchange_all_keys()
+{
+    get_server_pk_gm();
+    get_server_pk_paillier();
+    send_gm_pk();
+    send_paillier_pk();
 }
 
 void Client::answer_server_pk_request()
@@ -447,6 +457,23 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
     return owner.output();
 }
 
+Rev_EncCompare_Owner Client::create_rev_enc_comparator(size_t bit_size, bool use_lsic)
+{
+    assert(has_gm_pk());
+
+    Comparison_protocol_A *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_A(0,bit_size,*server_gm_);
+    }else{
+        assert(has_paillier_pk());
+        comparator = new Compare_A(0,bit_size,*server_paillier_,*server_gm_,rand_state_);
+    }
+    
+    return Rev_EncCompare_Owner(0,0,bit_size,*server_paillier_,comparator,rand_state_);
+}
+
+
 void Client::disconnect()
 {
     cout << "Disconnect" << endl;
@@ -501,8 +528,8 @@ void Client::test_enc_compare(size_t l)
     //    cout << "a = " << a << endl;
     //    cout << "b = " << b << endl;
     
-    get_server_pk_gm();
-    get_server_pk_paillier();
+//    get_server_pk_gm();
+//    get_server_pk_paillier();
     
     
     boost::asio::streambuf out_buff;
@@ -534,8 +561,8 @@ void Client::test_rev_enc_compare(size_t l)
     //    cout << "a = " << a << endl;
     //    cout << "b = " << b << endl;
     
-    get_server_pk_gm();
-    get_server_pk_paillier();
+//    get_server_pk_gm();
+//    get_server_pk_paillier();
     
     boost::asio::streambuf out_buff;
     std::ostream output_stream(&out_buff);
@@ -554,8 +581,8 @@ void Client::test_rev_enc_compare(size_t l)
 
 void Client::test_linear_enc_argmax()
 {
-    get_server_pk_gm();
-    get_server_pk_paillier();
+//    get_server_pk_gm();
+//    get_server_pk_paillier();
 
     size_t k = 5;
     size_t nbits = 100;
@@ -583,7 +610,10 @@ void Client::test_linear_enc_argmax()
     
     Linear_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
     
+    ScopedTimer *t = new ScopedTimer("Linear enc argmax");
+    
     run_linear_enc_argmax(owner);
+    delete t;
     
     size_t mpc_argmax = owner.output();
     assert(real_argmax == mpc_argmax);
@@ -638,11 +668,12 @@ int main(int argc, char* argv[])
         gmp_randseed_ui(randstate,time(NULL));
         
 
-        Client client(io_service, randstate,1024,80);
+        Client client(io_service, randstate,1024,100);
 
         string hostname(argv[1]);
         client.connect(io_service, hostname);
 
+        client.exchange_all_keys();
         // server has b = 20
 
 /*        ScopedTimer *t_lsic = new ScopedTimer("LSIC");

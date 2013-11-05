@@ -104,7 +104,7 @@ void Server::run()
 
 
 Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
-: server_(server), socket_(socket), client_gm_(NULL), id_(id)
+: server_(server), socket_(socket), client_gm_(NULL), client_paillier_(NULL), id_(id)
 {
     gmp_randinit_set(rand_state_, state);
 }
@@ -119,6 +119,9 @@ Server_session::~Server_session()
 void Server_session::run_session()
 {
     cout << id_ << ": Start session" << endl;
+    
+    // exchange keys
+    exchange_all_keys();
     
     // main loop to catch requests
     bool should_exit = false;
@@ -170,7 +173,6 @@ void Server_session::run_session()
                 
                 cout << id_ << ": Rev Enc Compare result: " << b << endl;
             }else if(line == START_ENC_COMPARE){
-                get_client_gm_pk();
                 run_enc_comparison(0, client_gm_);
             }else if(line == TEST_ENC_ARGMAX){
                 Linear_EncArgmax_Helper helper(100,5,server_->paillier());
@@ -231,25 +233,57 @@ void Server_session::send_fhe_pk()
     boost::asio::write(*socket_, buff);
 }
 
-void Server_session::get_client_gm_pk()
+void Server_session::get_client_pk_gm()
 {
-    Protobuf::PK_Status m;
-    m.set_type(Protobuf::PK_Status_Key_Type_GM);
-    
     if (client_gm_) {
-        m.set_state(Protobuf::PK_Status_Key_Status_HAS_PK);
-        
-        cout << id_ << ": Alread has client's PK" << endl;
-    }else{
-        m.set_state(Protobuf::PK_Status_Key_Status_NEED_PK);
-        
-        sendMessageToSocket<Protobuf::PK_Status>(*socket_,m);
-        
-        Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
-        client_gm_ = create_from_pk_message(pk,rand_state_);
-        cout << id_ << ": Received client's PK" << endl;
+        return;
     }
+
+    Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
+    cout << id_ << ":Received GM PK" << endl;
+    client_gm_ = create_from_pk_message(pk,rand_state_);
 }
+
+void Server_session::get_client_pk_paillier()
+{
+    if (client_paillier_) {
+        return;
+    }
+
+    Protobuf::Paillier_PK pk = readMessageFromSocket<Protobuf::Paillier_PK>(*socket_);
+    cout << id_ << ":Received Paillier PK" << endl;
+    client_paillier_ = create_from_pk_message(pk,rand_state_);
+}
+
+
+void Server_session::exchange_all_keys()
+{
+    send_gm_pk();
+    send_paillier_pk();
+    get_client_pk_gm();
+    get_client_pk_paillier();
+}
+
+//void Server_session::get_client_gm_pk()
+//{
+//    Protobuf::PK_Status m;
+//    m.set_type(Protobuf::PK_Status_Key_Type_GM);
+//    
+//    if (client_gm_) {
+//        m.set_state(Protobuf::PK_Status_Key_Status_HAS_PK);
+//        
+//        cout << id_ << ": Alread has client's PK" << endl;
+//    }else{
+//        m.set_state(Protobuf::PK_Status_Key_Status_NEED_PK);
+//        
+//        sendMessageToSocket<Protobuf::PK_Status>(*socket_,m);
+//        
+//        Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
+//        client_gm_ = create_from_pk_message(pk,rand_state_);
+//        cout << id_ << ": Received client's PK" << endl;
+//    }
+//}
+
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {

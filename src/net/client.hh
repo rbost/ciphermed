@@ -15,7 +15,7 @@ using namespace std;
 
 class Client {
 public:
-    Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int nbits_gm, unsigned int lambda);
+    Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda);
     ~Client();
     
     void connect(boost::asio::io_service& io_service, const string& hostname);
@@ -34,7 +34,11 @@ public:
     void get_server_pk_paillier();
     void get_server_pk_fhe();
     
+    void send_gm_pk();
+    void send_paillier_pk();
     void answer_server_pk_request();
+
+    void exchange_all_keys();
 
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
     mpz_class run_lsic_A(LSIC_A *lsic);
@@ -52,6 +56,8 @@ public:
 
     size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner);
     
+    /* to build comparators */
+    Rev_EncCompare_Owner create_rev_enc_comparator(size_t bit_size, bool use_lsic);
     
     /* test functions */
     mpz_class test_lsic(const mpz_class &a, size_t l);
@@ -68,6 +74,7 @@ protected:
     tcp::socket socket_;
     
     GM_priv gm_;
+    Paillier_priv_fast paillier_;
     
     Paillier *server_paillier_;
     GM *server_gm_;
