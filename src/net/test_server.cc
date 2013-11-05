@@ -6,6 +6,7 @@
 
 #include <net/server.hh>
 #include <net/linear_classifier_server.hh>
+#include <net/protocol_tester.hh>
 
 static void test_basic_server()
 {
@@ -15,7 +16,7 @@ static void test_basic_server()
     
     
     cout << "Init server" << endl;
-    Server server(randstate,1024,0,1024,100);
+    Tester_Server server(randstate,1024,100);
     
     cout << "Start server" << endl;
     server.run();
@@ -36,7 +37,7 @@ static void test_linear_classifier_server()
     model[3] = 0;
     
     cout << "Init server" << endl;
-    Linear_Classifier_Server server(randstate,1024,0,1024,100,model,64);
+    Linear_Classifier_Server server(randstate,1024,100,model,64);
     
     cout << "Start server" << endl;
     server.run();
@@ -44,9 +45,9 @@ static void test_linear_classifier_server()
 
 int main()
 {
-//    test_basic_server();
+    test_basic_server();
     
-    test_linear_classifier_server();
+//    test_linear_classifier_server();
     
     return 0;
 }

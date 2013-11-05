@@ -101,11 +101,6 @@ void Server::run()
     }
 }
 
-Server_session* Server::create_new_server_session(tcp::socket *socket)
-{
-    Server_session *s = new Server_session(this, rand_state_, n_clients_++, socket);
-    return s;
-}
 
 Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
 : server_(server), socket_(socket), client_gm_(NULL), client_paillier_(NULL), id_(id)
@@ -118,84 +113,6 @@ Server_session::~Server_session()
     if (client_gm_) {
         delete client_gm_;
     }
-}
-
-void Server_session::run_session()
-{
-    cout << id_ << ": Start session" << endl;
-    
-    // exchange keys
-    exchange_all_keys();
-    
-    // main loop to catch requests
-    bool should_exit = false;
-    try {
-        for (;!should_exit; ) {
-        
-        // wait for a complete request
-        boost::asio::read_until(*socket_, input_buf_, "\r\n");
-        
-        std::istream input_stream(&input_buf_);
-        std::string line;
-        
-    //    std::string s( (std::istreambuf_iterator<char>( input_stream )),
-    //                  (std::istreambuf_iterator<char>()) );
-    //    cout << s << endl;
-
-        // parse the input
-        do {
-            getline(input_stream,line);
-//            cout << line;
-            if (line == "") {
-                continue;
-            }
-
-            if (line == GET_PAILLIER_PK) {
-                send_paillier_pk();
-            }else if(line == GET_GM_PK) {
-                send_gm_pk();
-            }else if(line == GET_FHE_PK) {
-                send_fhe_pk();
-            }else if(line == START_LSIC) {
-                mpz_class b(20);
-                test_lsic(b,100);
-            }else if(line == START_PRIV_COMP) {
-                mpz_class b(20);
-                test_compare(b,100);
-            }else if(line == DECRYPT_GM) {
-                mpz_class c;
-                getline(input_stream,line);
-                c.set_str(line,10);
-                decrypt_gm(c);
-            }else if(line == DECRYPT_FHE) {
-                Ctxt c(server_->fhe_sk());
-                input_stream >> c;
-                decrypt_fhe(c);
-            }else if(line == START_REV_ENC_COMPARE){
-                // get the bit length and launch the helper
-                bool b = run_rev_enc_comparison(0);
-                
-                cout << id_ << ": Rev Enc Compare result: " << b << endl;
-            }else if(line == START_ENC_COMPARE){
-                run_enc_comparison(0, client_gm_);
-            }else if(line == TEST_ENC_ARGMAX){
-                Linear_EncArgmax_Helper helper(100,5,server_->paillier());
-                run_linear_enc_argmax(helper);
-            }else if(line == DISCONNECT){
-                should_exit = true;
-                break;
-            }
-        } while (!input_stream.eof());
-    }
-    cout << id_ << ": Disconnected" << endl;
-
-        
-    } catch (std::exception& e) {
-        std::cout << "Exception: " << e.what() << std::endl;
-    }
-
-    // we are done, delete ourself
-    delete this;
 }
 
 void Server_session::send_paillier_pk()
@@ -608,18 +525,3 @@ void Server_session::decrypt_fhe(const Ctxt &c)
     pp0.print(cout);
 }
 
-/* TESTS */
-
-void Server_session::test_lsic(const mpz_class &b,size_t l)
-{
-    cout << id_ << ": Start LSIC" << endl;
-    LSIC_B lsic(b,l, server_->gm());
-    run_lsic_B(&lsic);
-}
-
-void Server_session::test_compare(const mpz_class &a,size_t l)
-{
-    cout << id_ << ": Test compare" << endl;
-    Compare_B comparator(a,l,server_->paillier(),server_->gm());
-    run_priv_compare_B(&comparator);
-}

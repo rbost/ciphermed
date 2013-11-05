@@ -60,15 +60,6 @@ public:
     EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
     Rev_EncCompare_Owner create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic);
     
-    /* test functions */
-    mpz_class test_lsic(const mpz_class &a, size_t l);
-    mpz_class test_compare(const mpz_class &b, size_t l);
-    void test_rev_enc_compare(size_t l);
-    void test_enc_compare(size_t l);
-    void test_linear_enc_argmax();
-    void test_decrypt_gm(const mpz_class &c);
-    void test_fhe();
-    
     unsigned int n_threads() const { return n_threads_; }
     void set_n_thread(unsigned int n) { assert(n > 0); n_threads_ = n; }
 protected:

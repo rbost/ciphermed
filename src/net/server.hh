@@ -20,7 +20,7 @@ public:
     Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda);
     virtual ~Server();
     
-    virtual Server_session* create_new_server_session(tcp::socket *socket);
+    virtual Server_session* create_new_server_session(tcp::socket *socket) = 0;
     void run();
     
     Paillier_priv_fast& paillier() { return paillier_; };
@@ -53,7 +53,7 @@ public:
     Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket);
     virtual ~Server_session();
     
-    virtual void run_session();
+    virtual void run_session() = 0;
     
     void send_paillier_pk();
     void send_gm_pk();
@@ -87,11 +87,6 @@ public:
 
     unsigned int id() const {return id_;}
     
-    
-    /* Test functions */
-    void test_lsic(const mpz_class &b,size_t l);
-    void test_compare(const mpz_class &a,size_t l);
-
 protected:
     Server *server_;
     tcp::socket *socket_;

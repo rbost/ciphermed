@@ -6,6 +6,7 @@
 
 #include <net/client.hh>
 #include <net/linear_classifier_client.hh>
+#include <net/protocol_tester.hh>
 
 
 static void test_basic_client(const string &hostname)
@@ -20,7 +21,7 @@ static void test_basic_client(const string &hostname)
         gmp_randseed_ui(randstate,time(NULL));
         
         
-        Client client(io_service, randstate,1024,100);
+        Tester_Client client(io_service, randstate,1024,100);
         
         client.connect(io_service, hostname);
         
@@ -100,8 +101,8 @@ int main(int argc, char* argv[])
     }
     string hostname(argv[1]);
 
-//    test_basic_client(hostname);
-    test_linear_classifier_client(hostname);
+    test_basic_client(hostname);
+//    test_linear_classifier_client(hostname);
     
     return 0;
 }
