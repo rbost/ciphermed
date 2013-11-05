@@ -265,3 +265,40 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, 
     owner.unpermuteResult(permuted_argmax.get_ui());
 }
 
+void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator)
+{
+    size_t k = helper.elements_number();
+    //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
+    
+    for (size_t i = 0; i < k - 1; i++) {
+        //        cout << "Round " << i << endl;
+//        Compare_B comparator(0,nbits,server_->paillier(),server_->gm());
+        //        LSIC_B comparator(0,nbits,server_->gm());
+        Comparison_protocol_B *comparator = comparator_creator();
+
+        Rev_EncCompare_Helper rev_enc_helper = helper.rev_enc_compare_helper(comparator);
+        
+        exec_rev_enc_comparison_helper(socket, rev_enc_helper);
+        
+        mpz_class randomized_enc_max, randomized_value;
+        
+        // read the values sent by the client
+        randomized_enc_max = readIntFromSocket(socket);
+        randomized_value = readIntFromSocket(socket);
+        
+        // and send the server's response
+        mpz_class new_enc_max, x, y;
+        helper.update_argmax(rev_enc_helper.output(), randomized_enc_max, randomized_value, i+1, new_enc_max, x, y);
+        
+        sendIntToSocket(socket,new_enc_max);
+        sendIntToSocket(socket,x);
+        sendIntToSocket(socket,y);
+    }
+    
+    cout << "Send result" << endl;
+    mpz_class permuted_argmax = helper.permuted_argmax();
+    sendIntToSocket(socket, permuted_argmax);
+}
+
+
+

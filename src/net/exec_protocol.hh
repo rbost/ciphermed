@@ -37,3 +37,4 @@ void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &
 
 
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda);
+void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator);
