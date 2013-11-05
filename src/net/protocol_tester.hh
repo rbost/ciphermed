@@ -45,6 +45,8 @@ class Tester_Client : public Client{
     void test_enc_compare(size_t l);
     void test_linear_enc_argmax();
     void test_fhe();
+    void test_change_es();
+    
     void disconnect();
     
     protected:
@@ -65,4 +67,5 @@ class  Tester_Server_session : public Server_session{
     /* Test functions */
     void test_lsic(const mpz_class &b,size_t l);
     void test_compare(const mpz_class &a,size_t l);
+    void test_change_es();
 };

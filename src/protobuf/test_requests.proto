@@ -8,6 +8,7 @@ message Test_Request
         TEST_REV_ENC_COMPARE = 3;
         TEST_LINEAR_ENC_ARGMAX = 4;
         TEST_FHE = 5;
+        TEST_CHANGE_ES = 6;
 
         DISCONNECT = 10;
     }

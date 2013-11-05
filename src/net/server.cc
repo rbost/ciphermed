@@ -346,6 +346,7 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
 
 void Server_session::run_change_encryption_scheme_slots_helper()
 {
+    cout << "Run change ES helper" << endl;
     EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
     exec_change_encryption_scheme_slots_helper(*socket_, server_->gm(), server_->fhe_sk(), ea);
 }

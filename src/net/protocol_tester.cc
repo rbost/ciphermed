@@ -10,6 +10,7 @@
 #include <net/message_io.hh>
 
 #include <net/defs.hh>
+#include <net/net_utils.hh>
 #include <util/util.hh>
 
 #include <FHE.h>
@@ -156,6 +157,32 @@ void Tester_Client::test_fhe()
 }
 
 
+void Tester_Client::test_change_es()
+{
+    send_test_query(Test_Request_Request_Type_TEST_CHANGE_ES);
+
+
+    EncryptedArray ea(*fhe_context_, fhe_G_);
+    
+    size_t n_slots = ea.size();
+    vector<long> bits_query(n_slots);
+    
+    vector<mpz_class> c_gm(bits_query.size());
+    
+    for (size_t i = 0; i < c_gm.size(); i++) {
+        bits_query[i] = gmp_urandomb_ui(rand_state_,1);
+        c_gm[i] = server_gm_->encrypt(bits_query[i]);
+    }
+    
+    Ctxt c_fhe = change_encryption_scheme(c_gm);
+    
+    send_fhe_ctxt_to_socket(socket_, c_fhe);
+    for (size_t i = 0; i < bits_query.size(); i++) {
+        cout << "[" << bits_query[i] << "]";
+    }
+    cout << endl;
+}
+
 void Tester_Client::disconnect()
 {
     cout << "Disconnect" << endl;
@@ -249,10 +276,15 @@ void Tester_Server_session::run_session()
                 }
                     break;
 
+                case Test_Request_Request_Type_TEST_CHANGE_ES:
+                {
+                    cout << id_ << ": Change ES" << endl;
+                    test_change_es();
+                }
                 default:
                 {
-                    cout << id_ << ": Bad Request" << endl;
-                    should_exit = true;
+                    cout << id_ << ": Bad Request " << request_type << endl;
+//                    should_exit = true;
                 }
                     break;
             }
@@ -282,4 +314,20 @@ void Tester_Server_session::test_compare(const mpz_class &a,size_t l)
     cout << id_ << ": Test compare" << endl;
     Compare_B comparator(a,l,server_->paillier(),server_->gm());
     run_priv_compare_B(&comparator);
+}
+
+void Tester_Server_session::test_change_es()
+{
+    run_change_encryption_scheme_slots_helper();
+    
+    // get the encryption from the client
+    Ctxt c = read_fhe_ctxt_from_socket(*socket_, server_->fhe_sk());
+    
+    EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
+    PlaintextArray pp0(ea);
+    ea.decrypt(c, server_->fhe_sk(), pp0);
+    cout << id_ << ": Decryption result = " << endl;
+    pp0.print(cout);
+    cout << endl;
+
 }
