@@ -18,7 +18,7 @@ class Server_session;
 class Server {
 public:  
     Server(gmp_randstate_t state, unsigned int nbits_p, unsigned int abits_p, unsigned int nbits_gm, unsigned int lambda);
-    ~Server();
+    virtual ~Server();
     
     
     void run();
@@ -51,9 +51,9 @@ protected:
 class Server_session {
 public:
     Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket);
-    ~Server_session();
+    virtual ~Server_session();
     
-    void run_session();
+    virtual void run_session();
     
     void send_paillier_pk();
     void send_gm_pk();
@@ -77,6 +77,10 @@ public:
     bool run_rev_enc_comparison(Rev_EncCompare_Helper &helper);
 
     void run_linear_enc_argmax(Linear_EncArgmax_Helper &helper);
+
+    
+    EncCompare_Helper create_enc_comparator_helper(size_t bit_size, bool use_lsic);
+    Rev_EncCompare_Helper create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic);
 
     void decrypt_gm(const mpz_class &c);
     void decrypt_fhe(const Ctxt &c);

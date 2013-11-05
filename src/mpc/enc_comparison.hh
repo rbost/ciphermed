@@ -17,6 +17,7 @@ class EncCompare_Owner {
 public:
     EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p, Comparison_protocol_B *comparator, gmp_randstate_t state);
     
+    void set_input(const mpz_class &v_a, const mpz_class &v_b);
     mpz_class setup(unsigned int lambda); // lambda is the parameter for statistical security. r <- [0, 2^{l+lambda}[ \cap \Z 
     void decryptResult(const mpz_class &c_t);
     inline bool output() const { assert(is_protocol_done_); return t_; }

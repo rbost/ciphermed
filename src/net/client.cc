@@ -457,8 +457,24 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner)
     return owner.output();
 }
 
-Rev_EncCompare_Owner Client::create_rev_enc_comparator(size_t bit_size, bool use_lsic)
+EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
 {
+    assert(has_paillier_pk());
+
+    Comparison_protocol_B *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_B(0,bit_size,gm_);
+    }else{
+        comparator = new Compare_B(0,bit_size,paillier_,gm_);
+    }
+
+    return EncCompare_Owner(0,0,bit_size,*server_paillier_,comparator,rand_state_);
+}
+
+Rev_EncCompare_Owner Client::create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic)
+{
+    assert(has_paillier_pk());
     assert(has_gm_pk());
 
     Comparison_protocol_A *comparator;
@@ -466,7 +482,6 @@ Rev_EncCompare_Owner Client::create_rev_enc_comparator(size_t bit_size, bool use
     if (use_lsic) {
         comparator = new LSIC_A(0,bit_size,*server_gm_);
     }else{
-        assert(has_paillier_pk());
         comparator = new Compare_A(0,bit_size,*server_paillier_,*server_gm_,rand_state_);
     }
     

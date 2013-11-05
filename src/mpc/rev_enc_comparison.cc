@@ -14,6 +14,13 @@ Rev_EncCompare_Owner::Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 
+void Rev_EncCompare_Owner::set_input(const mpz_class &v_a, const mpz_class &v_b)
+{
+    assert(!is_set_up_);
+    a_ = v_a;
+    b_ = v_b;
+}
+
 mpz_class Rev_EncCompare_Owner::setup(unsigned int lambda)
 {
     mpz_class x, r, z, c;

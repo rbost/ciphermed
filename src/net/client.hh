@@ -57,7 +57,8 @@ public:
     size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner);
     
     /* to build comparators */
-    Rev_EncCompare_Owner create_rev_enc_comparator(size_t bit_size, bool use_lsic);
+    EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
+    Rev_EncCompare_Owner create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic);
     
     /* test functions */
     mpz_class test_lsic(const mpz_class &a, size_t l);

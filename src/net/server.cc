@@ -102,7 +102,6 @@ void Server::run()
 }
 
 
-
 Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
 : server_(server), socket_(socket), client_gm_(NULL), client_paillier_(NULL), id_(id)
 {
@@ -557,6 +556,36 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
     mpz_class permuted_argmax = helper.permuted_argmax();
     sendIntToSocket(*socket_, permuted_argmax);
 }
+
+
+EncCompare_Helper Server_session::create_enc_comparator_helper(size_t bit_size, bool use_lsic)
+{
+
+    Comparison_protocol_A *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_A(0,bit_size,*client_gm_);
+    }else{
+        comparator = new Compare_A(0,bit_size,*client_paillier_,*client_gm_,rand_state_);
+    }
+    
+    return EncCompare_Helper(bit_size,server_->paillier(),comparator);
+}
+
+Rev_EncCompare_Helper Server_session::create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic)
+{
+    Comparison_protocol_B *comparator;
+    
+    if (use_lsic) {
+        comparator = new LSIC_B(0,bit_size,server_->gm());
+    }else{
+        comparator = new Compare_B(0,bit_size,server_->paillier(),server_->gm());
+    }
+
+    return Rev_EncCompare_Helper(bit_size,server_->paillier(),comparator);
+}
+
+
 
 
 void Server_session::decrypt_gm(const mpz_class &c)

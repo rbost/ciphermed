@@ -13,6 +13,13 @@ EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, c
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 
+void EncCompare_Owner::set_input(const mpz_class &v_a, const mpz_class &v_b)
+{
+    assert(!is_set_up_);
+    a_ = v_a;
+    b_ = v_b;
+}
+
 // setup runs lines 1 to 4 in the protocol description
 mpz_class EncCompare_Owner::setup(unsigned int lambda)
 {
