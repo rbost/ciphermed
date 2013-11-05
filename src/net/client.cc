@@ -20,6 +20,7 @@
 #include <net/net_utils.hh>
 #include <net/message_io.hh>
 #include <util/util.hh>
+#include <util/fhe_util.hh>
 
 #include <net/client.hh>
 
@@ -29,42 +30,12 @@ using boost::asio::ip::tcp;
 
 using namespace std;
 
-static ZZX makeIrredPoly(long p, long d)
-{
-    assert(d >= 1);
-    assert(ProbPrime(p));
-    
-    if (d == 1) return ZZX(1, 1); // the monomial X
-    
-    zz_pBak bak; bak.save();
-    zz_p::init(p);
-    return to_ZZX(BuildIrred_zz_pX(d));
-}
-
 Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
-: socket_(io_service), gm_(GM_priv::keygen(state,keysize),state), paillier_(Paillier_priv_fast::keygen(state,keysize), state), server_paillier_(NULL), server_gm_(NULL), server_fhe_pk_(NULL),n_threads_(2), lambda_(lambda)
+: socket_(io_service), gm_(GM_priv::keygen(state,keysize),state), paillier_(Paillier_priv_fast::keygen(state,keysize), state), server_paillier_(NULL), server_gm_(NULL), fhe_context_(NULL), server_fhe_pk_(NULL), fhe_sk_(NULL), n_threads_(2), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
     
-    // generate a context. This one should be consisten with the server's one
-    // i.e. m, p, r must be the same
-    long p = FHE_p;
-    long r = FHE_r
-    long d = FHE_d;
-    long c = FHE_c;
-    long L = FHE_L;
-//    long w = FHE_w;
-    long s = FHE_s;
-    long k = FHE_k;
-    long chosen_m = FHE_m;
-    
-    long m = FindM(k, L, c, p, d, s, chosen_m, true);
-    fhe_context_ = new FHEcontext(m, p, r);
-    buildModChain(*fhe_context_, L, c);
-
-    // we suppose d > 0
-    fhe_G_ = makeIrredPoly(FHE_p, FHE_d);
-    
+    init_FHE_context();
 }
 
 Client::~Client()
@@ -82,6 +53,28 @@ void Client::connect(boost::asio::io_service& io_service, const string& hostname
     tcp::resolver::query query(hostname, to_string( PORT ));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     boost::asio::connect(socket_, endpoint_iterator);
+}
+
+void Client::init_FHE_context()
+{
+    if (fhe_context_) {
+        return;
+    }
+    // generate a context. This one should be consisten with the server's one
+    // i.e. m, p, r must be the same
+    
+    fhe_context_ = create_FHEContext(FHE_p,FHE_r,FHE_d,FHE_c,FHE_L,FHE_s,FHE_k,FHE_m);
+    // we suppose d > 0
+    fhe_G_ = makeIrredPoly(FHE_p, FHE_d);
+}
+void Client::init_FHE_key()
+{
+    if (fhe_sk_) {
+        return;
+    }
+    
+    fhe_sk_ = new FHESecKey(*fhe_context_);
+    fhe_sk_->GenSecKey(FHE_w); // A Hamming-weight-w secret key
 }
 
 

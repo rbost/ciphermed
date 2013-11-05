@@ -22,6 +22,9 @@ public:
 
     tcp::socket& socket() { return socket_; }
     
+    void init_FHE_context();
+    void init_FHE_key();
+
     const GM_priv& gm() { return gm_; };
     vector<mpz_class> gm_pk() const { return gm_.pubkey(); }
     vector<mpz_class> gm_sk() const { return {gm_.pubkey()[0],gm_.pubkey()[1],gm_.privkey()[0],gm_.privkey()[1]}; }
@@ -71,9 +74,10 @@ protected:
     
     Paillier *server_paillier_;
     GM *server_gm_;
+    
     FHEcontext *fhe_context_;
     FHEPubKey *server_fhe_pk_;
-
+    FHESecKey *fhe_sk_;
     ZZX fhe_G_;
 
     gmp_randstate_t rand_state_;

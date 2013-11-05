@@ -23,6 +23,10 @@ public:
     virtual Server_session* create_new_server_session(tcp::socket *socket) = 0;
     void run();
     
+    void init_FHE_context();
+    void init_FHE_key();
+
+    
     Paillier_priv_fast& paillier() { return paillier_; };
     vector<mpz_class> paillier_pk() const { return paillier_.pubkey(); }
     vector<mpz_class> paillier_sk() const { return paillier_.privkey(); }

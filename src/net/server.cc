@@ -7,6 +7,7 @@
 
 #include <FHE.h>
 #include <EncryptedArray.h>
+#include <util/fhe_util.hh>
 
 #include <net/defs.hh>
 
@@ -27,51 +28,42 @@ using boost::asio::ip::tcp;
 
 using namespace std;
 
-static ZZX makeIrredPoly(long p, long d)
-{
-    assert(d >= 1);
-    assert(ProbPrime(p));
-    
-    if (d == 1) return ZZX(1, 1); // the monomial X
-    
-    zz_pBak bak; bak.save();
-    zz_p::init(p);
-    return to_ZZX(BuildIrred_zz_pX(d));
-}
-
 Server::Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
-: paillier_(Paillier_priv_fast::keygen(state,keysize),state), gm_(GM_priv::keygen(state,keysize),state), n_clients_(0), lambda_(lambda)
+: paillier_(Paillier_priv_fast::keygen(state,keysize),state), gm_(GM_priv::keygen(state,keysize),state), fhe_context_(NULL), fhe_sk_(NULL), n_clients_(0), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
 
     // generate an FHE private key
-    // first generate a context. This one should be consisten with the server's one
-    // i.e. m, p, r must be the same
-    long p = FHE_p;
-    long r = FHE_r
-    long d = FHE_d;
-    long c = FHE_c;
-    long L = FHE_L;
-    long w = FHE_w;
-    long s = FHE_s;
-    long k = FHE_k;
-    long chosen_m = FHE_m;
-    
-    long m = FindM(k, L, c, p, d, s, chosen_m, true);
-    fhe_context_ = new FHEcontext(m, p, r);
-    buildModChain(*fhe_context_, L, c);
-    fhe_sk_ = new FHESecKey(*fhe_context_);
-    fhe_sk_->GenSecKey(w); // A Hamming-weight-w secret key
-
-    // we suppose d > 0
-    fhe_G_ = makeIrredPoly(p, d);
-
+    init_FHE_context();
+    init_FHE_key();
 }
 
 Server::~Server()
 {
     delete fhe_sk_;
     delete fhe_context_;
+}
+
+void Server::init_FHE_context()
+{
+    if (fhe_context_) {
+        return;
+    }
+    // generate a context. This one should be consisten with the server's one
+    // i.e. m, p, r must be the same
+    
+    fhe_context_ = create_FHEContext(FHE_p,FHE_r,FHE_d,FHE_c,FHE_L,FHE_s,FHE_k,FHE_m);
+    // we suppose d > 0
+    fhe_G_ = makeIrredPoly(FHE_p, FHE_d);
+}
+void Server::init_FHE_key()
+{
+    if (fhe_sk_) {
+        return;
+    }
+
+    fhe_sk_ = new FHESecKey(*fhe_context_);
+    fhe_sk_->GenSecKey(FHE_w); // A Hamming-weight-w secret key
 }
 
 void Server::run()
