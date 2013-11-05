@@ -1,8 +1,8 @@
 OBJDIRS     += net
 NETSRC  := net_utils.cc
-CLIENT_SRC := client.cc $(NETSRC)
+CLIENT_SRC := client.cc linear_classifier_client.cc $(NETSRC)
 CLIENT_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(CLIENT_SRC))
-SERVER_SRC := server.cc $(NETSRC)
+SERVER_SRC := server.cc linear_classifier_server.cc $(NETSRC)
 SERVER_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(SERVER_SRC))
 
 
@@ -11,14 +11,14 @@ $(OBJDIR)/libnet.so: $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) -lgmp -lgmpxx -lcrypto
 
 all:	$(OBJDIR)/net/client
-$(OBJDIR)/net/client: $(CLIENT_OBJ) $(PROTO_H) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so
+$(OBJDIR)/net/client: $(OBJDIR)/net/test_client.o $(CLIENT_OBJ) $(PROTO_H) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) $(L_BOOST_THREAD)\
        -lprotobuf -lprotobuf_defs
 
 
 all:	$(OBJDIR)/net/server
-$(OBJDIR)/net/server: $(SERVER_OBJ) $(PROTO_H) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libfhemath.so $(OBJDIR)/libprotobuf_defs.so
+$(OBJDIR)/net/server: $(OBJDIR)/net/test_server.o $(SERVER_OBJ) $(PROTO_H) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libfhemath.so $(OBJDIR)/libprotobuf_defs.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lfhemath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) $(L_BOOST_THREAD)\
        -lprotobuf -lprotobuf_defs

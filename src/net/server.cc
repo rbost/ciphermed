@@ -88,7 +88,7 @@ void Server::run()
             tcp::socket *socket = new tcp::socket(io_service);
             acceptor.accept(*socket);
             
-            Server_session *c = new Server_session(this, rand_state_, n_clients_++, socket);
+            Server_session *c = create_new_server_session(socket);
             
             cout << "Start new connexion: " << c->id() << endl;
             thread t (&Server_session::run_session,c);
@@ -101,6 +101,11 @@ void Server::run()
     }
 }
 
+Server_session* Server::create_new_server_session(tcp::socket *socket)
+{
+    Server_session *s = new Server_session(this, rand_state_, n_clients_++, socket);
+    return s;
+}
 
 Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
 : server_(server), socket_(socket), client_gm_(NULL), client_paillier_(NULL), id_(id)
@@ -617,21 +622,4 @@ void Server_session::test_compare(const mpz_class &a,size_t l)
     cout << id_ << ": Test compare" << endl;
     Compare_B comparator(a,l,server_->paillier(),server_->gm());
     run_priv_compare_B(&comparator);
-}
-
-
-int main()
-{
-    gmp_randstate_t randstate;
-    gmp_randinit_default(randstate);
-    gmp_randseed_ui(randstate,time(NULL));
-    
-
-    cout << "Init server" << endl;
-    Server server(randstate,1024,256,1024,100);
-    
-    cout << "Start server" << endl;
-    server.run();
-    
-    return 0;
 }
