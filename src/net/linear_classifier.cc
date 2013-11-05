@@ -12,9 +12,11 @@
 
 
 Linear_Classifier_Server::Linear_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size)
-: Server(state, Linear_Classifier_Server::key_deps_descriptor(), keysize, lambda), model_(model), bit_size_(bit_size)
+: Server(state, Linear_Classifier_Server::key_deps_descriptor(), keysize, lambda), enc_model_(model.size()), bit_size_(bit_size)
 {
-    
+    for (size_t i = 0; i < enc_model_.size(); i++) {
+        enc_model_[i] = paillier_->encrypt(model[i]);
+    }
 }
 
 Server_session* Linear_Classifier_Server::create_new_server_session(tcp::socket *socket)
@@ -41,7 +43,7 @@ void Linear_Classifier_Server_session::run_session()
 
 void Linear_Classifier_Server_session::send_model()
 {
-    Protobuf::BigIntArray model_message = convert_to_message(linear_server_->model());
+    Protobuf::BigIntArray model_message = convert_to_message(linear_server_->enc_model());
     sendMessageToSocket(*socket_, model_message);
 }
 
@@ -67,15 +69,17 @@ bool Linear_Classifier_Client::run()
     get_model();
     
     // compute the encrypted dot product
-    mpz_class v = 1;
+    mpz_class v = 1,w;
     
     for (size_t i = 0; i < values_.size(); i++) {
         v = server_paillier_->add(v, server_paillier_->constMult(values_[i],model_[i]));
     }
     
+    w = model_[model_.size()-1];
+
     // build the comparator over encrypted data
     EncCompare_Owner owner = create_enc_comparator_owner(bit_size_,false);
-    owner.set_input(v, model_[model_.size()-1]);
+    owner.set_input(v, w);
     
     bool result = run_enc_comparison(owner);
     

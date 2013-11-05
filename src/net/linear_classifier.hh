@@ -18,7 +18,7 @@ class  Linear_Classifier_Server : public Server{
     
     Server_session* create_new_server_session(tcp::socket *socket);
     
-    vector<mpz_class> model() const { return model_; }
+    vector<mpz_class> enc_model() const { return enc_model_; }
     size_t bit_size() const { return bit_size_; }
     
     static Key_dependencies_descriptor key_deps_descriptor()
@@ -27,7 +27,7 @@ class  Linear_Classifier_Server : public Server{
     }
 
     protected:
-    vector<mpz_class> model_;
+    vector<mpz_class> enc_model_;
     size_t bit_size_;
 };
 
