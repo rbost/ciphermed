@@ -276,9 +276,9 @@ void Server_session::run_priv_compare_B(Compare_B *comparator)
 void Server_session::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l)
 {
     //    LSIC_A comparator(0,l,*server_gm_);
-    Compare_A comparator(0,l,*client_paillier_,*client_gm_,rand_state_);
+    Compare_A *comparator = new Compare_A(0,l,*client_paillier_,*client_gm_,rand_state_);
     
-    Rev_EncCompare_Owner owner(a,b,l,*client_paillier_,&comparator,rand_state_);
+    Rev_EncCompare_Owner owner(a,b,l,*client_paillier_,comparator,rand_state_);
     run_rev_enc_comparison_owner(owner);
 }
 
@@ -290,9 +290,9 @@ void Server_session::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 bool Server_session::run_rev_enc_comparison_helper(const size_t &l)
 {
 //    LSIC_B comparator(0,l,server_->gm());
-    Compare_B comparator(0,l,server_->paillier(),server_->gm());
+    Compare_B *comparator = new Compare_B(0,l,server_->paillier(),server_->gm());
     
-    Rev_EncCompare_Helper helper(l,server_->paillier(),&comparator);
+    Rev_EncCompare_Helper helper(l,server_->paillier(),comparator);
     return run_rev_enc_comparison_helper(helper);
 }
 
@@ -308,8 +308,8 @@ bool Server_session::run_enc_comparison_owner(const mpz_class &a, const mpz_clas
 
 #warning WE MUST BE ABLE TO CHOOSE COMPARISON PROTOCOL
 
-    LSIC_B lsic(0,l,server_->gm());
-    EncCompare_Owner owner(a,b,l,*client_paillier_,&lsic,rand_state_);
+    LSIC_B *lsic = new LSIC_B(0,l,server_->gm());
+    EncCompare_Owner owner(a,b,l,*client_paillier_,lsic,rand_state_);
     return run_enc_comparison_owner(owner);
 }
 
@@ -324,8 +324,8 @@ void Server_session::run_enc_comparison_helper(const size_t &l)
     assert(client_gm_ != NULL);
     
 #warning WE MUST BE ABLE TO CHOOSE COMPARISON PROTOCOL
-    LSIC_A lsic(0,l,*client_gm_);
-    EncCompare_Helper helper(l,server_->paillier(),&lsic);
+    LSIC_A *lsic = new LSIC_A(0,l,*client_gm_);
+    EncCompare_Helper helper(l,server_->paillier(),lsic);
     run_enc_comparison_helper(helper);
 }
 

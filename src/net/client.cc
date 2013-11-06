@@ -240,9 +240,9 @@ void Client::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b
     assert(has_gm_pk());
     
 //    LSIC_A comparator(0,l,*server_gm_);
-    Compare_A comparator(0,l,*server_paillier_,*server_gm_,rand_state_);
+    Compare_A *comparator = new Compare_A(0,l,*server_paillier_,*server_gm_,rand_state_);
 
-    Rev_EncCompare_Owner owner(a,b,l,*server_paillier_,&comparator,rand_state_);
+    Rev_EncCompare_Owner owner(a,b,l,*server_paillier_,comparator,rand_state_);
     run_rev_enc_comparison_owner(owner);
 }
 
@@ -258,9 +258,9 @@ bool Client::run_rev_enc_comparison_helper(const size_t &l)
     assert(has_gm_pk());
 
     //    LSIC_B comparator(0,l,server_->gm());
-    Compare_B comparator(0,l,*paillier_,*gm_);
+    Compare_B *comparator = new Compare_B(0,l,*paillier_,*gm_);
     
-    Rev_EncCompare_Helper helper(l,*paillier_,&comparator);
+    Rev_EncCompare_Helper helper(l,*paillier_,comparator);
     return run_rev_enc_comparison_helper(helper);
 }
 
@@ -277,8 +277,8 @@ bool Client::run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, si
     assert(has_gm_pk());
     assert(gm_!=NULL);
 
-    LSIC_B lsic(0,l,*gm_);
-    EncCompare_Owner owner(a,b,l,*server_paillier_,&lsic,rand_state_);
+    LSIC_B *lsic = new LSIC_B(0,l,*gm_);
+    EncCompare_Owner owner(a,b,l,*server_paillier_,lsic,rand_state_);
     return run_enc_comparison_owner(owner);
 }
 
@@ -292,8 +292,8 @@ void Client::run_enc_comparison_helper(const size_t &l)
 {
     assert(server_gm_ != NULL);
 #warning WE MUST BE ABLE TO CHOOSE COMPARISON PROTOCOL
-    LSIC_A lsic(0,l,*server_gm_);
-    EncCompare_Helper helper(l,*paillier_,&lsic);
+    LSIC_A *lsic = new LSIC_A(0,l,*server_gm_);
+    EncCompare_Helper helper(l,*paillier_,lsic);
     run_enc_comparison_helper(helper);
 }
 
