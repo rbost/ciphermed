@@ -22,7 +22,7 @@ public:
     Server(gmp_randstate_t state, Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda);
     virtual ~Server();
     
-    virtual Server_session* create_new_server_session(tcp::socket *socket) = 0;
+    virtual Server_session* create_new_server_session(tcp::socket &socket) = 0;
     void run();
     
     /* Keys management */
@@ -67,7 +67,7 @@ protected:
 
 class Server_session {
 public:
-    Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket);
+    Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket &socket);
     virtual ~Server_session();
     
     virtual void run_session() = 0;
@@ -112,7 +112,7 @@ public:
     
 protected:
     Server *server_;
-    tcp::socket *socket_;
+    tcp::socket socket_;
     boost::asio::streambuf input_buf_;
 
     GM *client_gm_;

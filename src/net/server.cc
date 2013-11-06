@@ -115,8 +115,8 @@ void Server::run()
         
         for (;;)
         {
-            tcp::socket *socket = new tcp::socket(io_service);
-            acceptor.accept(*socket);
+            tcp::socket socket(io_service);
+            acceptor.accept(socket);
             
             Server_session *c = create_new_server_session(socket);
             
@@ -132,8 +132,8 @@ void Server::run()
 }
 
 
-Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
-: server_(server), socket_(socket), client_gm_(NULL), client_paillier_(NULL), client_fhe_pk_(NULL), id_(id)
+Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned int id, tcp::socket &socket)
+: server_(server), socket_(std::move(socket)), client_gm_(NULL), client_paillier_(NULL), client_fhe_pk_(NULL), id_(id)
 {
     gmp_randinit_set(rand_state_, state);
 }
@@ -153,7 +153,7 @@ void Server_session::send_paillier_pk()
     cout << id_ << ": Send Paillier PK" << endl;
     Protobuf::Paillier_PK pk_message = get_pk_message(&(server_->paillier()));
     
-    sendMessageToSocket<Protobuf::Paillier_PK>(*socket_,pk_message);
+    sendMessageToSocket<Protobuf::Paillier_PK>(socket_,pk_message);
 }
 
 void Server_session::send_gm_pk()
@@ -164,7 +164,7 @@ void Server_session::send_gm_pk()
     cout << id_ << ": Send GM PK" << endl;
     Protobuf::GM_PK pk_message = get_pk_message(&(server_->gm()));
     
-    sendMessageToSocket<Protobuf::GM_PK>(*socket_,pk_message);
+    sendMessageToSocket<Protobuf::GM_PK>(socket_,pk_message);
 }
 
 void Server_session::send_fhe_pk()
@@ -174,7 +174,7 @@ void Server_session::send_fhe_pk()
 
     Protobuf::FHE_PK pk_message = get_pk_message(publicKey);
     
-    sendMessageToSocket<Protobuf::FHE_PK>(*socket_,pk_message);
+    sendMessageToSocket<Protobuf::FHE_PK>(socket_,pk_message);
 
 }
 
@@ -184,7 +184,7 @@ void Server_session::get_client_pk_gm()
         return;
     }
 
-    Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(*socket_);
+    Protobuf::GM_PK pk = readMessageFromSocket<Protobuf::GM_PK>(socket_);
     cout << id_ << ": Received GM PK" << endl;
     client_gm_ = create_from_pk_message(pk,rand_state_);
 }
@@ -195,7 +195,7 @@ void Server_session::get_client_pk_paillier()
         return;
     }
 
-    Protobuf::Paillier_PK pk = readMessageFromSocket<Protobuf::Paillier_PK>(*socket_);
+    Protobuf::Paillier_PK pk = readMessageFromSocket<Protobuf::Paillier_PK>(socket_);
     cout << id_ << ": Received Paillier PK" << endl;
     client_paillier_ = create_from_pk_message(pk,rand_state_);
 }
@@ -207,7 +207,7 @@ void Server_session::get_client_pk_fhe()
         return;
     }
     
-    Protobuf::FHE_PK pk = readMessageFromSocket<Protobuf::FHE_PK>(*socket_);
+    Protobuf::FHE_PK pk = readMessageFromSocket<Protobuf::FHE_PK>(socket_);
     cout << id_ << ": Received FHE PK" << endl;
     client_fhe_pk_ = create_from_pk_message(pk,server_->fhe_context());
 }
@@ -242,34 +242,34 @@ void Server_session::exchange_keys()
 
 mpz_class Server_session::run_comparison_protocol_A(Comparison_protocol_A *comparator)
 {
-    exec_comparison_protocol_A(*socket_,comparator,1);
+    exec_comparison_protocol_A(socket_,comparator,1);
     return comparator->output();
 }
 
 mpz_class Server_session::run_lsic_A(LSIC_A *lsic)
 {
-    exec_lsic_A(*socket_,lsic);
+    exec_lsic_A(socket_,lsic);
     return lsic->output();
 }
 mpz_class Server_session::run_priv_compare_A(Compare_A *comparator)
 {
-    exec_priv_compare_A(*socket_,comparator,1);
+    exec_priv_compare_A(socket_,comparator,1);
     return comparator->output();
 }
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
-    exec_comparison_protocol_B(*socket_,comparator);
+    exec_comparison_protocol_B(socket_,comparator);
 }
 
 void Server_session::run_lsic_B(LSIC_B *lsic)
 {
-    exec_lsic_B(*socket_,lsic);
+    exec_lsic_B(socket_,lsic);
 }
 
 void Server_session::run_priv_compare_B(Compare_B *comparator)
 {
-    exec_priv_compare_B(*socket_,comparator);
+    exec_priv_compare_B(socket_,comparator);
 }
 
 // we suppose that the client already has the server's public key for Paillier
@@ -284,7 +284,7 @@ void Server_session::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_
 
 void Server_session::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 {
-    exec_rev_enc_comparison_owner(*socket_, owner, server_->lambda());
+    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda());
 }
 
 bool Server_session::run_rev_enc_comparison_helper(const size_t &l)
@@ -298,7 +298,7 @@ bool Server_session::run_rev_enc_comparison_helper(const size_t &l)
 
 bool Server_session::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 {
-    exec_rev_enc_comparison_helper(*socket_, helper);
+    exec_rev_enc_comparison_helper(socket_, helper);
     return helper.output();
 }
 
@@ -315,7 +315,7 @@ bool Server_session::run_enc_comparison_owner(const mpz_class &a, const mpz_clas
 
 bool Server_session::run_enc_comparison_owner(EncCompare_Owner &owner)
 {
-    exec_enc_comparison_owner(*socket_, owner, server_->lambda());
+    exec_enc_comparison_owner(socket_, owner, server_->lambda());
     return owner.output();
 }
 
@@ -331,7 +331,7 @@ void Server_session::run_enc_comparison_helper(const size_t &l)
 
 void Server_session::run_enc_comparison_helper(EncCompare_Helper &helper)
 {
-    exec_enc_comparison_helper(*socket_,helper);
+    exec_enc_comparison_helper(socket_,helper);
 }
 
 
@@ -341,21 +341,21 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper)
 
     auto comparator_creator = [this,nbits](){ return new Compare_B(0,nbits,server_->paillier(),server_->gm()); };
 
-    exec_linear_enc_argmax(*socket_, helper, comparator_creator);
+    exec_linear_enc_argmax(socket_, helper, comparator_creator);
 }
 
 Ctxt Server_session::change_encryption_scheme(const vector<mpz_class> &c_gm)
 {
     EncryptedArray ea(server_->fhe_context(), server_->fhe_G());
     
-    return exec_change_encryption_scheme_slots(*socket_, c_gm, *client_gm_ ,*client_fhe_pk_, ea, rand_state_);
+    return exec_change_encryption_scheme_slots(socket_, c_gm, *client_gm_ ,*client_fhe_pk_, ea, rand_state_);
 }
 
 
 void Server_session::run_change_encryption_scheme_slots_helper()
 {
     EncryptedArray ea(server_->fhe_context(), server_->fhe_G());
-    exec_change_encryption_scheme_slots_helper(*socket_, server_->gm(), server_->fhe_sk(), ea);
+    exec_change_encryption_scheme_slots_helper(socket_, server_->gm(), server_->fhe_sk(), ea);
 }
 
 EncCompare_Owner Server_session::create_enc_comparator_owner(size_t bit_size, bool use_lsic)

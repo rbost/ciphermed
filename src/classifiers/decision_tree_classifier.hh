@@ -21,7 +21,7 @@ class Decision_tree_Classifier_Server : public Server {
 public:
     Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model, unsigned int n_variables);
   
-    Server_session* create_new_server_session(tcp::socket *socket);
+    Server_session* create_new_server_session(tcp::socket &socket);
 
     static Key_dependencies_descriptor key_deps_descriptor()
     {
@@ -39,7 +39,7 @@ protected:
 class  Decision_tree_Classifier_Server_session : public Server_session{
 public:
     
-    Decision_tree_Classifier_Server_session(Decision_tree_Classifier_Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
+    Decision_tree_Classifier_Server_session(Decision_tree_Classifier_Server *server, gmp_randstate_t state, unsigned int id, tcp::socket &socket)
     : Server_session(server,state,id,socket), tree_server_(server) {};
     
     void run_session();

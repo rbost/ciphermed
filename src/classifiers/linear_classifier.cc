@@ -19,7 +19,7 @@ Linear_Classifier_Server::Linear_Classifier_Server(gmp_randstate_t state, unsign
     }
 }
 
-Server_session* Linear_Classifier_Server::create_new_server_session(tcp::socket *socket)
+Server_session* Linear_Classifier_Server::create_new_server_session(tcp::socket &socket)
 {
     return new Linear_Classifier_Server_session(this, rand_state_, n_clients_++, socket);
 }
@@ -44,7 +44,7 @@ void Linear_Classifier_Server_session::run_session()
 void Linear_Classifier_Server_session::send_model()
 {
     Protobuf::BigIntArray model_message = convert_to_message(linear_server_->enc_model());
-    sendMessageToSocket(*socket_, model_message);
+    sendMessageToSocket(socket_, model_message);
 }
 
 

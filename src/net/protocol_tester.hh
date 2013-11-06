@@ -23,7 +23,7 @@ class  Tester_Server : public Server{
     Tester_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
     : Server(state,Tester_Server::key_deps_descriptor(), keysize, lambda) {};
     
-    Server_session* create_new_server_session(tcp::socket *socket);
+    Server_session* create_new_server_session(tcp::socket &socket);
     
     static Key_dependencies_descriptor key_deps_descriptor()
     {
@@ -58,7 +58,7 @@ class Tester_Client : public Client{
 class  Tester_Server_session : public Server_session{
     public:
     
-    Tester_Server_session(Tester_Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
+    Tester_Server_session(Tester_Server *server, gmp_randstate_t state, unsigned int id, tcp::socket &socket)
     : Server_session(server,state,id,socket){};
     
     void run_session();

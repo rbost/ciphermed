@@ -193,7 +193,7 @@ void Tester_Client::disconnect()
 
 
 
-Server_session* Tester_Server::create_new_server_session(tcp::socket *socket)
+Server_session* Tester_Server::create_new_server_session(tcp::socket &socket)
 {
     Tester_Server_session *s = new Tester_Server_session(this, rand_state_, n_clients_++, socket);
     return s;
@@ -201,7 +201,7 @@ Server_session* Tester_Server::create_new_server_session(tcp::socket *socket)
 
 enum Test_Request_Request_Type Tester_Server_session::get_test_query()
 {
-    Test_Request request = readMessageFromSocket<Test_Request>(*socket_);
+    Test_Request request = readMessageFromSocket<Test_Request>(socket_);
     
     return request.type();
 }
@@ -321,7 +321,7 @@ void Tester_Server_session::test_change_es()
     run_change_encryption_scheme_slots_helper();
     
     // get the encryption from the client
-    Ctxt c = read_fhe_ctxt_from_socket(*socket_, server_->fhe_sk());
+    Ctxt c = read_fhe_ctxt_from_socket(socket_, server_->fhe_sk());
     
     EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
     PlaintextArray pp0(ea);
@@ -339,7 +339,7 @@ void Tester_Server_session::decrypt_gm(const mpz_class &c)
 
 void Tester_Server_session::decrypt_fhe()
 {
-    Protobuf::FHE_Ctxt m = readMessageFromSocket<Protobuf::FHE_Ctxt>(*socket_);
+    Protobuf::FHE_Ctxt m = readMessageFromSocket<Protobuf::FHE_Ctxt>(socket_);
     Ctxt c = convert_from_message(m, server_->fhe_sk());
     
     EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());

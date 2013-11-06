@@ -16,7 +16,7 @@ Decision_tree_Classifier_Server::Decision_tree_Classifier_Server(gmp_randstate_t
 
 }
 
-Server_session* Decision_tree_Classifier_Server::create_new_server_session(tcp::socket *socket)
+Server_session* Decision_tree_Classifier_Server::create_new_server_session(tcp::socket &socket)
 {
     return new Decision_tree_Classifier_Server_session(this, rand_state_, n_clients_++, socket);
 }
@@ -29,7 +29,7 @@ void Decision_tree_Classifier_Server_session::run_session()
         // get the query
         vector<Ctxt> query;
         for (size_t i = 0; i < tree_server_->n_variables() ; i++) {
-            query.push_back(read_fhe_ctxt_from_socket(*socket_, *client_fhe_pk_));
+            query.push_back(read_fhe_ctxt_from_socket(socket_, *client_fhe_pk_));
         }
 
 
@@ -41,7 +41,7 @@ void Decision_tree_Classifier_Server_session::run_session()
         Ctxt c_r = evalPoly_FHE(tree_server_->model_poly(), query,ea,useShallowCircuit);
 
         // send the result back to the client
-        send_fhe_ctxt_to_socket(*socket_, c_r);
+        send_fhe_ctxt_to_socket(socket_, c_r);
     
     } catch (std::exception& e) {
         std::cout << "Exception: " << e.what() << std::endl;

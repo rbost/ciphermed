@@ -16,7 +16,7 @@ class  Linear_Classifier_Server : public Server{
     public:
     Linear_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size);
     
-    Server_session* create_new_server_session(tcp::socket *socket);
+    Server_session* create_new_server_session(tcp::socket &socket);
     
     vector<mpz_class> enc_model() const { return enc_model_; }
     size_t bit_size() const { return bit_size_; }
@@ -35,7 +35,7 @@ class  Linear_Classifier_Server : public Server{
 class  Linear_Classifier_Server_session : public Server_session{
     public:
     
-    Linear_Classifier_Server_session(Linear_Classifier_Server *server, gmp_randstate_t state, unsigned int id, tcp::socket *socket)
+    Linear_Classifier_Server_session(Linear_Classifier_Server *server, gmp_randstate_t state, unsigned int id, tcp::socket &socket)
     : Server_session(server,state,id,socket), linear_server_(server) {};
     
     void run_session();
