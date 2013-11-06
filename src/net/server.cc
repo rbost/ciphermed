@@ -411,26 +411,3 @@ Rev_EncCompare_Helper Server_session::create_rev_enc_comparator_helper(size_t bi
 
     return Rev_EncCompare_Helper(bit_size,server_->paillier(),comparator);
 }
-
-
-
-
-void Server_session::decrypt_gm(const mpz_class &c)
-{
-    bool b = (server_->gm()).decrypt(c);
-    cout << id_ << ": Decryption result = " << b << endl;
-}
-
-void Server_session::decrypt_fhe()
-{
-    Protobuf::FHE_Ctxt m = readMessageFromSocket<Protobuf::FHE_Ctxt>(*socket_);
-    Ctxt c = convert_from_message(m, server_->fhe_sk());
-
-    EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
-    PlaintextArray pp0(ea);
-    ea.decrypt(c, server_->fhe_sk(), pp0);
-    cout << id_ << ": Decryption result = " << endl;
-    pp0.print(cout);
-    cout << endl;
-}
-
