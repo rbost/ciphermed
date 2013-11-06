@@ -16,7 +16,7 @@
 #include <FHE.h>
 #include <EncryptedArray.h>
 
-
+const bool use_lsic__ = true;
 
 void Tester_Client::send_test_query(enum Test_Request_Request_Type type)
 {
@@ -60,15 +60,11 @@ void Tester_Client::test_enc_compare(size_t l)
     //    cout << "a = " << a << endl;
     //    cout << "b = " << b << endl;
     
-    //    get_server_pk_gm();
-    //    get_server_pk_paillier();
-    
-    
     mpz_class c_a, c_b;
 
     send_test_query(Test_Request_Request_Type_TEST_ENC_COMPARE);
 
-    bool res = run_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    bool res = run_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
     cout<< "\nResult is " << res << endl;
     cout << "Result should be " << (a < b) << endl;
 }
@@ -81,15 +77,12 @@ void Tester_Client::test_rev_enc_compare(size_t l)
     
     //    cout << "a = " << a << endl;
     //    cout << "b = " << b << endl;
-    
-    //    get_server_pk_gm();
-    //    get_server_pk_paillier();
-    
+
     mpz_class c_a, c_b;
 
     send_test_query(Test_Request_Request_Type_TEST_REV_ENC_COMPARE);
 
-    run_rev_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+    run_rev_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
     
     cout << "\nResult should be " << (a < b) << endl;
 }
@@ -97,9 +90,6 @@ void Tester_Client::test_rev_enc_compare(size_t l)
 
 void Tester_Client::test_linear_enc_argmax()
 {
-    //    get_server_pk_gm();
-    //    get_server_pk_paillier();
-    
     size_t k = 5;
     size_t nbits = 100;
     
@@ -122,7 +112,7 @@ void Tester_Client::test_linear_enc_argmax()
     
     ScopedTimer *t = new ScopedTimer("Linear enc argmax");
     
-    run_linear_enc_argmax(owner);
+    run_linear_enc_argmax(owner,use_lsic__);
     delete t;
     
     size_t mpc_argmax = owner.output();
@@ -242,14 +232,14 @@ void Tester_Server_session::run_session()
                 case Test_Request_Request_Type_TEST_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Enc Compare" << endl;
-                    run_enc_comparison_helper(0);
+                    run_enc_comparison_helper(0,use_lsic__);
                 }
                     break;
                     
                 case Test_Request_Request_Type_TEST_REV_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Rev Enc Compare" << endl;
-                    bool b = run_rev_enc_comparison_helper(0);
+                    bool b = run_rev_enc_comparison_helper(0,use_lsic__);
                     cout << id_ << ": Rev Enc Compare result: " << b << endl;
                 }
                     break;
@@ -258,7 +248,7 @@ void Tester_Server_session::run_session()
                 {
                     cout << id_ << ": Test Linear Enc Argmax" << endl;
                     Linear_EncArgmax_Helper helper(100,5,server_->paillier());
-                    run_linear_enc_argmax(helper);
+                    run_linear_enc_argmax(helper,use_lsic__);
                 }
                     break;
                     
