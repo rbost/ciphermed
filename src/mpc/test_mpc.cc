@@ -326,9 +326,9 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     }
     GM *gm_ptr = &gm;
     GM_priv *gm_priv_ptr = &gm_priv;
-    Paillier *p_ptr = &p;
-    Paillier_priv_fast *pp_ptr = &pp;
-    gmp_randstate_t *randstate_ptr = &randstate;
+//    Paillier *p_ptr = &p;
+//    Paillier_priv_fast *pp_ptr = &pp;
+//    gmp_randstate_t *randstate_ptr = &randstate;
 
 //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
 //    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
@@ -343,19 +343,6 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     delete t;
     
     t = new ScopedTimer("Running comparisons");
-//
-//    for (size_t i = 0; i < k; i++) {
-//        for (size_t j = 0; j < i; j++) {
-//            runProtocol(*(client.comparators()[i][j]), *(server.comparators()[i][j]), lambda);
-//        }
-//    }
-//    
-//    delete t;
-//    
-//    t = new ScopedTimer("Sorting & un-permuting");
-//    server.sort();
-//    client.unpermuteResult(server.permuted_argmax());
-
     
     if (num_threads > 1) {
         runProtocol(client,server,randstate,lambda,num_threads);
@@ -407,9 +394,9 @@ static void test_linear_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,
     }
     GM *gm_ptr = &gm;
     GM_priv *gm_priv_ptr = &gm_priv;
-    Paillier *p_ptr = &p;
-    Paillier_priv_fast *pp_ptr = &pp;
-    gmp_randstate_t *randstate_ptr = &randstate;
+//    Paillier *p_ptr = &p;
+//    Paillier_priv_fast *pp_ptr = &pp;
+//    gmp_randstate_t *randstate_ptr = &randstate;
     
 //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
 //    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
@@ -450,9 +437,7 @@ static ZZX makeIrredPoly(long p, long d)
 }
 
 static void test_change_ES()
-{
-    long n_levels = 3;
-    
+{    
     long p = 2;
     long r = 1;
     long d = 1;
