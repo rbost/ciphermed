@@ -2,7 +2,7 @@ OBJDIRS     += net
 NETSRC  := net_utils.cc exec_protocol.cc client.cc server.cc
 NETOBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
 
-DEMO_SRC := linear_classifier.cc protocol_tester.cc
+DEMO_SRC := protocol_tester.cc
 DEMO_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(DEMO_SRC))
 
 all:    $(OBJDIR)/libnet.so

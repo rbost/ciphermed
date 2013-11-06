@@ -5,7 +5,6 @@
 #include <mpc/linear_enc_argmax.hh>
 
 #include <net/server.hh>
-#include <net/linear_classifier.hh>
 #include <net/protocol_tester.hh>
 
 static void test_basic_server()
@@ -21,32 +20,9 @@ static void test_basic_server()
     server.run();
 }
 
-
-static void test_linear_classifier_server()
-{
-    gmp_randstate_t randstate;
-    gmp_randinit_default(randstate);
-    gmp_randseed_ui(randstate,time(NULL));
-    
-    
-    vector<mpz_class> model(4);
-    model[0] = 1;
-    model[1] = 1;
-    model[2] = 1;
-    model[3] = 0;
-    
-    cout << "Init server" << endl;
-    Linear_Classifier_Server server(randstate,1024,100,model,64);
-    
-    cout << "Start server" << endl;
-    server.run();
-}
-
 int main()
 {
     test_basic_server();
-    
-//    test_linear_classifier_server();
-    
+        
     return 0;
 }

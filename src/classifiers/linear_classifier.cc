@@ -4,7 +4,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
 
-#include <net/linear_classifier.hh>
+#include <classifiers/linear_classifier.hh>
 
 #include <protobuf/protobuf_conversion.hh>
 #include <net/message_io.hh>

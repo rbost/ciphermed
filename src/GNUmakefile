@@ -65,6 +65,7 @@ include mpc/Makefrag
 include tree/Makefrag
 include protobuf/Makefrag
 include net/Makefrag
+include classifiers/Makefrag
 
 $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
 	@mkdir -p $(@D)
