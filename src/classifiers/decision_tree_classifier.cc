@@ -7,8 +7,8 @@
 #include <tree/util.hh>
 #include <tree/util_poly.hh>
 
-Decision_tree_Classifier_Server::Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model)
-: Server(state, Decision_tree_Classifier_Server::key_deps_descriptor(), keysize, 0)
+Decision_tree_Classifier_Server::Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model, unsigned int n_variables)
+: Server(state, Decision_tree_Classifier_Server::key_deps_descriptor(), keysize, 0), n_variables_(n_variables)
 {
     EncryptedArray ea(*fhe_context_, fhe_G_);
     model_poly_ = model.to_polynomial_with_slots(ea.size());
@@ -28,7 +28,7 @@ void Decision_tree_Classifier_Server_session::run_session()
                 
         // get the query
         vector<Ctxt> query;
-        for (size_t i = 0; i < n_levels; i++) {
+        for (size_t i = 0; i < tree_server_->n_variables() ; i++) {
             query.push_back(read_fhe_ctxt_from_socket(*socket_, *client_fhe_pk_));
         }
 
@@ -50,7 +50,7 @@ void Decision_tree_Classifier_Server_session::run_session()
     delete this;
 }
 
-Decision_tree_Classifier_Client::Decision_tree_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned long query)
+Decision_tree_Classifier_Client::Decision_tree_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, vector<long> &query)
 : Client(io_service,state,Decision_tree_Classifier_Server::key_deps_descriptor(),keysize,0), query_(query)
 {
     
@@ -62,18 +62,16 @@ void Decision_tree_Classifier_Client::run()
     
     EncryptedArray ea(*fhe_context_, fhe_G_);
 
-    vector<PlaintextArray> b(n_levels,PlaintextArray(ea));
-    vector<Ctxt> c_b(n_levels,Ctxt(*fhe_sk_));
+    vector<PlaintextArray> b(query_.size(),PlaintextArray(ea));
+    vector<Ctxt> c_b(query_.size(),Ctxt(*fhe_sk_));
     
-    vector<long> bits_query = bitDecomp(query_, n_levels);
-    
-    for (size_t i = 0; i < n_levels; i++) {
-        b[i].encode(bits_query[i]);
+    for (size_t i = 0; i < query_.size(); i++) {
+        b[i].encode(query_[i]);
         ea.encrypt(c_b[i],*fhe_sk_,b[i]);
     }
 
     // send the query to the server ...
-    for (size_t i = 0; i < n_levels; i++) {
+    for (size_t i = 0; i < query_.size(); i++) {
         send_fhe_ctxt_to_socket(socket_, c_b[i]);
     }
     
@@ -84,9 +82,9 @@ void Decision_tree_Classifier_Client::run()
     vector<long> res_bits;
     ea.decrypt(c_r, *fhe_sk_, res_bits);
     
-    long res = bitDecomp_inv(res_bits);
-    assert(query_ == res);
-    
+    for (size_t i = 0; i < query_.size(); i++) {
+        assert(res_bits[i] == query_[i]);
+    }
     
     cout << "Test passed!" << endl;
 

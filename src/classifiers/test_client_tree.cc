@@ -14,9 +14,9 @@ static void test_tree_classifier_client(const string &hostname)
         gmp_randseed_ui(randstate,time(NULL));
 
 
-        long query = rand() % ((1<<n_levels) - 1);
-        
-        Decision_tree_Classifier_Client client(io_service, randstate,1024,query);
+        long query = rand() % ((1<<N_LEVELS) - 1);
+        vector<long> query_bits = bitDecomp(query, N_LEVELS);
+        Decision_tree_Classifier_Client client(io_service, randstate,1024,query_bits);
         
         client.connect(io_service, hostname);
         

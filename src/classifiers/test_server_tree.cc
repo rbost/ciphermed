@@ -7,10 +7,10 @@ static void test_tree_classifier_server()
     gmp_randseed_ui(randstate,time(NULL));
     
     Tree<long> *t;
-    t = binaryRepTree(n_levels);
+    t = binaryRepTree(N_LEVELS);
 
     cout << "Init server" << endl;
-    Decision_tree_Classifier_Server server(randstate,1024,*t);
+    Decision_tree_Classifier_Server server(randstate,1024,*t,N_LEVELS);
     
     cout << "Start server" << endl;
     server.run();

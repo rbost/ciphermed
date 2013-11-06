@@ -15,11 +15,11 @@
 
 using namespace std;
 
-const size_t n_levels = 3;
+#define N_LEVELS 3
 
 class Decision_tree_Classifier_Server : public Server {
 public:
-    Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model);
+    Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model, unsigned int n_variables);
   
     Server_session* create_new_server_session(tcp::socket *socket);
 
@@ -29,9 +29,10 @@ public:
     }
 
     Multivariate_poly< vector<long> > model_poly() const { return model_poly_; }
-    
+    unsigned int n_variables() const { return n_variables_; }
 protected:
     Multivariate_poly< vector<long> > model_poly_;
+    const unsigned int n_variables_;
 };
 
 
@@ -49,10 +50,10 @@ protected:
 
 class Decision_tree_Classifier_Client : public Client{
 public:
-    Decision_tree_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned long query);
+    Decision_tree_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, vector<long> &query);
     
     void run();
     
 protected:
-    unsigned long query_;
+    vector<long> query_;
 };
