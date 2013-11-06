@@ -42,7 +42,7 @@ public:
     vector<mpz_class> gm_sk() const { assert(gm_!=NULL); return {gm_->pubkey()[0],gm_->pubkey()[1],gm_->privkey()[0],gm_->privkey()[1]}; }
     
     const FHESecKey& fhe_sk() const { return *fhe_sk_; } // I don't want anyone to modify the secret key
-    const FHEcontext fhe_context() const { return *fhe_context_; }
+    const FHEcontext& fhe_context() const { return *fhe_context_; }
     const ZZX& fhe_G() const { return fhe_G_; }
     
     Key_dependencies_descriptor key_deps_desc() const { return key_deps_desc_; }
