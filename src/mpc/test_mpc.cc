@@ -524,7 +524,7 @@ int main(int ac, char **av)
     
 
 //    test_lsic(l);
-//    test_compare(l);
+    test_compare(l);
 
 //    cout << "\n\n";
     
@@ -536,7 +536,7 @@ int main(int ac, char **av)
 //    cout << "\n\n";
 //    test_enc_argmax(n,l,lambda,t);
 //    cout << "\n\n";
-    test_linear_enc_argmax(n,l,lambda);
+//    test_linear_enc_argmax(n,l,lambda);
    
 //    cout << "\n\n";
 //    test_change_ES();

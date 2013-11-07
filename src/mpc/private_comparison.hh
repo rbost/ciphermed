@@ -18,10 +18,10 @@ public:
     std::vector<mpz_class> compute_w(const std::vector<mpz_class> &c_b);
     std::vector<mpz_class> compute_sums(const std::vector<mpz_class> &c_w);
     
-    std::vector<mpz_class> compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums);
+    std::vector<mpz_class> compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums, std::vector<size_t> &rerand_indexes);
     
-    std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c);
-    std::vector<mpz_class> rerandomize_parallel(const std::vector<mpz_class> &c, unsigned int n_threads = 4);
+    std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes);
+    std::vector<mpz_class> rerandomize_parallel(const std::vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes, unsigned int n_threads = 4);
     
     void shuffle(std::vector<mpz_class> &c);
 

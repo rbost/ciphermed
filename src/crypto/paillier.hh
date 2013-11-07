@@ -18,6 +18,7 @@ class Paillier {
     mpz_class constMult(const mpz_class &c, long m) const { return constMult(m,c); };
     mpz_class scalarize(const mpz_class &c);
     void refresh(mpz_class &c);
+    mpz_class random_encryption();
 
     void rand_gen(size_t niter = 100, size_t nmax = 1000);
 

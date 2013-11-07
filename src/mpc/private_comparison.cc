@@ -71,10 +71,11 @@ std::vector<mpz_class> Compare_A::compute(const std::vector<mpz_class> &c_b, uns
 {
     vector<mpz_class> c = compute_w(c_b);
     c = compute_sums(c);
-    c = compute_c(c_b,c);
-//    c = rerandomize(c);
-
-    c = rerandomize_parallel(c,n_threads);
+    
+    vector<size_t> rerand_indexes(0);
+    c = compute_c(c_b,c,rerand_indexes);
+    
+    c = rerandomize_parallel(c,rerand_indexes,n_threads);
     shuffle(c);
     
     
@@ -112,18 +113,28 @@ vector<mpz_class> Compare_A::compute_sums(const std::vector<mpz_class> &c_w)
     return c_sums;
 }
 
-vector<mpz_class> Compare_A::compute_c(const std::vector<mpz_class> &c_b,const std::vector<mpz_class> &c_sums)
+vector<mpz_class> Compare_A::compute_c(const std::vector<mpz_class> &c_b,const std::vector<mpz_class> &c_sums, std::vector<size_t> &rerand_indexes)
 {
     ScopedTimer timer("compute_c");
     
     vector<mpz_class> c(bit_length_);
+    long delta = (1-s_)/2;
+    
     
     for (size_t i = 0; i < bit_length_; i++) {
+        long a_i = mpz_tstbit(a_.get_mpz_t(),i);
+
+        if (a_i != delta) {
+            // a_i != delta => c_i > 0
+            // avoid computations, generate a random element
+            // the decryption of c[i] can be 0 but this happens with neg. prob.
+            c[i] = paillier_.random_encryption();
+            continue;
+        }
         c[i] = paillier_.constMult(3,c_sums[i]);
         
         c[i] = paillier_.sub(c[i], c_b[i]);
         
-        long a_i = mpz_tstbit(a_.get_mpz_t(),i);
         
         switch (a_i+s_) {
             case 1:
@@ -142,25 +153,27 @@ vector<mpz_class> Compare_A::compute_c(const std::vector<mpz_class> &c_b,const s
             break;
         }
         
+        rerand_indexes.push_back(i);
+        
     }
     
     // you will have to rerandomize and shuffle c
     return c;
 }
 
-vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c)
+vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes)
 {
     ScopedTimer timer("rerandomize");
     vector<mpz_class> c_rand(c);
     
-    for (size_t i = 0; i < c_rand.size(); i++) {
-        c_rand[i] = paillier_.scalarize(c_rand[i]);
+    for (size_t i = 0; i < rerand_indexes.size(); i++) {
+        c_rand[rerand_indexes[i]] = paillier_.scalarize(c_rand[rerand_indexes[i]]);
     }
     
     return c_rand;
 }
 
-vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, unsigned int n_threads)
+vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes, unsigned int n_threads)
 {
     ScopedTimer timer("rerandomize parallel");
  
@@ -168,15 +181,23 @@ vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, un
     vector<mpz_class> c_rand(c);
     
     
-    for (size_t i = 0; i < c_rand.size(); i++) {
-        auto job =[this,i,&c_rand]
+//    for (size_t i = 0; i < c_rand.size(); i++) {
+//        auto job =[this,i,&c_rand]
+//        {
+//            c_rand[i] = paillier_.scalarize(c_rand[i]);
+//        };
+//        pool.enqueue(job);
+//    }
+
+    
+    for (size_t i = 0; i < rerand_indexes.size(); i++) {
+        auto job =[this,i,&c_rand,&rerand_indexes]
         {
-            c_rand[i] = paillier_.scalarize(c_rand[i]);
+            c_rand[rerand_indexes[i]] = paillier_.scalarize(c_rand[rerand_indexes[i]]);
         };
         pool.enqueue(job);
     }
 
-    
     return c_rand;
 }
 

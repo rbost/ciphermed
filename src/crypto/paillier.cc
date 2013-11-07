@@ -114,6 +114,13 @@ void Paillier::refresh(mpz_class &c)
     c = c*rn %n2;
 }
 
+mpz_class Paillier::random_encryption()
+{
+    mpz_class r;
+    mpz_urandomm(r.get_mpz_t(),_randstate,n2.get_mpz_t());
+
+    return r;
+}
 /*
  * Private-key operations
  */
