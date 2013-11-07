@@ -51,7 +51,7 @@ Ctxt Change_ES_FHE_to_GM_B::decrypt_encrypt(const mpz_class &c, GM_priv &gm, con
 
 vector<mpz_class> Change_ES_FHE_to_GM_slots_A::blind(const vector<mpz_class> &c, GM &gm, gmp_randstate_t state, unsigned long n_slots)
 {
-    size_t n = min(c.size(),n_slots);
+    size_t n = std::min<size_t>(c.size(),n_slots);
     vector<mpz_class> rand_c(n_slots);
     coins_ = vector<long>(n);
     
