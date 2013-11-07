@@ -1,6 +1,6 @@
 #include <mpc/private_comparison.hh>
 
-#include <util/threadpool.hh>
+#include <thread>
 #include <util/util.hh>
 
 using namespace std;
@@ -27,17 +27,31 @@ vector<mpz_class> Compare_B::encrypt_bits()
 vector<mpz_class> Compare_B::encrypt_bits_parallel(unsigned int n_threads)
 {
     ScopedTimer timer("encrypt_bits_parallel");
-    ThreadPool pool(n_threads);
-
     vector<mpz_class> c_b(bit_length_);
     
-    for (size_t i = 0; i < bit_length_; i++) {
-        size_t j = i;
-        auto job =[this,j,&c_b]()
-        {
-            c_b[j] = paillier_.encrypt(mpz_tstbit(b_.get_mpz_t(),j));
-        };
-        pool.enqueue(job);
+    
+    size_t n = bit_length_;
+    size_t m = ceilf( ((float)n)/n_threads);
+    thread threads[n_threads];
+
+    auto job =[this,&c_b](size_t i_start,size_t i_end)
+    {
+        for (size_t i = i_start; i < i_end; i++) {
+            c_b[i] = paillier_.encrypt(mpz_tstbit(b_.get_mpz_t(),i));
+        }
+    };
+
+    size_t t = 0, i_start = 0;
+    
+    for (t = 0; t < n_threads; t++) {
+        threads[t] = thread(job,i_start,min<size_t>(i_start+m,n));
+        i_start += m;
+    }
+    
+    
+    size_t t_max = t;
+    for (t = 0; t < t_max; t++) {
+        threads[t].join();
     }
 
     return c_b;
@@ -173,31 +187,48 @@ vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c, const std::
     return c_rand;
 }
 
+void threadCall(Paillier &paillier, vector<mpz_class> &c_rand, vector<size_t> &rerand_indexes, size_t i_start, size_t i_end)
+{
+    for (size_t i = i_start; i < i_end; i++) {
+        c_rand[rerand_indexes[i]] = paillier.scalarize(c_rand[rerand_indexes[i]]);
+    }
+
+}
+
+void call_from_thread(int tid) {
+    std::cout << "Launched by thread " << tid << std::endl;
+}
+
 vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes, unsigned int n_threads)
 {
     ScopedTimer timer("rerandomize parallel");
  
-    ThreadPool pool(n_threads);
     vector<mpz_class> c_rand(c);
     
+    size_t n = rerand_indexes.size();
+    size_t m = ceilf( ((float)n)/n_threads);
+    thread threads[n_threads];
     
-//    for (size_t i = 0; i < c_rand.size(); i++) {
-//        auto job =[this,i,&c_rand]
-//        {
-//            c_rand[i] = paillier_.scalarize(c_rand[i]);
-//        };
-//        pool.enqueue(job);
-//    }
-
-    
-    for (size_t i = 0; i < rerand_indexes.size(); i++) {
-        auto job =[this,i,&c_rand,&rerand_indexes]
-        {
+    auto job =[this,&c_rand,&rerand_indexes](size_t i_start,size_t i_end)
+    {
+        for (size_t i = i_start; i < i_end; i++) {
             c_rand[rerand_indexes[i]] = paillier_.scalarize(c_rand[rerand_indexes[i]]);
-        };
-        pool.enqueue(job);
-    }
+        }
+    };
 
+    size_t t = 0, i_start = 0;
+    
+    for (t = 0; t < n_threads; t++) {
+        threads[t] = thread(job,i_start,min<size_t>(i_start+m,n));
+        i_start += m;
+    }
+    
+    
+    size_t t_max = t;
+    for (t = 0; t < t_max; t++) {
+        threads[t].join();
+    }
+    
     return c_rand;
 }
 
@@ -221,6 +252,7 @@ void Compare_A::unblind(const mpz_class &t_prime)
 void runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state)
 {
     vector<mpz_class> c_b;
+//    c_b = party_b.encrypt_bits();
     c_b = party_b.encrypt_bits_parallel(2);
 
     vector<mpz_class> c = party_a.compute(c_b,2);

@@ -68,6 +68,7 @@ protected:
     GM_priv gm_;
 };
 
+void threadCall(Paillier &paillier, std::vector<mpz_class> &c_rand, std::vector<size_t> &rerand_indexes, size_t i_start, size_t i_end);
 
 
 void runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state);
