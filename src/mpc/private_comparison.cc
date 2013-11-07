@@ -32,16 +32,10 @@ vector<mpz_class> Compare_B::encrypt_bits_parallel(unsigned int n_threads)
     vector<mpz_class> c_b(bit_length_);
     
     for (size_t i = 0; i < bit_length_; i++) {
-        c_b[i] = paillier_.encrypt(mpz_tstbit(b_.get_mpz_t(),i));
-    }
-    
-    Paillier_priv_fast *paillier_ptr = &paillier_;
-    vector<mpz_class> *c_b_ptr = &c_b;
-    
-    for (size_t i = 0; i < bit_length_; i++) {
-        auto job =[this,paillier_ptr,i,c_b_ptr]
+        size_t j = i;
+        auto job =[this,j,&c_b]()
         {
-            (*c_b_ptr)[i] = paillier_ptr->encrypt(mpz_tstbit(b_.get_mpz_t(),i));
+            c_b[j] = paillier_.encrypt(mpz_tstbit(b_.get_mpz_t(),j));
         };
         pool.enqueue(job);
     }
@@ -70,6 +64,21 @@ Compare_A::Compare_A(const mpz_class &x, const size_t &l, Paillier &paillier, GM
     paillier_one_ = paillier_.pubkey()[1]; // g is an encryption of 1
     gmp_randinit_set(randstate_, state);
 
+}
+
+
+std::vector<mpz_class> Compare_A::compute(const std::vector<mpz_class> &c_b, unsigned int n_threads)
+{
+    vector<mpz_class> c = compute_w(c_b);
+    c = compute_sums(c);
+    c = compute_c(c_b,c);
+//    c = rerandomize(c);
+
+    c = rerandomize_parallel(c,n_threads);
+    shuffle(c);
+    
+    
+    return c;
 }
 
 vector<mpz_class> Compare_A::compute_w(const std::vector<mpz_class> &c_b)
@@ -158,13 +167,11 @@ vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, un
     ThreadPool pool(n_threads);
     vector<mpz_class> c_rand(c);
     
-    Paillier *paillier_ptr = &paillier_;
-    vector<mpz_class> *c_rand_ptr = &c_rand;
     
     for (size_t i = 0; i < c_rand.size(); i++) {
-        auto job =[paillier_ptr,i,c_rand_ptr]
+        auto job =[this,i,&c_rand]
         {
-            (*c_rand_ptr)[i] = paillier_ptr->scalarize((*c_rand_ptr)[i]);
+            c_rand[i] = paillier_.scalarize(c_rand[i]);
         };
         pool.enqueue(job);
     }
@@ -194,19 +201,11 @@ void runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state)
 {
     vector<mpz_class> c_b;
     c_b = party_b.encrypt_bits_parallel(2);
-    
-    vector<mpz_class> c_w = party_a.compute_w(c_b);
-    vector<mpz_class> c_sums = party_a.compute_sums(c_w);
-    vector<mpz_class> c = party_a.compute_c(c_b,c_sums);
-//    vector<mpz_class> c_rand = party_a.rerandomize(c);
-    vector<mpz_class> c_rand = party_a.rerandomize_parallel(c,2);
-    
-    // we have to suffle
-    ScopedTimer *timer = new ScopedTimer("shuffle");
 
-    random_shuffle(c_rand.begin(),c_rand.end(),[state](int n){ return gmp_urandomm_ui(state,n); });
+    vector<mpz_class> c = party_a.compute(c_b,2);
+
     
-    delete timer;
-    mpz_class t_prime = party_b.search_zero(c_rand);
+//    delete timer;
+    mpz_class t_prime = party_b.search_zero(c);
     party_a.unblind(t_prime);
 }

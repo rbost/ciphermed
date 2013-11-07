@@ -48,14 +48,8 @@ void exec_priv_compare_A(tcp::socket &socket, Compare_A *comparator, unsigned in
     
     Protobuf::BigIntArray c_b_message = readMessageFromSocket<Protobuf::BigIntArray>(socket);
     c_b = convert_from_message(c_b_message);
-    
-    vector<mpz_class> c_w = comparator->compute_w(c_b);
-    vector<mpz_class> c_sums = comparator->compute_sums(c_w);
-    vector<mpz_class> c = comparator->compute_c(c_b,c_sums);
-    vector<mpz_class> c_rand = comparator->rerandomize_parallel(c,n_threads);
-    
-    // we have to suffle
-    comparator->shuffle(c_rand);
+
+    vector<mpz_class> c_rand = comparator->compute(c_b,n_threads);
     
     // send the result
     

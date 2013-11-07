@@ -13,6 +13,8 @@ public:
     
     void set_value(const mpz_class &x) { a_ = x; };
 
+    std::vector<mpz_class> compute(const std::vector<mpz_class> &c_b, unsigned int n_threads = 4);
+    
     std::vector<mpz_class> compute_w(const std::vector<mpz_class> &c_b);
     std::vector<mpz_class> compute_sums(const std::vector<mpz_class> &c_w);
     
