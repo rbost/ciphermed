@@ -265,7 +265,6 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, 
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator)
 {
     size_t k = helper.elements_number();
-    //    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
     
     for (size_t i = 0; i < k - 1; i++) {
         //        cout << "Round " << i << endl;
