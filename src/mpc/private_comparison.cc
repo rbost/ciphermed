@@ -187,18 +187,6 @@ vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c, const std::
     return c_rand;
 }
 
-void threadCall(Paillier &paillier, vector<mpz_class> &c_rand, vector<size_t> &rerand_indexes, size_t i_start, size_t i_end)
-{
-    for (size_t i = i_start; i < i_end; i++) {
-        c_rand[rerand_indexes[i]] = paillier.scalarize(c_rand[rerand_indexes[i]]);
-    }
-
-}
-
-void call_from_thread(int tid) {
-    std::cout << "Launched by thread " << tid << std::endl;
-}
-
 vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes, unsigned int n_threads)
 {
     ScopedTimer timer("rerandomize parallel");
