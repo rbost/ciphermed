@@ -13,8 +13,8 @@ $(OBJDIR)/classifiers/client_linear: $(OBJDIR)/classifiers/test_client_linear.o 
 
 all:	$(OBJDIR)/classifiers/server_linear
 
-$(OBJDIR)/classifiers/server_linear: $(OBJDIR)/classifiers/test_server_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libfhemath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -lfhemath -lfheutil\
+$(OBJDIR)/classifiers/server_linear: $(OBJDIR)/classifiers/test_server_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet
 
@@ -33,8 +33,8 @@ $(OBJDIR)/classifiers/client_tree: $(OBJDIR)/classifiers/test_client_tree.o $(TR
 
 all:	$(OBJDIR)/classifiers/server_tree
 
-$(OBJDIR)/classifiers/server_tree: $(OBJDIR)/classifiers/test_server_tree.o $(TREE_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libfhemath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lfhemath -lfheutil\
+$(OBJDIR)/classifiers/server_tree: $(OBJDIR)/classifiers/test_server_tree.o $(TREE_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet
 

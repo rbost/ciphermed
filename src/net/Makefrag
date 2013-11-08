@@ -19,8 +19,8 @@ $(OBJDIR)/net/client: $(OBJDIR)/net/test_client.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJ
 
 all:	$(OBJDIR)/net/server
 
-$(OBJDIR)/net/server: $(OBJDIR)/net/test_server.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libfhemath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lfhemath -lfheutil\
+$(OBJDIR)/net/server: $(OBJDIR)/net/test_server.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet
 
