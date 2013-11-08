@@ -198,6 +198,30 @@ Protobuf::FHE_Ctxt convert_to_message(const Ctxt &c)
     m.set_content(stream.str().c_str());
     
     return m;
-
 }
 
+FHEcontext* create_from_message(const Protobuf::FHE_Context &message)
+{
+    std::istringstream stream(message.content());
+    
+    unsigned long m, p, r;
+    readContextBase(stream, m, p, r);
+    
+    FHEcontext *context = new FHEcontext(m, p, r);
+    
+    stream >> (*context);
+
+    return context;
+}
+
+Protobuf::FHE_Context convert_to_message(const FHEcontext &c)
+{
+    Protobuf::FHE_Context m;
+    std::ostringstream stream;
+    writeContextBase(stream, c);
+    stream << c;
+    
+    m.set_content(stream.str().c_str());
+    
+    return m;
+}

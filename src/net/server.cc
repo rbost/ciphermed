@@ -167,6 +167,15 @@ void Server_session::send_gm_pk()
     sendMessageToSocket<Protobuf::GM_PK>(socket_,pk_message);
 }
 
+void Server_session::send_fhe_context()
+{
+    const FHEcontext &context = server_->fhe_context();
+    cout << id_ << ": Send FHE Context" << endl;
+    Protobuf::FHE_Context pk_message = convert_to_message(context);
+    
+    sendMessageToSocket<Protobuf::FHE_Context>(socket_,pk_message);
+}
+
 void Server_session::send_fhe_pk()
 {
     const FHEPubKey& publicKey = server_->fhe_sk(); // cast so we only send the public informations
@@ -222,16 +231,22 @@ void Server_session::exchange_keys()
     if (key_deps_desc.need_server_paillier) {
         send_paillier_pk();
     }
-    if (key_deps_desc.need_server_fhe) {
-        send_fhe_pk();
-    }
 
-    
     if (key_deps_desc.need_client_gm) {
         get_client_pk_gm();
     }
     if (key_deps_desc.need_client_paillier) {
         get_client_pk_paillier();
+    }
+    
+    if (key_deps_desc.need_server_fhe ||
+        key_deps_desc.need_client_fhe) {
+        // if we use FHE, we need to send the context to the client before doing anything
+        send_fhe_context();
+    }
+
+    if (key_deps_desc.need_server_fhe) {
+        send_fhe_pk();
     }
     if (key_deps_desc.need_client_fhe) {
         get_client_pk_fhe();

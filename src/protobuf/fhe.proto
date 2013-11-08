@@ -1,5 +1,9 @@
 package Protobuf;
 
+message FHE_Context {
+    required string content = 1;
+}
+
 message FHE_PK {
     required string content = 1;
 }

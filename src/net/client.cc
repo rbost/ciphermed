@@ -65,14 +65,17 @@ void Client::init_needed_keys(unsigned int keysize)
     if (key_deps_desc_.need_client_paillier) {
         init_Paillier(keysize);
     }
-    if (key_deps_desc_.need_client_fhe) {
-        init_FHE_context();
-        init_FHE_key();
-    }
     
-    if (key_deps_desc_.need_server_fhe) {
-        init_FHE_context();
-    }
+    
+    // for FHE keys, we need the FHE context from the server
+//    if (key_deps_desc_.need_client_fhe) {
+//        init_FHE_context();
+//        init_FHE_key();
+//    }
+//    
+//    if (key_deps_desc_.need_server_fhe) {
+//        init_FHE_context();
+//    }
 }
 
 void Client::init_GM(unsigned int keysize)
@@ -138,6 +141,20 @@ void Client::get_server_pk_paillier()
     server_paillier_ = create_from_pk_message(pk,rand_state_);
 }
 
+void Client::get_fhe_context()
+{
+    if (fhe_context_) {
+        return;
+    }
+    
+    Protobuf::FHE_Context c = readMessageFromSocket<Protobuf::FHE_Context>(socket_);
+    cout << "Received FHE Context" << endl;
+    fhe_context_ = create_from_message(c);
+    
+    // we suppose d > 0
+    fhe_G_ = makeIrredPoly(FHE_p, FHE_d);
+}
+
 void Client::get_server_pk_fhe()
 {
     if (server_fhe_pk_) {
@@ -181,10 +198,6 @@ void Client::exchange_keys()
     if (key_deps_desc_.need_server_paillier) {
         get_server_pk_paillier();
     }
-    if (key_deps_desc_.need_server_fhe) {
-        get_server_pk_fhe();
-    }
-
     
     if (key_deps_desc_.need_client_gm) {
         send_gm_pk();
@@ -192,7 +205,19 @@ void Client::exchange_keys()
     if (key_deps_desc_.need_client_paillier) {
         send_paillier_pk();
     }
+    
+    if (key_deps_desc_.need_server_fhe ||
+        key_deps_desc_.need_client_fhe) {
+        // if we use FHE, we need the context from the server before doing anything
+        get_fhe_context();
+    }
+    
+    if (key_deps_desc_.need_server_fhe) {
+        get_server_pk_fhe();
+    }
     if (key_deps_desc_.need_client_fhe) {
+        // create the key only now
+        init_FHE_key();
         send_fhe_pk();
     }
 }

@@ -50,7 +50,7 @@ clean:
 .DELETE_ON_ERROR:
 
 # make it so that no intermediate .o files are ever deleted
-.PRECIOUS: %.o %.pb.h %.pb.cc
+.PRECIOUS: %.o %.pb.h %.pb.cc %.pb.o
 
 $(OBJDIR)/%.o: %.cc
 	@mkdir -p $(@D)

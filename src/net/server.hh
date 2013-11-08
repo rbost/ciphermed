@@ -74,6 +74,7 @@ public:
     
     void send_paillier_pk();
     void send_gm_pk();
+    void send_fhe_context();
     void send_fhe_pk();
     void get_client_pk_gm();
     void get_client_pk_paillier();

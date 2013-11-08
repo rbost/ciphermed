@@ -40,6 +40,7 @@ public:
     bool has_fhe_pk() const { return (server_fhe_pk_ != NULL); }
     void get_server_pk_gm();
     void get_server_pk_paillier();
+    void get_fhe_context();
     void get_server_pk_fhe();
     
     void send_gm_pk();
