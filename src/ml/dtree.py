@@ -11,6 +11,7 @@ if __name__ == '__main__':
   datasets = [
     load_simple_breast_cancer_data(SIMPLE_BREAST_CANCER_DATA),
     load_audiology_data(AUDIOLOGY_TRAIN_DATA, AUDIOLOGY_TEST_DATA),
+    load_nursery_data(NURSERY_DATA),
   ]
 
   np.seterr(all='raise')

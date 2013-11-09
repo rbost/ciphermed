@@ -12,6 +12,8 @@ HAR_DATA_BASEFOLDER='datasets/har/har'
 AUDIOLOGY_TRAIN_DATA='datasets/audiology/audiology.standardized.data'
 AUDIOLOGY_TEST_DATA='datasets/audiology/audiology.standardized.test'
 
+NURSERY_DATA='datasets/nursery/nursery.data'
+
 def load_wdbc_breast_cancer_data(fname):
   with open(fname, 'r') as infp:
     lines = infp.readlines()
@@ -227,5 +229,39 @@ def load_audiology_data(train_fname, test_fname):
 
   X_train, Y_train = load_file(train_fname)
   X_test, Y_test = load_file(test_fname)
+
+  return X_train, X_test, Y_train, Y_test
+
+def load_nursery_data(fname):
+  with open(fname, 'r') as infp:
+    lines = infp.readlines()
+
+  schema = [
+    ['usual','pretentious','great_pret'],
+    ['proper','less_proper','improper','critical','very_crit'],
+    ['complete','completed','incomplete','foster'],
+    ['1','2','3','more'],
+    ['convenient','less_conv','critical'],
+    ['convenient','inconv'],
+    ['nonprob','slightly_prob','problematic'],
+    ['recommended','priority','not_recom'],
+    ['not_recom', 'recommend', 'very_recom', 'priority', 'spec_prior'],
+  ]
+
+  schema_map = [ { v : k for k, v in enumerate(s) } for s in schema ]
+
+  lines = [l.strip().split(',') for l in lines]
+
+  def extractlabel(l):
+    return schema_map[-1][l[-1]]
+
+  def extractfeatures(l):
+    return [sm[v] if v != '?' else 0 for sm, v in zip(schema_map, l)]
+
+  Y = np.array(map(extractlabel, lines))
+  X = np.array(map(extractfeatures, lines))
+
+  X_train, X_test, Y_train, Y_test = \
+    cross_validation.train_test_split(X, Y, test_size=0.2)
 
   return X_train, X_test, Y_train, Y_test
