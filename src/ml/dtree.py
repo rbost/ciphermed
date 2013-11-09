@@ -15,7 +15,12 @@ if __name__ == '__main__':
 
   np.seterr(all='raise')
 
-  for X_train, X_test, Y_train, Y_test in datasets:
+  PRINT_TREES=False
+  if PRINT_TREES:
+    import StringIO
+    import pydot
+
+  for idx, (X_train, X_test, Y_train, Y_test) in enumerate(datasets):
 
     clf = tree.DecisionTreeClassifier()
     clf.fit(X_train, Y_train)
@@ -26,3 +31,9 @@ if __name__ == '__main__':
 
     print "metrics on testing data"
     print metrics.classification_report(Y_test, clf.predict(X_test))
+
+    if PRINT_TREES:
+      dot_data = StringIO.StringIO()
+      tree.export_graphviz(clf, out_file=dot_data)
+      graph = pydot.graph_from_dot_data(dot_data.getvalue())
+      graph.write_pdf("dtree-%d.pdf" % (idx))
