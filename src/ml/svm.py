@@ -11,6 +11,7 @@ if __name__ == '__main__':
   datasets = [
     load_wdbc_breast_cancer_data(WDBC_BREAST_CANCER_DATA),
     load_har_data(HAR_DATA_BASEFOLDER),
+    load_credit_data(CREDIT_DATA),
   ]
 
   np.seterr(all='raise')

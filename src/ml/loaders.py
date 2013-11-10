@@ -14,6 +14,8 @@ AUDIOLOGY_TEST_DATA='datasets/audiology/audiology.standardized.test'
 
 NURSERY_DATA='datasets/nursery/nursery.data'
 
+CREDIT_DATA='datasets/credit/crx.data'
+
 def load_wdbc_breast_cancer_data(fname):
   with open(fname, 'r') as infp:
     lines = infp.readlines()
@@ -260,6 +262,57 @@ def load_nursery_data(fname):
 
   Y = np.array(map(extractlabel, lines))
   X = np.array(map(extractfeatures, lines))
+
+  X_train, X_test, Y_train, Y_test = \
+    cross_validation.train_test_split(X, Y, test_size=0.2)
+
+  return X_train, X_test, Y_train, Y_test
+
+def load_credit_data(fname):
+  with open(fname, 'r') as infp:
+    lines = infp.readlines()
+
+  schema = [
+    ['b','a'],
+    None,
+    None,
+    ['u','y','l','t'],
+    ['g','p','gg'],
+    ['c','d','cc','i','j','k','m','r','q','w','x','e','aa','ff'],
+    ['v','h','bb','j','n','z','dd','ff','o'],
+    None,
+    ['t','f'],
+    ['t','f'],
+    None,
+    ['t','f'],
+    ['g','p','s'],
+    None,
+    None,
+  ]
+
+  schema_map = [ { v : k for k, v in enumerate(s) } if s else None for s in schema ]
+
+  lines = [l.strip().split(',') for l in lines]
+
+  def extractlabel(l):
+    assert l[-1] == '+' or l[-1] == '-'
+    return 1.0 if l[-1] == '+' else 0
+
+  def extractfeatures(l):
+    l = l[:-1]
+    f = []
+    for sm, v in zip(schema_map, l):
+      if sm is None:
+        f.append(float(v) if v != '?' else 0.0)
+        continue
+      pos = sm[v] if v != '?' else 0
+      one_of_k = [1.0 if idx == pos else 0.0 for idx in xrange(len(sm))]
+      f.extend(one_of_k)
+    return f
+
+  Y = np.array(map(extractlabel, lines))
+  X = np.array(map(extractfeatures, lines))
+  X = preprocessing.scale(X)
 
   X_train, X_test, Y_train, Y_test = \
     cross_validation.train_test_split(X, Y, test_size=0.2)
