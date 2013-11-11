@@ -344,6 +344,18 @@ void Client::run_change_encryption_scheme_slots_helper()
     exec_change_encryption_scheme_slots_helper(socket_, *gm_, *fhe_sk_, ea);
 }
 
+
+mpz_class Client::compute_dot_product(const vector<mpz_class> &x)
+{
+    return exec_compute_dot_product(socket_, x, *server_paillier_);
+}
+
+void Client::help_compute_dot_product(const vector<mpz_class> &y, bool encrypted_input)
+{
+    exec_help_compute_dot_product(socket_, y, *paillier_, encrypted_input);
+}
+
+
 EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
 {
     assert(has_paillier_pk());

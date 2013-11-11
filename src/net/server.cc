@@ -366,6 +366,17 @@ void Server_session::run_change_encryption_scheme_slots_helper()
     exec_change_encryption_scheme_slots_helper(socket_, server_->gm(), server_->fhe_sk(), ea);
 }
 
+
+mpz_class Server_session::compute_dot_product(const vector<mpz_class> &x)
+{
+    return exec_compute_dot_product(socket_, x, *client_paillier_);
+}
+
+void Server_session::help_compute_dot_product(const vector<mpz_class> &y, bool encrypted_input)
+{
+    exec_help_compute_dot_product(socket_, y, server_->paillier(), encrypted_input);
+}
+
 EncCompare_Owner Server_session::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
 {
     Comparison_protocol_B *comparator;

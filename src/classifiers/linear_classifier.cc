@@ -29,7 +29,7 @@ void Linear_Classifier_Server_session::run_session()
     try {
         exchange_keys();
         
-        send_model();
+        help_compute_dot_product(linear_server_->enc_model(),true);
         
         EncCompare_Helper helper = create_enc_comparator_helper(linear_server_->bit_size(), false);
         run_enc_comparison_helper(helper);
@@ -41,23 +41,10 @@ void Linear_Classifier_Server_session::run_session()
 }
 
 
-void Linear_Classifier_Server_session::send_model()
-{
-    Protobuf::BigIntArray model_message = convert_to_message(linear_server_->enc_model());
-    sendMessageToSocket(socket_, model_message);
-}
-
-
 Linear_Classifier_Client::Linear_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size)
 : Client(io_service,state,Linear_Classifier_Server::key_deps_descriptor(),keysize,lambda), bit_size_(bit_size),values_(vals)
 {
     
-}
-
-void Linear_Classifier_Client::get_model()
-{
-    Protobuf::BigIntArray model_message = readMessageFromSocket<Protobuf::BigIntArray>(socket_);
-    model_ = convert_from_message(model_message);
 }
 
 bool Linear_Classifier_Client::run()
@@ -65,17 +52,15 @@ bool Linear_Classifier_Client::run()
     // get public keys
     exchange_keys();
     
-    // get the model
-    get_model();
     
-    // compute the encrypted dot product
-    mpz_class v = 1,w;
+    // prepare data
+    vector <mpz_class> x = values_;
+    x.push_back(-1);
     
-    for (size_t i = 0; i < values_.size(); i++) {
-        v = server_paillier_->add(v, server_paillier_->constMult(values_[i],model_[i]));
-    }
+    // compute the dot product
+    mpz_class v = compute_dot_product(x);
+    mpz_class w = 1; // encryption of 0
     
-    w = model_[model_.size()-1];
 
     // build the comparator over encrypted data
     EncCompare_Owner owner = create_enc_comparator_owner(bit_size_,false);

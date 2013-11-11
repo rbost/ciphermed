@@ -104,6 +104,9 @@ public:
     Ctxt change_encryption_scheme(const vector<mpz_class> &c_gm);
     void run_change_encryption_scheme_slots_helper();
     
+    mpz_class compute_dot_product(const vector<mpz_class> &x);
+    void help_compute_dot_product(const vector<mpz_class> &y, bool encrypted_input = false);
+
     EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
     EncCompare_Helper create_enc_comparator_helper(size_t bit_size, bool use_lsic);
     Rev_EncCompare_Owner create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic);

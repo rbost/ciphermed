@@ -39,7 +39,6 @@ class  Linear_Classifier_Server_session : public Server_session{
     : Server_session(server,state,id,socket), linear_server_(server) {};
     
     void run_session();
-    void send_model();
     
     protected:
     Linear_Classifier_Server *linear_server_;
@@ -50,7 +49,6 @@ class Linear_Classifier_Client : public Client{
 public:
     Linear_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size);
 
-    void get_model();
     bool run();
     
 protected:

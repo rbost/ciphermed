@@ -318,3 +318,37 @@ void exec_change_encryption_scheme_slots_helper(tcp::socket &socket, GM_priv &gm
     
     send_fhe_ctxt_to_socket(socket, c_blinded_fhe);
 }
+
+mpz_class exec_compute_dot_product(tcp::socket &socket, const vector<mpz_class> &x, Paillier &p)
+{
+    // get the input vector from the socket
+    vector<mpz_class> y = read_int_array_from_socket(socket);
+    
+    // compute the encrypted dot product
+    // compute the encrypted dot product
+    mpz_class v = 1;
+    
+    for (size_t i = 0; i < y.size(); i++) {
+        v = p.add(v, p.constMult(x[i],y[i]));
+    }
+
+    return v;
+}
+
+void exec_help_compute_dot_product(tcp::socket &socket, const vector<mpz_class> &y, Paillier_priv &pp, bool encrypted_input)
+{
+    vector<mpz_class> c_y;
+    
+    // encrypt the input vector if necessary
+    if (encrypted_input) {
+        c_y  = y;
+    }else{
+        c_y = vector<mpz_class>(y.size());
+        
+        for (size_t i = 0; i < y.size(); i++) {
+            c_y[i] = pp.encrypt(y[i]);
+        }
+    }
+    
+    send_int_array_to_socket(socket, c_y);
+}
