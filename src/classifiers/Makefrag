@@ -8,7 +8,7 @@ all:	$(OBJDIR)/classifiers/client_linear
 $(OBJDIR)/classifiers/client_linear: $(OBJDIR)/classifiers/test_client_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 
 all:	$(OBJDIR)/classifiers/server_linear
@@ -16,7 +16,7 @@ all:	$(OBJDIR)/classifiers/server_linear
 $(OBJDIR)/classifiers/server_linear: $(OBJDIR)/classifiers/test_server_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 
 
@@ -28,7 +28,7 @@ all:	$(OBJDIR)/classifiers/client_tree
 $(OBJDIR)/classifiers/client_tree: $(OBJDIR)/classifiers/test_client_tree.o $(TREE_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 
 all:	$(OBJDIR)/classifiers/server_tree
@@ -36,7 +36,7 @@ all:	$(OBJDIR)/classifiers/server_tree
 $(OBJDIR)/classifiers/server_tree: $(OBJDIR)/classifiers/test_server_tree.o $(TREE_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 
 # vim: set noexpandtab:

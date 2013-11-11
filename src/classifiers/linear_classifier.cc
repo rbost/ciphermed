@@ -29,10 +29,17 @@ void Linear_Classifier_Server_session::run_session()
     try {
         exchange_keys();
         
+        RESET_BENCHMARK_TIMER
+
         help_compute_dot_product(linear_server_->enc_model(),true);
         
         EncCompare_Helper helper = create_enc_comparator_helper(linear_server_->bit_size(), false);
         run_enc_comparison_helper(helper);
+
+#ifdef BENCHMARK
+        cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
+#endif
+
     } catch (std::exception& e) {
         std::cout << "Exception: " << e.what() << std::endl;
     }
@@ -52,7 +59,7 @@ bool Linear_Classifier_Client::run()
     // get public keys
     exchange_keys();
     
-    
+    RESET_BENCHMARK_TIMER
     // prepare data
     vector <mpz_class> x = values_;
     x.push_back(-1);
@@ -68,5 +75,8 @@ bool Linear_Classifier_Client::run()
     
     bool result = run_enc_comparison_owner(owner);
     
+#ifdef BENCHMARK
+    cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
+#endif
     return result;
 }

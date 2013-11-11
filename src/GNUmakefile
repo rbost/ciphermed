@@ -9,10 +9,18 @@ L_BOOST_SYSTEM ?= -lboost_system
 L_BOOST_THREAD ?= -lboost_thread
 
 DEBUG ?= 0
+BENCHMARK ?= 0
+
 ifeq ($(strip $(DEBUG)),1)
 	CXXOPT :=
 else
-	CXXOPT := -O3 -DNDEBUG
+	CXXOPT := -O3
+endif
+
+ifeq ($(strip $(BENCHMARK)),1)
+	CXXOPT := $(CXXOPT) -D BENCHMARK
+else
+	CXXOPT := $(CXXOPT) -O3 -D BENCHMARK
 endif
 
 OBJDIR	 := obj

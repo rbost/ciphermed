@@ -1,7 +1,13 @@
 #include <classifiers/linear_classifier.hh>
+#include <util/benchmarks.hh>
 
 static void test_linear_classifier_server()
 {
+#ifdef BENCHMARK
+    cout << "BENCHMARK flag set" << endl;
+    BENCHMARK_INIT
+#endif
+    
     gmp_randstate_t randstate;
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));

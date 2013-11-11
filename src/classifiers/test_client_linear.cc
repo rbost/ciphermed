@@ -1,11 +1,16 @@
 #include <classifiers/linear_classifier.hh>
 
 #include <util/util.hh>
+#include <util/benchmarks.hh>
 
 static void test_linear_classifier_client(const string &hostname)
 {
     try
     {
+#ifdef BENCHMARK
+        cout << "BENCHMARK flag set" << endl;
+        BENCHMARK_INIT
+#endif
         
         boost::asio::io_service io_service;
         
