@@ -3,8 +3,8 @@ SHAIFHESRC   :=
 SHAIFHEOBJ   := $(patsubst %.cc,$(OBJDIR)/fhe/%.o,$(FHESRC))
 
 #all:    $(OBJDIR)/libfhe.so
-#$(OBJDIR)/libfhe.so: $(FHEOBJ) $(OBJDIR)/libfhemath.so
-#	$(CXX) -shared -o $@ $(FHEOBJ) $(LDFLAGS) -lgmpxx -lgmp -lfhemath
+#$(OBJDIR)/libfhe.so: $(FHEOBJ) $(OBJDIR)/libmath.so
+#	$(CXX) -shared -o $@ $(FHEOBJ) $(LDFLAGS) -lgmpxx -lgmp -lmath
 
 all:    $(OBJDIR)/shaifhe/test $(OBJDIR)/shaifhe/shiftfun
 

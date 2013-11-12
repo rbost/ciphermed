@@ -26,7 +26,6 @@ EncArgmax_Owner::~EncArgmax_Owner()
     for (size_t i = 0; i < k_; i++) {
         for (size_t j = 0; j < i; j++) {
             // delete the private comparators
-            delete comparators_[i][j]->comparator();
             delete comparators_[i][j];
         }
     }
@@ -65,7 +64,6 @@ EncArgmax_Helper::~EncArgmax_Helper()
     for (size_t i = 0; i < comparators_.size(); i++) {
         for (size_t j = 0; j < comparators_[i].size(); j++) {
             // delete the private comparators
-            delete comparators_[i][j]->comparator();
             delete comparators_[i][j];
         }
     }

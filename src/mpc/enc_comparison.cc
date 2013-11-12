@@ -13,6 +13,11 @@ EncCompare_Owner::EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, c
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
 }
 
+EncCompare_Owner::~EncCompare_Owner()
+{
+    delete comparator_;
+}
+
 void EncCompare_Owner::set_input(const mpz_class &v_a, const mpz_class &v_b)
 {
     assert(!is_set_up_);
@@ -60,6 +65,11 @@ EncCompare_Helper::EncCompare_Helper(const size_t &l, Paillier_priv_fast &pp, Co
 : bit_length_(l), paillier_(pp), comparator_(comparator), two_l_(0), is_set_up_(false)
 {
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
+}
+
+EncCompare_Helper::~EncCompare_Helper()
+{
+    delete comparator_;
 }
 
 void EncCompare_Helper::set_bit_length(size_t l)

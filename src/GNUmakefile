@@ -9,10 +9,18 @@ L_BOOST_SYSTEM ?= -lboost_system
 L_BOOST_THREAD ?= -lboost_thread
 
 DEBUG ?= 0
+BENCHMARK ?= 0
+
 ifeq ($(strip $(DEBUG)),1)
 	CXXOPT :=
 else
-	CXXOPT := -O3 -DNDEBUG
+	CXXOPT := -O3
+endif
+
+ifeq ($(strip $(BENCHMARK)),1)
+	CXXOPT := $(CXXOPT) -D BENCHMARK
+else
+	CXXOPT := $(CXXOPT) -O3 -D BENCHMARK
 endif
 
 OBJDIR	 := obj
@@ -50,7 +58,7 @@ clean:
 .DELETE_ON_ERROR:
 
 # make it so that no intermediate .o files are ever deleted
-.PRECIOUS: %.o %.pb.h %.pb.cc
+.PRECIOUS: %.o %.pb.h %.pb.cc %.pb.o
 
 $(OBJDIR)/%.o: %.cc
 	@mkdir -p $(@D)
@@ -65,6 +73,7 @@ include mpc/Makefrag
 include tree/Makefrag
 include protobuf/Makefrag
 include net/Makefrag
+include classifiers/Makefrag
 
 $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
 	@mkdir -p $(@D)

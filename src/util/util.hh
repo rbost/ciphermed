@@ -60,6 +60,57 @@ private:
     Timer t_;
 };
 
+class ResumableTimer {
+public:
+    ResumableTimer(const std::string &m) : m_(m), total_time_ms_(0), is_running_(true), t_() {}
+    ResumableTimer(const ResumableTimer&) = delete;
+    ResumableTimer(ResumableTimer &&) = delete;
+    ResumableTimer &operator=(const ResumableTimer &) = delete;
+
+    void restart()
+    {
+        total_time_ms_ = 0.;
+        is_running_ = true;
+        t_.lap();
+    }
+    
+    void pause()
+    {
+        total_time_ms_ += t_.lap_ms();
+        is_running_ = false;
+    }
+    
+    void resume()
+    {
+        is_running_ = true;
+        t_.lap();
+    }
+    
+    double get_elapsed_time()
+    {
+        if (is_running_) {
+            return total_time_ms_+t_.lap_ms();
+        }
+        return total_time_ms_;
+    }
+    
+    ~ResumableTimer()
+    {
+        if (is_running_) {
+            total_time_ms_ += t_.lap_ms();
+        }
+        
+        std::cerr << "region " << m_ << " took " << total_time_ms_ << " ms" << std::endl;
+    }
+
+private:
+    std::string m_;
+    double total_time_ms_;
+    bool is_running_;
+
+    Timer t_;
+};
+
 inline void
 assert_s(bool value, const std::string &msg) throw (FHEError)
 {

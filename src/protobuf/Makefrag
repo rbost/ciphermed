@@ -15,7 +15,7 @@ OBJDIRS     += protobuf
 SRC  := protobuf_conversion.cc 
 OBJ  := $(patsubst %.cc,$(OBJDIR)/protobuf/%.o,$(SRC))
 
-PROTO_FILE = bigint.proto keys.proto lsic_messages.proto
+PROTO_FILE = bigint.proto keys.proto lsic_messages.proto fhe.proto test_requests.proto
 PROTO_H = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.h,$(PROTO_FILE)) $(PROTO_SRC_DIR)/proto_headers.hh
 PROTO_CC = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.cc,$(PROTO_FILE))
 PROTO_OBJ = $(patsubst %.proto, $(PROTO_OBJ_DIR)/%.pb.o,$(PROTO_FILE))
@@ -32,7 +32,7 @@ $(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(OBJ)  $(OBJDIR)/libcrypto.so
 
 all:	$(OBJDIR)/protobuf/test_protobuf
 $(OBJDIR)/protobuf/test_protobuf: $(OBJDIR)/protobuf/test_protobuf.o $(OBJ) $(PROTO_OBJ) $(OBJDIR)/libcrypto.so
-	$(CXX) $^ -o $@ $(LDFLAGS) -lgmp -lprotobuf -lcrypto -lntl
+	$(CXX) $^ -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lgmp -lprotobuf -lcrypto -lntl -lgf2x
 
 
 # vim: set noexpandtab:

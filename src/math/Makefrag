@@ -1,23 +1,26 @@
 OBJDIRS     += math
-MATHSRC   :=  field.cc matrix.cc poly.cc math_util.cc num_th_alg.cc prime_seq.cc
+MATHSRC_OTHER   :=  field.cc matrix.cc poly.cc
+MATHOBJ_OTHER   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC_ALL))
+
+MATHSRC   :=  math_util.cc num_th_alg.cc prime_seq.cc
 MATHOBJ   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC))
 
-all:    $(OBJDIR)/libfhemath.so
-$(OBJDIR)/libfhemath.so: $(MATHOBJ) $(OBJDIR)/libfheutil.so
+all:    $(OBJDIR)/libmath.so
+$(OBJDIR)/libmath.so: $(MATHOBJ) $(OBJDIR)/libfheutil.so
 	$(CXX) -shared -o $@ $(MATHOBJ) $(LDFLAGS) -lgmpxx -lgmp -lfheutil
 
-all:    $(OBJDIR)/math/r
-$(OBJDIR)/math/r: $(OBJDIR)/math/r.o $(OBJDIR)/libfhemath.so 
-	$(CXX) $< -o $@ $(LDFLAGS) -lfhemath -lfheutil
+test_math:    $(OBJDIR)/math/r
+$(OBJDIR)/math/r: $(OBJDIR)/math/r.o $(MATHOBJ_OTHER) $(OBJDIR)/libmath.so
+	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lfheutil
 
 all:    $(OBJDIR)/math/test_algo
 $(OBJDIR)/math/test_algo: $(OBJDIR)/math/test_algo.o 
-	$(CXX) $< -o $@ $(LDFLAGS) -lfhemath -lfheutil -lntl
+	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lfheutil -lntl
 
 install: install_math
 
 .PHONY: install_math
-install_math: $(OBJDIR)/libfhemath.so
-	install -m 644 $(OBJDIR)/libfhemath.so /usr/lib
+install_math: $(OBJDIR)/libmath.so
+	install -m 644 $(OBJDIR)/libmath.so /usr/lib
 
 # vim: set noexpandtab:

@@ -324,16 +324,11 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     for (size_t i = 0; i < k; i++) {
         v[i] = pp.encrypt(v[i]);
     }
-    GM *gm_ptr = &gm;
-    GM_priv *gm_priv_ptr = &gm_priv;
-    Paillier *p_ptr = &p;
-    Paillier_priv_fast *pp_ptr = &pp;
-    gmp_randstate_t *randstate_ptr = &randstate;
 
-//    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
-//    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
-    auto party_a_creator = [gm_ptr,nbits](){ return new LSIC_A(0,nbits,*gm_ptr); };
-    auto party_b_creator = [gm_priv_ptr,nbits](){ return new LSIC_B(0,nbits,*gm_priv_ptr); };
+//    auto party_a_creator = [&gm,&p,nbits,&randstate](){ return new Compare_A(0,nbits,p,gm,randstate); };
+//    auto party_b_creator = [&gm_priv,&pp,nbits](){ return new Compare_B(0,nbits,pp,gm_priv); };
+    auto party_a_creator = [&gm,nbits](){ return new LSIC_A(0,nbits,gm); };
+    auto party_b_creator = [&gm_priv,nbits](){ return new LSIC_B(0,nbits,gm_priv); };
    
     timer_exec = new ScopedTimer("Protocol execution");
 
@@ -343,19 +338,6 @@ static void test_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigne
     delete t;
     
     t = new ScopedTimer("Running comparisons");
-//
-//    for (size_t i = 0; i < k; i++) {
-//        for (size_t j = 0; j < i; j++) {
-//            runProtocol(*(client.comparators()[i][j]), *(server.comparators()[i][j]), lambda);
-//        }
-//    }
-//    
-//    delete t;
-//    
-//    t = new ScopedTimer("Sorting & un-permuting");
-//    server.sort();
-//    client.unpermuteResult(server.permuted_argmax());
-
     
     if (num_threads > 1) {
         runProtocol(client,server,randstate,lambda,num_threads);
@@ -405,16 +387,11 @@ static void test_linear_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,
     for (size_t i = 0; i < k; i++) {
         v[i] = pp.encrypt(v[i]);
     }
-    GM *gm_ptr = &gm;
-    GM_priv *gm_priv_ptr = &gm_priv;
-    Paillier *p_ptr = &p;
-    Paillier_priv_fast *pp_ptr = &pp;
-    gmp_randstate_t *randstate_ptr = &randstate;
-    
-//    auto party_a_creator = [gm_ptr,p_ptr,nbits,randstate_ptr](){ return new Compare_A(0,nbits,*p_ptr,*gm_ptr,*randstate_ptr); };
-//    auto party_b_creator = [gm_priv_ptr,pp_ptr,nbits](){ return new Compare_B(0,nbits,*pp_ptr,*gm_priv_ptr); };
-    auto party_a_creator = [gm_ptr,nbits](){ return new LSIC_A(0,nbits,*gm_ptr); };
-    auto party_b_creator = [gm_priv_ptr,nbits](){ return new LSIC_B(0,nbits,*gm_priv_ptr); };
+
+//    auto party_a_creator = [&gm,&p,nbits,&randstate](){ return new Compare_A(0,nbits,p,gm,randstate); };
+//    auto party_b_creator = [&gm_priv,&pp,nbits](){ return new Compare_B(0,nbits,pp,gm_priv); };
+    auto party_a_creator = [&gm,nbits](){ return new LSIC_A(0,nbits,gm); };
+    auto party_b_creator = [&gm_priv,nbits](){ return new LSIC_B(0,nbits,gm_priv); };
 
 
     Linear_EncArgmax_Owner client(v,nbits,p,randstate, lambda);
@@ -450,9 +427,7 @@ static ZZX makeIrredPoly(long p, long d)
 }
 
 static void test_change_ES()
-{
-    long n_levels = 3;
-    
+{    
     long p = 2;
     long r = 1;
     long d = 1;
@@ -549,7 +524,7 @@ int main(int ac, char **av)
     
 
 //    test_lsic(l);
-//    test_compare(l);
+    test_compare(l);
 
 //    cout << "\n\n";
     
@@ -563,7 +538,7 @@ int main(int ac, char **av)
 //    cout << "\n\n";
 //    test_linear_enc_argmax(n,l,lambda);
    
-    cout << "\n\n";
-    test_change_ES();
+//    cout << "\n\n";
+//    test_change_ES();
 	return 0;
 }

@@ -1,5 +1,6 @@
 #include <gmpxx.h>
 #include <string>
+#include <sstream>
 
 #include <protobuf/protobuf_conversion.hh>
 
@@ -154,4 +155,73 @@ Protobuf::Paillier_PK get_pk_message(const Paillier *paillier)
     *(pk_message.mutable_g()) = convert_to_message(pk[1]);
     
     return pk_message;
+}
+
+FHEPubKey* create_from_pk_message(const Protobuf::FHE_PK &m_pk, const FHEcontext &fhe_context)
+{
+    FHEPubKey *fhe_pk = new FHEPubKey(fhe_context);
+    
+    std::istringstream stream(m_pk.content());
+    stream >> (*fhe_pk);
+    
+    return fhe_pk;
+}
+
+Protobuf::FHE_PK get_pk_message(const FHEPubKey& pubKey)
+{
+    Protobuf::FHE_PK pk_message;
+
+    std::ostringstream stream;
+    stream << pubKey;
+    
+    pk_message.set_content(stream.str().c_str());
+    
+    return pk_message;
+}
+
+
+Ctxt convert_from_message(const Protobuf::FHE_Ctxt &m, const FHEPubKey &pubkey)
+{
+    Ctxt c(pubkey);
+    
+    std::istringstream stream(m.content());
+    stream >> c;
+    
+    return c;
+}
+
+Protobuf::FHE_Ctxt convert_to_message(const Ctxt &c)
+{
+    Protobuf::FHE_Ctxt m;
+    std::ostringstream stream;
+    stream << c;
+    m.set_content(stream.str().c_str());
+    
+    return m;
+}
+
+FHEcontext* create_from_message(const Protobuf::FHE_Context &message)
+{
+    std::istringstream stream(message.content());
+    
+    unsigned long m, p, r;
+    readContextBase(stream, m, p, r);
+    
+    FHEcontext *context = new FHEcontext(m, p, r);
+    
+    stream >> (*context);
+
+    return context;
+}
+
+Protobuf::FHE_Context convert_to_message(const FHEcontext &c)
+{
+    Protobuf::FHE_Context m;
+    std::ostringstream stream;
+    writeContextBase(stream, c);
+    stream << c;
+    
+    m.set_content(stream.str().c_str());
+    
+    return m;
 }

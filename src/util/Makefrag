@@ -1,5 +1,5 @@
 OBJDIRS     += util
-UTILSRC   := util.cc 
+UTILSRC   := util.cc benchmarks.cc
 UTILOBJ   := $(patsubst %.cc,$(OBJDIR)/util/%.o,$(UTILSRC))
 
 all:    $(OBJDIR)/libfheutil.so

@@ -10,13 +10,20 @@
 #include <net/message_io.hh>
 
 #include <net/defs.hh>
+#include <net/net_utils.hh>
 #include <util/util.hh>
 
 #include <FHE.h>
 #include <EncryptedArray.h>
 
+const bool use_lsic__ = true;
 
-
+void Tester_Client::send_test_query(enum Test_Request_Request_Type type)
+{
+    Test_Request request;
+    request.set_type(type);
+    sendMessageToSocket<Test_Request>(socket_,request);
+}
 
 mpz_class Tester_Client::test_lsic(const mpz_class &a, size_t l)
 {
@@ -24,11 +31,7 @@ mpz_class Tester_Client::test_lsic(const mpz_class &a, size_t l)
         get_server_pk_gm();
     }
     // send the start message
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << START_LSIC << "\n\r\n";
-    boost::asio::write(socket_, out_buff);
-    
+    send_test_query(Test_Request_Request_Type_TEST_LSIC);
     LSIC_A lsic(a,l,*server_gm_);
     return run_lsic_A(&lsic);
 }
@@ -42,10 +45,7 @@ mpz_class Tester_Client::test_compare(const mpz_class &b, size_t l)
         get_server_pk_paillier();
     }
     // send the start message
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << START_PRIV_COMP << "\n\r\n";
-    boost::asio::write(socket_, out_buff);
+    send_test_query(Test_Request_Request_Type_TEST_COMPARE);
     
     Compare_A comparator(b,l,*server_paillier_,*server_gm_,rand_state_);
     return run_priv_compare_A(&comparator);
@@ -60,26 +60,11 @@ void Tester_Client::test_enc_compare(size_t l)
     //    cout << "a = " << a << endl;
     //    cout << "b = " << b << endl;
     
-    //    get_server_pk_gm();
-    //    get_server_pk_paillier();
-    
-    
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    string line;
-    // send the start message
-    output_stream << START_ENC_COMPARE << "\n";
-    output_stream << "\r\n";
-    
-    boost::asio::write(socket_, out_buff);
-    
-    
-    // wait for the pk request from the server
-    answer_server_pk_request();
-    
     mpz_class c_a, c_b;
-    
-    bool res = run_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+
+    send_test_query(Test_Request_Request_Type_TEST_ENC_COMPARE);
+
+    bool res = run_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
     cout<< "\nResult is " << res << endl;
     cout << "Result should be " << (a < b) << endl;
 }
@@ -92,20 +77,12 @@ void Tester_Client::test_rev_enc_compare(size_t l)
     
     //    cout << "a = " << a << endl;
     //    cout << "b = " << b << endl;
-    
-    //    get_server_pk_gm();
-    //    get_server_pk_paillier();
-    
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << START_REV_ENC_COMPARE << "\n";
-    output_stream << "\r\n";
-    
-    boost::asio::write(socket_, out_buff);
-    
+
     mpz_class c_a, c_b;
-    
-    run_rev_enc_compare(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l);
+
+    send_test_query(Test_Request_Request_Type_TEST_REV_ENC_COMPARE);
+
+    run_rev_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
     
     cout << "\nResult should be " << (a < b) << endl;
 }
@@ -113,9 +90,6 @@ void Tester_Client::test_rev_enc_compare(size_t l)
 
 void Tester_Client::test_linear_enc_argmax()
 {
-    //    get_server_pk_gm();
-    //    get_server_pk_paillier();
-    
     size_t k = 5;
     size_t nbits = 100;
     
@@ -132,19 +106,13 @@ void Tester_Client::test_linear_enc_argmax()
         v[i] = server_paillier_->encrypt(v[i]);
     }
     
-    boost::asio::streambuf out_buff;
-    std::ostream output_stream(&out_buff);
-    output_stream << TEST_ENC_ARGMAX << "\n";
-    output_stream << "\r\n";
-    
-    boost::asio::write(socket_, out_buff);
-    
+    send_test_query(Test_Request_Request_Type_TEST_LINEAR_ENC_ARGMAX);
     
     Linear_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
     
     ScopedTimer *t = new ScopedTimer("Linear enc argmax");
     
-    run_linear_enc_argmax(owner);
+    run_linear_enc_argmax(owner,use_lsic__);
     delete t;
     
     size_t mpc_argmax = owner.output();
@@ -154,52 +122,78 @@ void Tester_Client::test_linear_enc_argmax()
     cout << "\nFound argmax = " << mpc_argmax << endl;
 }
 
-void Tester_Client::test_decrypt_gm(const mpz_class &c)
-{
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    
-    buff_stream << DECRYPT_GM << "\n"<< c << "\n\r\n";
-    boost::asio::write(socket_, buff);
-    
-}
-
 void Tester_Client::test_fhe()
 {
     get_server_pk_fhe();
     
     EncryptedArray ea(server_fhe_pk_->getContext(), fhe_G_);
+    
+    vector<long> bits(ea.size());
+    for (size_t i = 0; i < bits.size(); i++) {
+        bits[i] = gmp_urandomb_ui(rand_state_,1);
+    }
+    
     PlaintextArray p0(ea);
-    p0.encode(0);
+    p0.encode(bits);
     p0.print(cout);
     
     Ctxt c0(*server_fhe_pk_);
     ea.encrypt(c0, *server_fhe_pk_, p0);
     
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    
-    buff_stream << DECRYPT_FHE << "\n"<< c0 << "\n\r\n";
-    boost::asio::write(socket_, buff);
+    send_test_query(Test_Request_Request_Type_TEST_FHE);
+
+    Protobuf::FHE_Ctxt m = convert_to_message(c0);
+    sendMessageToSocket<Protobuf::FHE_Ctxt>(socket_,m);
 }
 
+
+void Tester_Client::test_change_es()
+{
+    send_test_query(Test_Request_Request_Type_TEST_CHANGE_ES);
+
+
+    EncryptedArray ea(*fhe_context_, fhe_G_);
+    
+    size_t n_slots = ea.size();
+    vector<long> bits_query(n_slots);
+    
+    vector<mpz_class> c_gm(bits_query.size());
+    
+    for (size_t i = 0; i < c_gm.size(); i++) {
+        bits_query[i] = gmp_urandomb_ui(rand_state_,1);
+        c_gm[i] = server_gm_->encrypt(bits_query[i]);
+    }
+    
+    Ctxt c_fhe = change_encryption_scheme(c_gm);
+    
+    send_fhe_ctxt_to_socket(socket_, c_fhe);
+    for (size_t i = 0; i < bits_query.size(); i++) {
+        cout << "[" << bits_query[i] << "]";
+    }
+    cout << endl;
+}
 
 void Tester_Client::disconnect()
 {
     cout << "Disconnect" << endl;
     
-    boost::asio::streambuf buff;
-    std::ostream buff_stream(&buff);
-    buff_stream << DISCONNECT << "\n\r\n";
-    boost::asio::write(socket_, buff);
+    send_test_query(Test_Request_Request_Type_DISCONNECT);
+
 }
 
 
 
-Server_session* Tester_Server::create_new_server_session(tcp::socket *socket)
+Server_session* Tester_Server::create_new_server_session(tcp::socket &socket)
 {
     Tester_Server_session *s = new Tester_Server_session(this, rand_state_, n_clients_++, socket);
     return s;
+}
+
+enum Test_Request_Request_Type Tester_Server_session::get_test_query()
+{
+    Test_Request request = readMessageFromSocket<Test_Request>(socket_);
+    
+    return request.type();
 }
 
 void Tester_Server_session::run_session()
@@ -207,67 +201,83 @@ void Tester_Server_session::run_session()
     cout << id_ << ": Start session" << endl;
     
     // exchange keys
-    exchange_all_keys();
+    exchange_keys();
     
     // main loop to catch requests
     bool should_exit = false;
     try {
         for (;!should_exit; ) {
+
+            // get the request
+            Test_Request_Request_Type request_type = get_test_query();
             
-            // wait for a complete request
-            boost::asio::read_until(*socket_, input_buf_, "\r\n");
             
-            std::istream input_stream(&input_buf_);
-            std::string line;
-            
-            //    std::string s( (std::istreambuf_iterator<char>( input_stream )),
-            //                  (std::istreambuf_iterator<char>()) );
-            //    cout << s << endl;
-            
-            // parse the input
-            do {
-                getline(input_stream,line);
-                //            cout << line;
-                if (line == "") {
-                    continue;
-                }
-                
-                if (line == GET_PAILLIER_PK) {
-                    send_paillier_pk();
-                }else if(line == GET_GM_PK) {
-                    send_gm_pk();
-                }else if(line == GET_FHE_PK) {
-                    send_fhe_pk();
-                }else if(line == START_LSIC) {
+            switch (request_type) {
+                case Test_Request_Request_Type_TEST_LSIC:
+                {
+                    cout << id_ << ": Test LSIC" << endl;
                     mpz_class b(20);
                     test_lsic(b,100);
-                }else if(line == START_PRIV_COMP) {
+                }
+                    break;
+
+                case Test_Request_Request_Type_TEST_COMPARE:
+                {
+                    cout << id_ << ": Test Compare" << endl;
                     mpz_class b(20);
                     test_compare(b,100);
-                }else if(line == DECRYPT_GM) {
-                    mpz_class c;
-                    getline(input_stream,line);
-                    c.set_str(line,10);
-                    decrypt_gm(c);
-                }else if(line == DECRYPT_FHE) {
-                    Ctxt c(server_->fhe_sk());
-                    input_stream >> c;
-                    decrypt_fhe(c);
-                }else if(line == START_REV_ENC_COMPARE){
-                    // get the bit length and launch the helper
-                    bool b = run_rev_enc_comparison(0);
-                    
-                    cout << id_ << ": Rev Enc Compare result: " << b << endl;
-                }else if(line == START_ENC_COMPARE){
-                    run_enc_comparison(0, client_gm_);
-                }else if(line == TEST_ENC_ARGMAX){
-                    Linear_EncArgmax_Helper helper(100,5,server_->paillier());
-                    run_linear_enc_argmax(helper);
-                }else if(line == DISCONNECT){
-                    should_exit = true;
-                    break;
                 }
-            } while (!input_stream.eof());
+                    break;
+
+                case Test_Request_Request_Type_TEST_ENC_COMPARE:
+                {
+                    cout << id_ << ": Test Enc Compare" << endl;
+                    run_enc_comparison_helper(0,use_lsic__);
+                }
+                    break;
+                    
+                case Test_Request_Request_Type_TEST_REV_ENC_COMPARE:
+                {
+                    cout << id_ << ": Test Rev Enc Compare" << endl;
+                    bool b = run_rev_enc_comparison_helper(0,use_lsic__);
+                    cout << id_ << ": Rev Enc Compare result: " << b << endl;
+                }
+                    break;
+                    
+                case Test_Request_Request_Type_TEST_LINEAR_ENC_ARGMAX:
+                {
+                    cout << id_ << ": Test Linear Enc Argmax" << endl;
+                    Linear_EncArgmax_Helper helper(100,5,server_->paillier());
+                    run_linear_enc_argmax(helper,use_lsic__);
+                }
+                    break;
+                    
+                case Test_Request_Request_Type_TEST_FHE:
+                {
+                    cout << id_ << ": Test FHE" << endl;
+                    decrypt_fhe();
+                }
+                    break;
+                    
+                case Test_Request_Request_Type_DISCONNECT:
+                {
+                    cout << id_ << ": Disconnect" << endl;
+                    should_exit = true;
+                }
+                    break;
+
+                case Test_Request_Request_Type_TEST_CHANGE_ES:
+                {
+                    cout << id_ << ": Change ES" << endl;
+                    test_change_es();
+                }
+                default:
+                {
+                    cout << id_ << ": Bad Request " << request_type << endl;
+//                    should_exit = true;
+                }
+                    break;
+            }
         }
         cout << id_ << ": Disconnected" << endl;
         
@@ -295,3 +305,38 @@ void Tester_Server_session::test_compare(const mpz_class &a,size_t l)
     Compare_B comparator(a,l,server_->paillier(),server_->gm());
     run_priv_compare_B(&comparator);
 }
+
+void Tester_Server_session::test_change_es()
+{
+    run_change_encryption_scheme_slots_helper();
+    
+    // get the encryption from the client
+    Ctxt c = read_fhe_ctxt_from_socket(socket_, server_->fhe_sk());
+    
+    EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
+    PlaintextArray pp0(ea);
+    ea.decrypt(c, server_->fhe_sk(), pp0);
+    cout << id_ << ": Decryption result = " << endl;
+    pp0.print(cout);
+    cout << endl;
+}
+
+void Tester_Server_session::decrypt_gm(const mpz_class &c)
+{
+    bool b = (server_->gm()).decrypt(c);
+    cout << id_ << ": Decryption result = " << b << endl;
+}
+
+void Tester_Server_session::decrypt_fhe()
+{
+    Protobuf::FHE_Ctxt m = readMessageFromSocket<Protobuf::FHE_Ctxt>(socket_);
+    Ctxt c = convert_from_message(m, server_->fhe_sk());
+    
+    EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
+    PlaintextArray pp0(ea);
+    ea.decrypt(c, server_->fhe_sk(), pp0);
+    cout << id_ << ": Decryption result = " << endl;
+    pp0.print(cout);
+    cout << endl;
+}
+

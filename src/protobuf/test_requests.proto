@@ -1,0 +1,16 @@
+
+message Test_Request
+{
+    enum Request_Type {
+        TEST_LSIC = 0;
+        TEST_COMPARE = 1;
+        TEST_ENC_COMPARE = 2;
+        TEST_REV_ENC_COMPARE = 3;
+        TEST_LINEAR_ENC_ARGMAX = 4;
+        TEST_FHE = 5;
+        TEST_CHANGE_ES = 6;
+
+        DISCONNECT = 10;
+    }
+    required Request_Type type = 1;
+}

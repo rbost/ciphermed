@@ -13,14 +13,18 @@ public:
     
     void set_value(const mpz_class &x) { a_ = x; };
 
+    std::vector<mpz_class> compute(const std::vector<mpz_class> &c_b, unsigned int n_threads = 4);
+    
     std::vector<mpz_class> compute_w(const std::vector<mpz_class> &c_b);
     std::vector<mpz_class> compute_sums(const std::vector<mpz_class> &c_w);
     
-    std::vector<mpz_class> compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums);
+    std::vector<mpz_class> compute_c(const std::vector<mpz_class> &c_a,const std::vector<mpz_class> &c_sums, std::vector<size_t> &rerand_indexes);
     
-    std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c);
-    std::vector<mpz_class> rerandomize_parallel(const std::vector<mpz_class> &c, unsigned int n_threads = 4);
+    std::vector<mpz_class> rerandomize(const std::vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes);
+    std::vector<mpz_class> rerandomize_parallel(const std::vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes, unsigned int n_threads = 4);
     
+    void shuffle(std::vector<mpz_class> &c);
+
     void unblind(const mpz_class &t_prime);
     
     GM gm() const { return gm_; }
@@ -28,6 +32,7 @@ public:
     virtual void set_bit_length(size_t l) {bit_length_ = l;}
 
     mpz_class output() const { return res_; }
+    
 protected:
     mpz_class a_;
     long s_;
@@ -37,6 +42,8 @@ protected:
     
     mpz_class res_;
     mpz_class paillier_one_;
+    
+    gmp_randstate_t randstate_;
 };
 
 class Compare_B : public Comparison_protocol_B {
@@ -61,6 +68,7 @@ protected:
     GM_priv gm_;
 };
 
+void threadCall(Paillier &paillier, std::vector<mpz_class> &c_rand, std::vector<size_t> &rerand_indexes, size_t i_start, size_t i_end);
 
 
 void runProtocol(Compare_A &party_a, Compare_B &party_b, gmp_randstate_t state);

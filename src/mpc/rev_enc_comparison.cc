@@ -7,11 +7,16 @@ using namespace std;
 
 
 Rev_EncCompare_Owner::Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p,Comparison_protocol_A* comparator, gmp_randstate_t state)
-: a_(v_a), b_(v_b), bit_length_(l), paillier_(p), comparator_(comparator), two_l_(0)
+: a_(v_a), b_(v_b), bit_length_(l), paillier_(p), comparator_(comparator), is_set_up_(false), two_l_(0)
 {
     assert(bit_length_ != 0);
     gmp_randinit_set(randstate_, state);
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
+}
+
+Rev_EncCompare_Owner::~Rev_EncCompare_Owner()
+{
+    delete comparator_;
 }
 
 void Rev_EncCompare_Owner::set_input(const mpz_class &v_a, const mpz_class &v_b)
@@ -63,6 +68,11 @@ Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, Paillier_priv_fast
 : bit_length_(l), paillier_(pp), comparator_(comparator), is_set_up_(false),two_l_(0), is_protocol_done_(false)
 {
     mpz_setbit(two_l_.get_mpz_t(),bit_length_); // set two_l_ to 2^l
+}
+
+Rev_EncCompare_Helper::~Rev_EncCompare_Helper()
+{
+    delete comparator_;
 }
 
 void Rev_EncCompare_Helper::set_bit_length(size_t l)

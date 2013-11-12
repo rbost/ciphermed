@@ -17,6 +17,7 @@ class Rev_EncCompare_Owner {
 public:
 //    Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, const std::vector<mpz_class> pk_p, const std::vector<mpz_class> &pk_gm, gmp_randstate_t state);
     Rev_EncCompare_Owner(const mpz_class &v_a, const mpz_class &v_b, const size_t &l, Paillier &p,Comparison_protocol_A* comparator, gmp_randstate_t state);
+    ~Rev_EncCompare_Owner();
     
     void set_input(const mpz_class &v_a, const mpz_class &v_b);
     mpz_class setup(unsigned int lambda); // lambda is the parameter for statistical security. r <- [0, 2^{l+lambda}[ \cap \Z
@@ -46,7 +47,8 @@ protected:
 class Rev_EncCompare_Helper {
 public:
     Rev_EncCompare_Helper(const size_t &l, Paillier_priv_fast &pp, Comparison_protocol_B *comparator);
-
+    ~Rev_EncCompare_Helper();
+    
     void setup(const mpz_class &c_z);
     void decryptResult(const mpz_class &c_t);
     inline bool protocol_done() { return is_protocol_done_; }
