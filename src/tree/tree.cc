@@ -1,4 +1,5 @@
 #include <tree/tree.hh>
+//#include <tree/util.hh>
 
 Tree<long>* balancedBinaryTree_aux(size_t n_leaves, size_t index, queue<size_t> &v_indices)
 {
@@ -52,4 +53,53 @@ Tree<long>* binaryRepTree(size_t level, size_t index_offset)
     left = binaryRepTree(level-1, index_offset + (1<<(level-1)));
     
     return new Node<long>(level-1, left, right);
+}
+
+ZZX encode_leaf(const Leaf<long> &leaf, const EncryptedArray &ea)
+{
+    vector<long> bits = bitDecomp(leaf.value(), ea.size());
+    ZZX poly;
+    ea.encode(poly, bits);
+    
+    return poly;
+}
+
+Ctxt evalNode_FHE(const Node<long> &node,const vector<Ctxt> &c_b_table, const EncryptedArray &ea)
+{
+//    if(tree.isLeaf())
+//    {
+//        const FHEPubKey &pk = c_b_table[0].getPubKey();
+//        Ctxt c = Ctxt(pk);
+//        ea.encrypt(c,pk,term.coefficient());
+//
+//        return c;
+//    }
+    
+    size_t index = node.index();
+    
+    Ctxt b = c_b_table[index];
+    Ctxt b_neg = ctxt_neg(b,ea);
+    
+    Ctxt left(b), right(b_neg);
+    if (node.leftChild()->isLeaf()) {
+        ZZX coeffPoly = encode_leaf(*((Leaf<long> *)node.leftChild()), ea);
+
+        left.multByConstant(coeffPoly);
+        
+    }else{
+        left *= evalNode_FHE(*((Node<long> *)node.leftChild()), c_b_table, ea);
+    }
+    
+    if (node.rightChild()->isLeaf()) {
+        ZZX coeffPoly = encode_leaf(*((Leaf<long> *)node.rightChild()), ea);
+        
+        right.multByConstant(coeffPoly);
+        
+    }else{
+        right *= evalNode_FHE(*((Node<long> *)node.rightChild()), c_b_table, ea);
+    }
+    
+    left += right;
+    
+    return left;
 }

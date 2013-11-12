@@ -7,6 +7,9 @@
 #include <tree/m_variate_poly.hh>
 #include <tree/util.hh>
 
+#include <FHE.h>
+#include <EncryptedArray.h>
+
 using namespace std;
 
 // These classes define a simple binary tree where leaves are storing
@@ -71,7 +74,8 @@ public:
     }
 
     inline bool isLeaf() const { return false; }
-
+    inline size_t index() const { return index_; }
+    
     inline Tree<T>* leftChild() const { return left_; }
     inline Tree<T>* rightChild() const { return right_; }
     
@@ -104,6 +108,22 @@ public:
     }
 };
 
+static Ctxt ctxt_neg(Ctxt &c, const EncryptedArray &ea)
+{
+    Ctxt c_neg(c);
+    PlaintextArray pa(ea);
+    pa.encode(1);
+    ZZX one;
+    ea.encode(one, pa);
+    
+    c_neg.addConstant(one);
+    
+    return c_neg;
+}
+
 Tree<long>* balancedBinaryTree(size_t n_leaves);
 Tree<long>* balancedBinaryTree_aux(size_t n_leaves, size_t index, queue<size_t> &v_indices);
 Tree<long>* binaryRepTree(size_t level, size_t index_offset = 0);
+
+ZZX encode_leaf(const Leaf<long> &leaf, const EncryptedArray &ea);
+Ctxt evalNode_FHE(const Node<long> &node,const vector<Ctxt> &c_b_table, const EncryptedArray &ea);

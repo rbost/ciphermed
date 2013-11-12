@@ -212,6 +212,16 @@ static void fun_with_fhe()
     cerr << "ea.dimension()=" << ea.dimension() << endl;
     cerr << "v.size()=" << v.size() << endl;
 
+    
+    
+    Ctxt b(publicKey);
+    p0.encode(1);
+    ea.encrypt(b,publicKey,p0);
+    Ctxt b_neg = ctxt_neg(b,ea);
+    ea.decrypt(b_neg, secretKey, pp0);
+    pp0.print(cerr);
+
+    
 }
 
 static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
@@ -222,7 +232,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     long r = 1;
     long d = 1;
     long c = 2;
-
+    
     long L;
     /* We have to understand how to choose the number of primes in the moduli chain */
     if(useShallowCircuit) L = 2;//= 2*log(n_levels)+1; // this seems to work with the shallow multiplication
@@ -251,30 +261,30 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
         G = context.alMod.getFactorsOverZZ()[0];
     else
         G = makeIrredPoly(p, d);
-
-//    addSome1DMatrices(secretKey); // compute key-switching matrices that we need
-
+    
+    //    addSome1DMatrices(secretKey); // compute key-switching matrices that we need
+    
     EncryptedArray ea(context, G);
     delete timer;
-
+    
     Tree<long> *t;
-
+    
     timer = new ScopedTimer("Build tree & polynomial");
-
+    
     t = binaryRepTree(n_levels);
     
     Multivariate_poly< vector<long> > selector = t->to_polynomial_with_slots(ea.size());
-
+    
     delete timer;
-
+    
     long query = rand() % ((1<<n_levels) - 1);
     vector<long> bits_query = bitDecomp(query, n_levels);
-
+    
     timer = new ScopedTimer("Encode query");
-
+    
     vector<PlaintextArray> b(n_levels,PlaintextArray(ea));
     vector<Ctxt> c_b(n_levels,Ctxt(publicKey));
-
+    
     
     for (size_t i = 0; i < n_levels; i++) {
         b[i].encode(bits_query[i]);
@@ -284,40 +294,129 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     delete timer;
     
     cerr << endl;
-
+    
     cerr << "selector: " << selector.termsCount() << " terms, degree " << selector.degree() << ", sum of degrees " << selector.sumOfDegrees() <<endl;
-//
-//    timer = new ScopedTimer("Eval polynomial - not regrouped");
-//    evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
-//    delete timer;
-//    
-//    cerr << endl;
+    //
+    //    timer = new ScopedTimer("Eval polynomial - not regrouped");
+    //    evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
+    //    delete timer;
+    //
+    //    cerr << endl;
     
     timer = new ScopedTimer("Regroup terms");
     
     selector = mergeRegroup(selector);
     cerr << endl;
-
+    
     delete timer;
     cerr << "selector regrouped: " << selector.termsCount() << " terms, degree " << selector.degree() << ", sum of degrees " << selector.sumOfDegrees() <<endl;
-
+    
     timer = new ScopedTimer("Eval polynomial - regrouped");
     Ctxt c_r = evalPoly_FHE(selector, c_b,ea,useShallowCircuit);
     delete timer;
     
     cerr << endl;
-
+    
     cerr << "Level of final cyphertext: " << c_r.getLevel() << endl;
     vector<long> res_bits;
     
     timer = new ScopedTimer("Decrypt");
     ea.decrypt(c_r, secretKey, res_bits);
     delete timer;
-
+    
     long res = bitDecomp_inv(res_bits);
     cerr << "query=" << query << endl;
     cerr << "result=" << res << endl;
+    
+    assert(query == res);
+}
 
+
+static void test_selector_tree(size_t n_levels = 3)
+{
+    ScopedTimer *timer;
+    
+    long p = 2;
+    long r = 1;
+    long d = 1;
+    long c = 2;
+    
+    long L;
+    /* We have to understand how to choose the number of primes in the moduli chain */
+    L = n_levels-1;
+    
+    
+    long w = 64;
+    long s = 1;
+    long k = 80;
+    long chosen_m = 0; // XXX: check?
+    
+    timer = new ScopedTimer("Setup SHE scheme");
+    
+    long m = FindM(k, L, c, p, d, s, chosen_m, true);
+    
+    FHEcontext context(m, p, r);
+    buildModChain(context, L, c);
+    FHESecKey secretKey(context);
+    const FHEPubKey& publicKey = secretKey;
+    secretKey.GenSecKey(w); // A Hamming-weight-w secret key
+    cerr << "Chosen level=" << L << endl;
+    
+    ZZX G;
+    
+    if (d == 0)
+        G = context.alMod.getFactorsOverZZ()[0];
+    else
+        G = makeIrredPoly(p, d);
+    
+    //    addSome1DMatrices(secretKey); // compute key-switching matrices that we need
+    
+    EncryptedArray ea(context, G);
+    delete timer;
+    
+    Tree<long> *t;
+    
+    timer = new ScopedTimer("Build tree");
+    
+    t = binaryRepTree(n_levels);
+    
+    delete timer;
+    
+    long query = rand() % ((1<<n_levels) - 1);
+    vector<long> bits_query = bitDecomp(query, n_levels);
+    
+    timer = new ScopedTimer("Encode query");
+    
+    vector<PlaintextArray> b(n_levels,PlaintextArray(ea));
+    vector<Ctxt> c_b(n_levels,Ctxt(publicKey));
+    
+    
+    for (size_t i = 0; i < n_levels; i++) {
+        b[i].encode(bits_query[i]);
+        ea.encrypt(c_b[i],publicKey,b[i]);
+    }
+    
+    delete timer;
+    
+    cerr << endl;
+ 
+    timer = new ScopedTimer("Eval tree");
+    Ctxt c_r = evalNode_FHE(*(Node<long> *)t,c_b,ea);
+    delete timer;
+    
+    cerr << endl;
+    
+    cerr << "Level of final cyphertext: " << c_r.getLevel() << endl;
+    vector<long> res_bits;
+    
+    timer = new ScopedTimer("Decrypt");
+    ea.decrypt(c_r, secretKey, res_bits);
+    delete timer;
+    
+    long res = bitDecomp_inv(res_bits);
+    cerr << "query=" << query << endl;
+    cerr << "result=" << res << endl;
+    
     assert(query == res);
 }
 
@@ -348,7 +447,13 @@ main(int ac, char **av)
 //    test_tree();
 //    test_poly();
 //    fun_with_fhe();
+    
+    cout << "Test selector with polynomial" << endl;
     test_selector(n,shallow);
+    
+    cout << "\n\n\n";
+    cout << "Test selector without polynomial" << endl;
+    test_selector_tree(n);
     
     return 0;
 }
