@@ -58,28 +58,17 @@ public:
     void run_priv_compare_B(Compare_B *comparator);
 
     bool run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    bool run_enc_comparison_owner(EncCompare_Owner &owner);
     void run_enc_comparison_helper(const size_t &l, bool use_lsic);
-    void run_enc_comparison_helper(EncCompare_Helper &helper);
 
     void run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    void run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner);
     bool run_rev_enc_comparison_helper(const size_t &l, bool use_lsic);
-    bool run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper);
 
-    mpz_class run_rev_enc_comparison_owner_enc_result(Rev_EncCompare_Owner &owner);
-    void run_rev_enc_comparison_helper_enc_result(Rev_EncCompare_Helper &helper);
-    void run_enc_comparison_owner_enc_result(EncCompare_Owner &owner);
-    mpz_class run_enc_comparison_helper_enc_result(EncCompare_Helper &helper);
-    
     void run_rev_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
     
     mpz_class run_rev_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic);
     
     mpz_class run_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
     void run_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic);
-
-    size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic);
     
     Ctxt change_encryption_scheme(const vector<mpz_class> &c_gm);
     void run_change_encryption_scheme_slots_helper();
@@ -87,6 +76,20 @@ public:
     mpz_class compute_dot_product(const vector<mpz_class> &x);
     void help_compute_dot_product(const vector<mpz_class> &y, bool encrypted_input = false);
     
+    /* calls to the comparison owner and helper objects */
+    
+    bool run_enc_comparison_owner(EncCompare_Owner &owner);
+    void run_enc_comparison_helper(EncCompare_Helper &helper);
+    void run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner);
+    bool run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper);
+
+    mpz_class run_rev_enc_comparison_owner_enc_result(Rev_EncCompare_Owner &owner);
+    void run_rev_enc_comparison_helper_enc_result(Rev_EncCompare_Helper &helper);
+    void run_enc_comparison_owner_enc_result(EncCompare_Owner &owner);
+    mpz_class run_enc_comparison_helper_enc_result(EncCompare_Helper &helper);
+
+    size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic);
+
     /* to build comparators */
     EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
     EncCompare_Helper create_enc_comparator_helper(size_t bit_size, bool use_lsic);
