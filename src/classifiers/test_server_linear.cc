@@ -1,7 +1,8 @@
 #include <classifiers/linear_classifier.hh>
 #include <util/benchmarks.hh>
+#include <ctime>
 
-static void test_linear_classifier_server()
+static void test_linear_classifier_server(unsigned int model_size, unsigned int nbits_max)
 {
 #ifdef BENCHMARK
     cout << "BENCHMARK flag set" << endl;
@@ -12,15 +13,26 @@ static void test_linear_classifier_server()
     gmp_randinit_default(randstate);
     gmp_randseed_ui(randstate,time(NULL));
     
+    srand(time(NULL));
     
-    vector<mpz_class> model(4);
-    model[0] = 1;
-    model[1] = 1;
-    model[2] = 1;
-    model[3] = 0;
+    assert(nbits_max > model_size + 1);
+    unsigned int nbits = nbits_max - model_size - 1;
     
+    long two_nbits = 1 << nbits;
+    
+    vector<mpz_class> model(model_size+1);
+    for (size_t i = 0; i <= model_size; i++) {
+        model[i] = rand()%two_nbits;
+        if (rand()%2) {
+            model[i] *= -1;
+        }
+    }
+    
+    cout << "Server for linear classifier\n";
+    cout << "Model as dimension " << model_size << "\n";
+    cout << nbits_max << " bits of precision" << endl;
     cout << "Init server" << endl;
-    Linear_Classifier_Server server(randstate,1024,100,model,64);
+    Linear_Classifier_Server server(randstate,1024,100,model,nbits_max);
     
     cout << "Start server" << endl;
     server.run();
@@ -28,7 +40,7 @@ static void test_linear_classifier_server()
 
 int main()
 {    
-    test_linear_classifier_server();
+    test_linear_classifier_server(30, 64);
     
     return 0;
 }

@@ -33,9 +33,7 @@ void Linear_Classifier_Server_session::run_session()
 
         help_compute_dot_product(linear_server_->enc_model(),true);
         
-        EncCompare_Helper helper = create_enc_comparator_helper(linear_server_->bit_size(), false);
-        run_enc_comparison_helper(helper);
-
+        run_enc_comparison_helper(linear_server_->bit_size(), false);
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
 #endif
@@ -70,11 +68,7 @@ bool Linear_Classifier_Client::run()
     
 
     // build the comparator over encrypted data
-    EncCompare_Owner owner = create_enc_comparator_owner(bit_size_,false);
-    owner.set_input(v, w);
-    
-    bool result = run_enc_comparison_owner(owner);
-    
+    bool result = run_enc_comparison_owner(v,w,bit_size_,false);
 #ifdef BENCHMARK
     cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
 #endif
