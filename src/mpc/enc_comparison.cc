@@ -99,10 +99,10 @@ mpz_class EncCompare_Helper::concludeProtocol(const mpz_class &c_r_l)
     mpz_class c_t_prime = comparator_->output();
     
     // t = t' + z_l + r_l (over F_2)
-    mpz_class c_t = comparator_->gm().XOR(c_t_prime,c_r_l);
-    c_t = comparator_->gm().XOR(c_t,c_z_l_);
+    c_t_ = comparator_->gm().XOR(c_t_prime,c_r_l);
+    c_t_ = comparator_->gm().XOR(c_t_,c_z_l_);
 
-    return c_t;
+    return c_t_;
 }
 
 void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, gmp_randstate_t state, unsigned int lambda)

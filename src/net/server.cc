@@ -297,7 +297,7 @@ void Server_session::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_
 
 void Server_session::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 {
-    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda());
+    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda(), true);
 }
 
 bool Server_session::run_rev_enc_comparison_helper(const size_t &l, bool use_lsic)
@@ -308,7 +308,7 @@ bool Server_session::run_rev_enc_comparison_helper(const size_t &l, bool use_lsi
 
 bool Server_session::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 {
-    exec_rev_enc_comparison_helper(socket_, helper);
+    exec_rev_enc_comparison_helper(socket_, helper, true);
     return helper.output();
 }
 
@@ -322,7 +322,7 @@ bool Server_session::run_enc_comparison_owner(const mpz_class &a, const mpz_clas
 
 bool Server_session::run_enc_comparison_owner(EncCompare_Owner &owner)
 {
-    exec_enc_comparison_owner(socket_, owner, server_->lambda());
+    exec_enc_comparison_owner(socket_, owner, server_->lambda(), true);
     return owner.output();
 }
 
@@ -334,7 +334,65 @@ void Server_session::run_enc_comparison_helper(const size_t &l, bool use_lsic)
 
 void Server_session::run_enc_comparison_helper(EncCompare_Helper &helper)
 {
-    exec_enc_comparison_helper(socket_,helper);
+    exec_enc_comparison_helper(socket_,helper, true);
+}
+
+
+// same as before, but the result is encrypted under QR
+// recall that in this case, the prefix 'rev_' has to be flipped
+
+mpz_class Server_session::run_rev_enc_comparison_owner_enc_result(Rev_EncCompare_Owner &owner)
+{
+    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda(), false);
+    return owner.encrypted_output();
+}
+
+void Server_session::run_rev_enc_comparison_helper_enc_result(Rev_EncCompare_Helper &helper)
+{
+    exec_rev_enc_comparison_helper(socket_, helper, false);
+}
+
+void Server_session::run_enc_comparison_owner_enc_result(EncCompare_Owner &owner)
+{
+    exec_enc_comparison_owner(socket_, owner, server_->lambda(), false);
+}
+
+mpz_class Server_session::run_enc_comparison_helper_enc_result(EncCompare_Helper &helper)
+{
+    exec_enc_comparison_helper(socket_,helper, false);
+    return helper.encrypted_output();
+}
+
+// here we keep the old convention as these are the function meant to be called
+
+void Server_session::run_rev_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+{
+    EncCompare_Owner owner = create_enc_comparator_owner(l, use_lsic);
+    owner.set_input(a,b);
+    run_enc_comparison_owner_enc_result(owner);
+}
+
+
+mpz_class Server_session::run_rev_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic)
+{
+    EncCompare_Helper helper = create_enc_comparator_helper(l, use_lsic);
+    return run_enc_comparison_helper_enc_result(helper);
+}
+
+
+mpz_class Server_session::run_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+{
+    Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, use_lsic);
+    owner.set_input(a,b);
+    
+    return run_rev_enc_comparison_owner_enc_result(owner);
+}
+
+
+void Server_session::run_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic)
+{
+    Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, use_lsic);
+    run_rev_enc_comparison_helper_enc_result(helper);
 }
 
 

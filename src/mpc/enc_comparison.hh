@@ -64,6 +64,7 @@ public:
     bool is_set_up() const { return is_set_up_; }
     void set_bit_length(size_t l);
 
+    mpz_class encrypted_output() const { return c_t_; }
 protected:
     size_t bit_length_;
     Paillier_priv_fast paillier_;
@@ -75,6 +76,9 @@ protected:
     /* cached values */
     mpz_class two_l_; // 2^l = 1 << bit_length_
     bool is_set_up_;
+    
+    /* encrypted output */
+    mpz_class c_t_;
 };
 
 void runProtocol(EncCompare_Owner &owner, EncCompare_Helper &helper, gmp_randstate_t state, unsigned int lambda = 100);

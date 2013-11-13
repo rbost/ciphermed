@@ -29,6 +29,8 @@ public:
     bool is_set_up() const { return is_set_up_; }
     size_t bit_length() const { return bit_length_; }
 
+    mpz_class encrypted_output() const { return c_t_; }
+
 protected:
     mpz_class a_,b_;
     size_t bit_length_;
@@ -42,6 +44,9 @@ protected:
 
     /* cached values */
     mpz_class two_l_; // 2^l = 1 << bit_length_
+    
+    /* encrypted output */
+    mpz_class c_t_;
 };
 
 class Rev_EncCompare_Helper {

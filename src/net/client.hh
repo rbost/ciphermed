@@ -67,6 +67,18 @@ public:
     bool run_rev_enc_comparison_helper(const size_t &l, bool use_lsic);
     bool run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper);
 
+    mpz_class run_rev_enc_comparison_owner_enc_result(Rev_EncCompare_Owner &owner);
+    void run_rev_enc_comparison_helper_enc_result(Rev_EncCompare_Helper &helper);
+    void run_enc_comparison_owner_enc_result(EncCompare_Owner &owner);
+    mpz_class run_enc_comparison_helper_enc_result(EncCompare_Helper &helper);
+    
+    void run_rev_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    
+    mpz_class run_rev_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic);
+    
+    mpz_class run_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    void run_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic);
+
     size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic);
     
     Ctxt change_encryption_scheme(const vector<mpz_class> &c_gm);

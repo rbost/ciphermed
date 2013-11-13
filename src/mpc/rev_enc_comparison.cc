@@ -58,10 +58,10 @@ mpz_class Rev_EncCompare_Owner::concludeProtocol(const mpz_class &c_z_l)
     mpz_class c_t_prime = comparator_->gm().neg(comparator_->output());
     
     // t = t' + z_l + r_l (over F_2)
-    mpz_class c_t = comparator_->gm().XOR(c_t_prime,c_r_l_);
-    c_t = comparator_->gm().XOR(c_t,c_z_l);
+    c_t_ = comparator_->gm().XOR(c_t_prime,c_r_l_);
+    c_t_ = comparator_->gm().XOR(c_t_,c_z_l);
     
-    return c_t;
+    return c_t_;
 }
 
 Rev_EncCompare_Helper::Rev_EncCompare_Helper(const size_t &l, Paillier_priv_fast &pp, Comparison_protocol_B *comparator)

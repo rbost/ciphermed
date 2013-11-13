@@ -129,7 +129,7 @@ void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator)
     
 }
 
-void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &owner, unsigned int lambda)
+void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result)
 {
     size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda));
@@ -147,12 +147,16 @@ void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &ow
     
     mpz_class c_t = owner.concludeProtocol(c_z_l);
     
-    // send the last message to the server
+    // if we don't decrypt the result, we are done now ...
+    if (!decrypt_result) {
+        return;
+    }
+    // ... else send the last message to the server
     Protobuf::BigInt c_t_message = convert_to_message(c_t);
     sendMessageToSocket(socket, c_t_message);
 }
 
-void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &helper)
+void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &helper, bool decrypt_result)
 {
     // setup the helper if necessary
     if (!helper.is_set_up()) {
@@ -174,13 +178,18 @@ void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &
     Protobuf::BigInt c_z_l_message = convert_to_message(c_z_l);
     sendMessageToSocket(socket, c_z_l_message);
     
-    // wait for the answer of the owner
+    // if we don't decrypt the result, we are done now ...
+    if (!decrypt_result) {
+        return;
+    }
+
+    // ... else wait for the answer of the owner
     Protobuf::BigInt c_t_message = readMessageFromSocket<Protobuf::BigInt>(socket);
     mpz_class c_t = convert_from_message(c_t_message);
     helper.decryptResult(c_t);
 }
 
-void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, unsigned int lambda)
+void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result)
 {
     // now run the protocol itself
     size_t l = owner.bit_length();
@@ -197,14 +206,18 @@ void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, uns
     Protobuf::BigInt c_r_l_message = convert_to_message(c_r_l);
     sendMessageToSocket(socket, c_r_l_message);
     
-    // wait for the answer of the owner
+    // if we don't decrypt the result, we are done now ...
+    if (!decrypt_result) {
+        return;
+    }
+    // ... else wait for the answer of the owner
     Protobuf::BigInt c_t_message = readMessageFromSocket<Protobuf::BigInt>(socket);
     mpz_class c_t = convert_from_message(c_t_message);
     
     owner.decryptResult(c_t);
 }
 
-void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper)
+void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper, bool decrypt_result)
 {
     // setup the helper if necessary
     if (!helper.is_set_up()) {
@@ -225,7 +238,11 @@ void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper)
     
     mpz_class c_t = helper.concludeProtocol(c_r_l);
     
-    // send the last message to the server
+    // if we don't decrypt the result, we are done now ...
+    if (!decrypt_result) {
+        return;
+    }
+    // else ... send the last message to the server
     Protobuf::BigInt c_t_message = convert_to_message(c_t);
     sendMessageToSocket(socket, c_t_message);
 }

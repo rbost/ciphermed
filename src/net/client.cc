@@ -268,7 +268,7 @@ void Client::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b
 
 void Client::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 {
-    exec_rev_enc_comparison_owner(socket_, owner, lambda_);
+    exec_rev_enc_comparison_owner(socket_, owner, lambda_, true);
 }
 
 
@@ -280,7 +280,7 @@ bool Client::run_rev_enc_comparison_helper(const size_t &l, bool use_lsic)
 
 bool Client::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 {
-    exec_rev_enc_comparison_helper(socket_, helper);
+    exec_rev_enc_comparison_helper(socket_, helper, true);
     return helper.output();
 }
 
@@ -295,7 +295,7 @@ bool Client::run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, si
 
 bool Client::run_enc_comparison_owner(EncCompare_Owner &owner)
 {
-    exec_enc_comparison_owner(socket_, owner, lambda_);
+    exec_enc_comparison_owner(socket_, owner, lambda_, true);
     return owner.output();
 }
 
@@ -307,9 +307,65 @@ void Client::run_enc_comparison_helper(const size_t &l, bool use_lsic)
 
 void Client::run_enc_comparison_helper(EncCompare_Helper &helper)
 {
-    exec_enc_comparison_helper(socket_,helper);
+    exec_enc_comparison_helper(socket_,helper, true);
 }
 
+// same as before, but the result is encrypted under QR
+// recall that in this case, the prefix 'rev_' has to be flipped
+
+mpz_class Client::run_rev_enc_comparison_owner_enc_result(Rev_EncCompare_Owner &owner)
+{
+    exec_rev_enc_comparison_owner(socket_, owner, lambda_, false);
+    return owner.encrypted_output();
+}
+
+void Client::run_rev_enc_comparison_helper_enc_result(Rev_EncCompare_Helper &helper)
+{
+    exec_rev_enc_comparison_helper(socket_, helper, false);
+}
+
+void Client::run_enc_comparison_owner_enc_result(EncCompare_Owner &owner)
+{
+    exec_enc_comparison_owner(socket_, owner, lambda_, false);
+}
+
+mpz_class Client::run_enc_comparison_helper_enc_result(EncCompare_Helper &helper)
+{
+    exec_enc_comparison_helper(socket_,helper, false);
+    return helper.encrypted_output();
+}
+
+// here we keep the old convention as these are the function meant to be called
+
+void Client::run_rev_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+{
+    EncCompare_Owner owner = create_enc_comparator_owner(l, use_lsic);
+    owner.set_input(a,b);
+    run_enc_comparison_owner_enc_result(owner);
+}
+
+
+mpz_class Client::run_rev_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic)
+{
+    EncCompare_Helper helper = create_enc_comparator_helper(l, use_lsic);
+    return run_enc_comparison_helper_enc_result(helper);
+}
+
+
+mpz_class Client::run_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+{
+    Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, use_lsic);
+    owner.set_input(a,b);
+    
+    return run_rev_enc_comparison_owner_enc_result(owner);
+}
+
+
+void Client::run_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic)
+{
+    Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, use_lsic);
+    run_rev_enc_comparison_helper_enc_result(helper);
+}
 
 
 size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic)
