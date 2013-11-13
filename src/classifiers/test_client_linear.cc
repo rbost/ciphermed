@@ -54,6 +54,55 @@ static void test_linear_classifier_client(const string &hostname, unsigned int m
     
 }
 
+
+static void bench_linear_classifier_client(const string &hostname, unsigned int model_size, unsigned int nbits_max, unsigned int nRounds = 10)
+{
+    cout << "Client for linear classifier\n";
+    cout << "Model as dimension " << model_size << "\n";
+    cout << nbits_max << " bits of precision" << endl;
+    
+    try
+    {
+#ifdef BENCHMARK
+        cout << "BENCHMARK flag set" << endl;
+        BENCHMARK_INIT
+#endif
+        
+        boost::asio::io_service io_service;
+        
+        gmp_randstate_t randstate;
+        gmp_randinit_default(randstate);
+        gmp_randseed_ui(randstate,time(NULL));
+        
+        srand(time(NULL));
+        
+        assert(nbits_max > model_size + 1);
+        unsigned int nbits = nbits_max - model_size - 1;
+        long two_nbits = 1 << nbits;
+        
+        vector<mpz_class> values(model_size);
+        for (size_t i = 0; i < model_size; i++) {
+            values[i] = rand()%two_nbits;
+            if (rand()%2) {
+                values[i] *= -1;
+            }
+        }
+        
+        Bench_Linear_Classifier_Client client(io_service, randstate,1024,100,values,nbits_max, nRounds);
+        
+        client.connect(io_service, hostname);
+        
+        client.run();
+        
+        //        client.disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "Exception: " << e.what() << std::endl;
+    }
+    
+}
+
 int main(int argc, char* argv[])
 {
     if (argc != 2)
@@ -63,7 +112,8 @@ int main(int argc, char* argv[])
     }
     string hostname(argv[1]);
 
-    test_linear_classifier_client(hostname,30,64);
+//    test_linear_classifier_client(hostname,30,64);
+    bench_linear_classifier_client(hostname,30,64,50);
     
     return 0;
 }
