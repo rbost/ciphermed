@@ -13,7 +13,7 @@ Compare_B::Compare_B(const mpz_class &y, const size_t &l, Paillier_priv_fast &pa
 
 vector<mpz_class> Compare_B::encrypt_bits()
 {
-    ScopedTimer timer("encrypt_bits");
+//    ScopedTimer timer("encrypt_bits");
     
     vector<mpz_class> c_b(bit_length_);
     
@@ -26,7 +26,7 @@ vector<mpz_class> Compare_B::encrypt_bits()
 
 vector<mpz_class> Compare_B::encrypt_bits_parallel(unsigned int n_threads)
 {
-    ScopedTimer timer("encrypt_bits_parallel");
+//    ScopedTimer timer("encrypt_bits_parallel");
     vector<mpz_class> c_b(bit_length_);
     
     
@@ -59,7 +59,7 @@ vector<mpz_class> Compare_B::encrypt_bits_parallel(unsigned int n_threads)
 
 mpz_class Compare_B::search_zero(const vector<mpz_class> &c)
 {
-    ScopedTimer timer("search_zero");
+//    ScopedTimer timer("search_zero");
     // can be parallelized
     for (size_t i = 0; i < c.size(); i++) {
         if (paillier_.decrypt(c[i]) == 0) {
@@ -98,7 +98,7 @@ std::vector<mpz_class> Compare_A::compute(const std::vector<mpz_class> &c_b, uns
 
 vector<mpz_class> Compare_A::compute_w(const std::vector<mpz_class> &c_b)
 {
-    ScopedTimer timer("compute_w");
+//    ScopedTimer timer("compute_w");
 
     vector<mpz_class> c_w(bit_length_);
     // can be parallelized
@@ -115,7 +115,7 @@ vector<mpz_class> Compare_A::compute_w(const std::vector<mpz_class> &c_b)
 
 vector<mpz_class> Compare_A::compute_sums(const std::vector<mpz_class> &c_w)
 {
-    ScopedTimer timer("compute_sums");
+//    ScopedTimer timer("compute_sums");
 
     vector<mpz_class> c_sums(bit_length_);
     c_sums[bit_length_-1] = 1;
@@ -129,7 +129,7 @@ vector<mpz_class> Compare_A::compute_sums(const std::vector<mpz_class> &c_w)
 
 vector<mpz_class> Compare_A::compute_c(const std::vector<mpz_class> &c_b,const std::vector<mpz_class> &c_sums, std::vector<size_t> &rerand_indexes)
 {
-    ScopedTimer timer("compute_c");
+//    ScopedTimer timer("compute_c");
     
     vector<mpz_class> c(bit_length_);
     long delta = (1-s_)/2;
@@ -177,7 +177,7 @@ vector<mpz_class> Compare_A::compute_c(const std::vector<mpz_class> &c_b,const s
 
 vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes)
 {
-    ScopedTimer timer("rerandomize");
+//    ScopedTimer timer("rerandomize");
     vector<mpz_class> c_rand(c);
     
     for (size_t i = 0; i < rerand_indexes.size(); i++) {
@@ -189,7 +189,7 @@ vector<mpz_class> Compare_A::rerandomize(const vector<mpz_class> &c, const std::
 
 vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, const std::vector<size_t> &rerand_indexes, unsigned int n_threads)
 {
-    ScopedTimer timer("rerandomize parallel");
+//    ScopedTimer timer("rerandomize parallel");
  
     vector<mpz_class> c_rand(c);
     
@@ -228,7 +228,7 @@ void Compare_A::shuffle(std::vector<mpz_class> &c)
 
 void Compare_A::unblind(const mpz_class &t_prime)
 {
-    ScopedTimer timer("unblind");
+//    ScopedTimer timer("unblind");
 
     if (s_ == 1) {
         res_ = t_prime;
