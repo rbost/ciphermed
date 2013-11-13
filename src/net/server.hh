@@ -91,20 +91,19 @@ public:
     void run_lsic_B(LSIC_B *lsic);
     void run_priv_compare_B(Compare_B *comparator);
 
-    bool run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    void run_enc_comparison_helper(const size_t &l, bool use_lsic);
+    bool enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    void help_enc_comparison(const size_t &l, bool use_lsic);
     
-    void run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    bool run_rev_enc_comparison_helper(const size_t &l, bool use_lsic);
+    void rev_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    bool help_rev_enc_comparison(const size_t &l, bool use_lsic);
     
-    void run_rev_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    void rev_enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    mpz_class help_rev_enc_comparison_enc_result(const size_t &l, bool use_lsic);
     
-    mpz_class run_rev_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic);
+    mpz_class enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    void help_enc_comparison_enc_result(const size_t &l, bool use_lsic);
     
-    mpz_class run_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    void run_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic);
-    
-    size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic);
+    /* other protocols */
     
     Ctxt change_encryption_scheme(const vector<mpz_class> &c_gm);
     void run_change_encryption_scheme_slots_helper();

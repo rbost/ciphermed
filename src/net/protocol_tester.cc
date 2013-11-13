@@ -232,14 +232,14 @@ void Tester_Server_session::run_session()
                 case Test_Request_Request_Type_TEST_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Enc Compare" << endl;
-                    run_enc_comparison_helper(0,use_lsic__);
+                    help_enc_comparison(0,use_lsic__);
                 }
                     break;
                     
                 case Test_Request_Request_Type_TEST_REV_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Rev Enc Compare" << endl;
-                    bool b = run_rev_enc_comparison_helper(0,use_lsic__);
+                    bool b = help_rev_enc_comparison(0,use_lsic__);
                     cout << id_ << ": Rev Enc Compare result: " << b << endl;
                 }
                     break;

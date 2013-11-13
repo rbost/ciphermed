@@ -38,7 +38,7 @@ void Linear_Classifier_Server_session::run_session()
         delete t;
         
         t = new ScopedTimer("Server: Compare enc data");
-        run_enc_comparison_helper(linear_server_->bit_size(), false);
+        help_enc_comparison(linear_server_->bit_size(), false);
         delete t;
 
 #ifdef BENCHMARK
@@ -120,7 +120,7 @@ void Bench_Linear_Classifier_Server_session::run_session()
             
             help_compute_dot_product(linear_server_->enc_model(),true);
             
-            run_enc_comparison_helper(linear_server_->bit_size(), false);
+            help_enc_comparison(linear_server_->bit_size(), false);
             
             server_time += GET_BENCHMARK_TIME;
 //            cout << "Round #" << i << " done" << endl;
