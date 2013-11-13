@@ -2,9 +2,14 @@
 
 #include <util/util.hh>
 #include <util/benchmarks.hh>
+#include <ctime>
 
-static void test_linear_classifier_client(const string &hostname)
+static void test_linear_classifier_client(const string &hostname, unsigned int model_size, unsigned int nbits_max)
 {
+    cout << "Client for linear classifier\n";
+    cout << "Model as dimension " << model_size << "\n";
+    cout << nbits_max << " bits of precision" << endl;
+
     try
     {
 #ifdef BENCHMARK
@@ -18,12 +23,21 @@ static void test_linear_classifier_client(const string &hostname)
         gmp_randinit_default(randstate);
         gmp_randseed_ui(randstate,time(NULL));
 
-        vector<mpz_class> values(4);
-        values[0] = -1;
-        values[1] = -1;
-        values[2] = -1;
+        srand(time(NULL));
 
-        Linear_Classifier_Client client(io_service, randstate,1024,100,values,64);
+        assert(nbits_max > model_size + 1);
+        unsigned int nbits = nbits_max - model_size - 1;
+        long two_nbits = 1 << nbits;
+
+        vector<mpz_class> values(model_size);
+        for (size_t i = 0; i < model_size; i++) {
+            values[i] = rand()%two_nbits;
+            if (rand()%2) {
+                values[i] *= -1;
+            }
+        }
+
+        Linear_Classifier_Client client(io_service, randstate,1024,100,values,nbits_max);
         
         client.connect(io_service, hostname);
         
@@ -49,7 +63,7 @@ int main(int argc, char* argv[])
     }
     string hostname(argv[1]);
 
-    test_linear_classifier_client(hostname);
+    test_linear_classifier_client(hostname,30,64);
     
     return 0;
 }
