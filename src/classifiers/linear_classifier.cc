@@ -29,11 +29,17 @@ void Linear_Classifier_Server_session::run_session()
     try {
         exchange_keys();
         
+        ScopedTimer *t;
         RESET_BENCHMARK_TIMER
 
+        t = new ScopedTimer("Server: Compute dot product");
         help_compute_dot_product(linear_server_->enc_model(),true);
+        delete t;
         
+        t = new ScopedTimer("Server: Compare enc data");
         run_enc_comparison_helper(linear_server_->bit_size(), false);
+        delete t;
+
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
 #endif
@@ -57,18 +63,23 @@ bool Linear_Classifier_Client::run()
     // get public keys
     exchange_keys();
     
+    ScopedTimer *t;
+
     RESET_BENCHMARK_TIMER
     // prepare data
     vector <mpz_class> x = values_;
     x.push_back(-1);
     
+    t = new ScopedTimer("Client: Compute dot product");
     // compute the dot product
     mpz_class v = compute_dot_product(x);
     mpz_class w = 1; // encryption of 0
-    
+    delete t;
 
+    t = new ScopedTimer("Client: Compare enc data");
     // build the comparator over encrypted data
     bool result = run_enc_comparison_owner(v,w,bit_size_,false);
+    delete t;
 #ifdef BENCHMARK
     cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
 #endif
