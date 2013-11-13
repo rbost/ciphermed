@@ -85,7 +85,7 @@ bool Linear_Classifier_Client::run()
 
     t = new ScopedTimer("Client: Compare enc data");
     // build the comparator over encrypted data
-    bool result = run_enc_comparison_owner(v,w,bit_size_,false);
+    bool result = enc_comparison(v,w,bit_size_,false);
     delete t;
 #ifdef BENCHMARK
     cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
@@ -174,7 +174,7 @@ void Bench_Linear_Classifier_Client::run()
         
         dot_prod_time += t.lap_ms();
         // build the comparator over encrypted data
-        bool result = run_enc_comparison_owner(v,w,bit_size_,false);
+        bool result = enc_comparison(v,w,bit_size_,false);
         compare_time += t.lap_ms();
 
         client_time += GET_BENCHMARK_TIME;

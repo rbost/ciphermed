@@ -259,7 +259,7 @@ void Client::run_priv_compare_B(Compare_B *comparator)
 
 
 // we suppose that the client already has the server's public key for Paillier
-void Client::run_rev_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+void Client::rev_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
 {
     Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, use_lsic);
     owner.set_input(a,b);
@@ -272,7 +272,7 @@ void Client::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 }
 
 
-bool Client::run_rev_enc_comparison_helper(const size_t &l, bool use_lsic)
+bool Client::help_rev_enc_comparison(const size_t &l, bool use_lsic)
 {
     Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, use_lsic);
     return run_rev_enc_comparison_helper(helper);
@@ -285,7 +285,7 @@ bool Client::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 }
 
 // we suppose that the client already has the server's public key for Paillier
-bool Client::run_enc_comparison_owner(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+bool Client::enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
 {
     EncCompare_Owner owner = create_enc_comparator_owner(l, use_lsic);
     owner.set_input(a,b);
@@ -299,7 +299,7 @@ bool Client::run_enc_comparison_owner(EncCompare_Owner &owner)
     return owner.output();
 }
 
-void Client::run_enc_comparison_helper(const size_t &l, bool use_lsic)
+void Client::help_enc_comparison(const size_t &l, bool use_lsic)
 {
     EncCompare_Helper helper = create_enc_comparator_helper(l, use_lsic);
     run_enc_comparison_helper(helper);
@@ -337,7 +337,7 @@ mpz_class Client::run_enc_comparison_helper_enc_result(EncCompare_Helper &helper
 
 // here we keep the old convention as these are the function meant to be called
 
-void Client::run_rev_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+void Client::rev_enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
 {
     EncCompare_Owner owner = create_enc_comparator_owner(l, use_lsic);
     owner.set_input(a,b);
@@ -345,14 +345,14 @@ void Client::run_rev_enc_comparison_owner_enc_result(const mpz_class &a, const m
 }
 
 
-mpz_class Client::run_rev_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic)
+mpz_class Client::help_rev_enc_comparison_enc_result(const size_t &l, bool use_lsic)
 {
     EncCompare_Helper helper = create_enc_comparator_helper(l, use_lsic);
     return run_enc_comparison_helper_enc_result(helper);
 }
 
 
-mpz_class Client::run_enc_comparison_owner_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+mpz_class Client::enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
 {
     Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, use_lsic);
     owner.set_input(a,b);
@@ -361,7 +361,7 @@ mpz_class Client::run_enc_comparison_owner_enc_result(const mpz_class &a, const 
 }
 
 
-void Client::run_enc_comparison_helper_enc_result(const size_t &l, bool use_lsic)
+void Client::help_enc_comparison_enc_result(const size_t &l, bool use_lsic)
 {
     Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, use_lsic);
     run_rev_enc_comparison_helper_enc_result(helper);

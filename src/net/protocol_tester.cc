@@ -64,7 +64,7 @@ void Tester_Client::test_enc_compare(size_t l)
 
     send_test_query(Test_Request_Request_Type_TEST_ENC_COMPARE);
 
-    bool res = run_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
+    bool res = enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
     cout<< "\nResult is " << res << endl;
     cout << "Result should be " << (a < b) << endl;
 }
@@ -82,7 +82,7 @@ void Tester_Client::test_rev_enc_compare(size_t l)
 
     send_test_query(Test_Request_Request_Type_TEST_REV_ENC_COMPARE);
 
-    run_rev_enc_comparison_owner(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
+    rev_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
     
     cout << "\nResult should be " << (a < b) << endl;
 }
