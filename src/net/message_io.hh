@@ -54,6 +54,8 @@ T readMessageFromSocket(boost::asio::ip::tcp::socket &socket) {
     
     m_readbuf.resize(HEADER_SIZE + msg_len);
     
+    EXCHANGED_BYTES(HEADER_SIZE + msg_len)
+    
     boost::asio::mutable_buffers_1 buf = boost::asio::buffer(&m_readbuf[HEADER_SIZE], msg_len);
     boost::asio::read(socket, buf);
     
@@ -75,6 +77,9 @@ void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
     unsigned msg_size = msg.ByteSize();
     
     writebuf.resize(HEADER_SIZE + msg_size);
+    
+    EXCHANGED_BYTES(HEADER_SIZE + msg_size);
+    
     encode_header(writebuf, msg_size);
     
     if (!msg.SerializeToArray(&writebuf[HEADER_SIZE], msg_size)) {

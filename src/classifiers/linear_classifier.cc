@@ -30,6 +30,7 @@ void Linear_Classifier_Server_session::run_session()
         exchange_keys();
         
         ScopedTimer *t;
+        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
 
         t = new ScopedTimer("Server: Compute dot product");
@@ -42,6 +43,7 @@ void Linear_Classifier_Server_session::run_session()
 
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
+        cout << IOBenchmark::byte_count() << " exchanged bytes" << endl;
 #endif
 
     } catch (std::exception& e) {
@@ -61,10 +63,15 @@ Linear_Classifier_Client::Linear_Classifier_Client(boost::asio::io_service& io_s
 bool Linear_Classifier_Client::run()
 {
     // get public keys
+    RESET_BYTE_COUNT
     exchange_keys();
+#ifdef BENCHMARK
+    const double to_kB = 1 << 10;
+    cout << "Key exchange: " <<  (IOBenchmark::byte_count()/to_kB) << " kB" << endl;
+#endif
     
     ScopedTimer *t;
-
+    RESET_BYTE_COUNT
     RESET_BENCHMARK_TIMER
     // prepare data
     vector <mpz_class> x = values_;
@@ -82,6 +89,7 @@ bool Linear_Classifier_Client::run()
     delete t;
 #ifdef BENCHMARK
     cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
+    cout << (IOBenchmark::byte_count()/to_kB) << " exchanged kB" << endl;
 #endif
     return result;
 }
