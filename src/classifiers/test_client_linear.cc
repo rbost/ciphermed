@@ -76,7 +76,7 @@ static void bench_linear_classifier_client(const string &hostname, unsigned int 
         
         srand(time(NULL));
         
-        assert(nbits_max > model_size + 1);
+//        assert(nbits_max > model_size + 1);
         unsigned int nbits = nbits_max - model_size - 1;
         long two_nbits = 1 << nbits;
         
@@ -105,15 +105,16 @@ static void bench_linear_classifier_client(const string &hostname, unsigned int 
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
-        std::cerr << "Usage: client <host>" << std::endl;
+        std::cerr << "Usage: client <host> <model_size>" << std::endl;
         return 1;
     }
     string hostname(argv[1]);
+    unsigned int model_size(atoi(argv[2]));
 
-//    test_linear_classifier_client(hostname,30,64);
-    bench_linear_classifier_client(hostname,30,64,50);
+//    test_linear_classifier_client(hostname,model_size);
+    bench_linear_classifier_client(hostname,model_size,64,10);
     
     return 0;
 }

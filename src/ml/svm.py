@@ -5,7 +5,7 @@ import os
 from sklearn import cross_validation, grid_search, \
     metrics, preprocessing, svm
 from loaders import *
-from util import *
+#from util import *
 
 if __name__ == '__main__':
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     print "metrics on testing data"
     print metrics.classification_report(Y_test, clf.predict(X_test))
 
-    with open(os.path.join('out', name + '.model'), 'w') as fp:
+    with open(os.path.join('out', name + '.model'), 'w+') as fp:
       coef_shape = clf.best_estimator_.coef_.shape
       assert coef_shape[0] == 1
       for w in clf.best_estimator_.coef_[0]:
