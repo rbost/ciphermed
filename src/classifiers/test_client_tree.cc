@@ -1,6 +1,7 @@
 #include <classifiers/decision_tree_classifier.hh>
 
 #include <util/util.hh>
+#include <util/benchmarks.hh>
 
 static vector<long> gen_nursery_query()
 {
@@ -22,7 +23,12 @@ static void test_tree_classifier_client(const string &hostname)
 {
     try
     {
+#ifdef BENCHMARK
+        cout << "BENCHMARK flag set" << endl;
+        BENCHMARK_INIT
+#endif
         
+   
         boost::asio::io_service io_service;
         
         gmp_randstate_t randstate;

@@ -1,4 +1,5 @@
 #include <classifiers/decision_tree_classifier.hh>
+#include <util/benchmarks.hh>
 
 
 static Tree<long>* model_nursery(vector<pair <vector<long>,long> > &criteria )
@@ -28,6 +29,11 @@ static void test_tree_classifier_server()
     vector<pair <vector<long>,long> > criteria;
 //    t = binaryRepTree(N_LEVELS);
     t = model_nursery(criteria);
+
+#ifdef BENCHMARK
+    cout << "BENCHMARK flag set" << endl;
+    BENCHMARK_INIT
+#endif
 
     cout << "Init server" << endl;
     Decision_tree_Classifier_Server server(randstate,1024,*t,4, criteria);

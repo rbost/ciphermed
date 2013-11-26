@@ -58,6 +58,10 @@ void Decision_tree_Classifier_Server_session::run_session()
         bool useShallowCircuit = true;
         EncryptedArray ea(server_->fhe_context(), server_->fhe_G());
 
+        ScopedTimer *t;
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+
         // get the query
         vector<mpz_class> query;
         query = read_int_array_from_socket(socket_);
@@ -66,34 +70,45 @@ void Decision_tree_Classifier_Server_session::run_session()
 
         vector<mpz_class> node_values(tree_server_->n_variables());
         
+        t = new ScopedTimer("Server: Compute dot product");
         // compute all the dot products
         for (size_t i = 0; i < node_values.size(); i++) {
             node_values[i] = client_paillier_->dot_product(query, get<0>(criteria[i]));
         }
-        
+        delete t;
+
         // compare
         vector<mpz_class> c_b_gm(tree_server_->n_variables());
         
+        t = new ScopedTimer("Server: Compare");
         for (size_t i = 0; i < node_values.size(); i++) {
             mpz_class c_treshold = client_paillier_->encrypt(get<1>(criteria[i]));
             c_b_gm[i] = enc_comparison_enc_result(node_values[i],c_treshold,64,false);
         }
-        
+        delete t;
+
         // convert
         vector<Ctxt> c_b_fhe;
 
+        t = new ScopedTimer("Server: Change encryption scheme");
         for (size_t i = 0; i < node_values.size(); i++) {
             // duplicate everything
             vector<mpz_class> duplicates(ea.size(),c_b_gm[i]);
             c_b_fhe.push_back(change_encryption_scheme(duplicates));
         }
-        
+        delete t;
+
         // evaluate the polynomial
 
         Ctxt c_r = evalPoly_FHE(tree_server_->model_poly(), c_b_fhe,ea,useShallowCircuit);
 
         // send the result back to the client
         send_fhe_ctxt_to_socket(socket_, c_r);
+
+#ifdef BENCHMARK
+        cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
+        cout << IOBenchmark::byte_count() << " exchanged bytes" << endl;
+#endif
 
         
     } catch (std::exception& e) {
