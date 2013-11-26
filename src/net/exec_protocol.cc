@@ -342,7 +342,6 @@ mpz_class exec_compute_dot_product(tcp::socket &socket, const vector<mpz_class> 
     vector<mpz_class> y = read_int_array_from_socket(socket);
     
     // compute the encrypted dot product
-    // compute the encrypted dot product
     mpz_class v = 1;
     
     for (size_t i = 0; i < y.size(); i++) {

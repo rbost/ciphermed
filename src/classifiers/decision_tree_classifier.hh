@@ -13,26 +13,31 @@
 #include <tree/tree.hh>
 #include <tree/m_variate_poly.hh>
 
+#include <utility>
+
 using namespace std;
 
 #define N_LEVELS 3
 
 class Decision_tree_Classifier_Server : public Server {
 public:
-    Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model, unsigned int n_variables);
+    Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model, unsigned int n_variables, const vector<pair <vector<long>,long> > &criteria);
   
     Server_session* create_new_server_session(tcp::socket &socket);
 
     static Key_dependencies_descriptor key_deps_descriptor()
     {
-        return Key_dependencies_descriptor(false,false,false,false,false,true);
+        return Key_dependencies_descriptor(false,false,false,true,true,true);
     }
 
     Multivariate_poly< vector<long> > model_poly() const { return model_poly_; }
     unsigned int n_variables() const { return n_variables_; }
+    vector<pair <vector<long>,long> > criteria() const { return criteria_; }
+
 protected:
     Multivariate_poly< vector<long> > model_poly_;
     const unsigned int n_variables_;
+    vector<pair <vector<long>,long> > criteria_;
 };
 
 
@@ -50,10 +55,11 @@ protected:
 
 class Decision_tree_Classifier_Client : public Client{
 public:
-    Decision_tree_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, vector<long> &query);
+    Decision_tree_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, vector<long> &query, unsigned int n_nodes);
     
     void run();
     
 protected:
     vector<long> query_;
+    unsigned int n_nodes_;
 };

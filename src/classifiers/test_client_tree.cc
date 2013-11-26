@@ -2,6 +2,22 @@
 
 #include <util/util.hh>
 
+static vector<long> gen_nursery_query()
+{
+    vector<long> query(8);
+    
+    query[0] = 1 + (rand() %3);
+    query[1] = 1 + (rand() %5);
+    query[2] = 1 + (rand() %4);
+    query[3] = 1 + (rand() %4);
+    query[4] = 1 + (rand() %3);
+    query[5] = 1 + (rand() %2);
+    query[6] = 1 + (rand() %3);
+    query[7] = 1 + (rand() %3);
+    
+    return query;
+}
+
 static void test_tree_classifier_client(const string &hostname)
 {
     try
@@ -14,9 +30,9 @@ static void test_tree_classifier_client(const string &hostname)
         gmp_randseed_ui(randstate,time(NULL));
 
 
-        long query = rand() % ((1<<N_LEVELS) - 1);
-        vector<long> query_bits = bitDecomp(query, N_LEVELS);
-        Decision_tree_Classifier_Client client(io_service, randstate,1024,query_bits);
+        vector<long> query = gen_nursery_query();
+//        vector<long> query_bits = bitDecomp(query, N_LEVELS);
+        Decision_tree_Classifier_Client client(io_service, randstate,1024,query,4);
         
         client.connect(io_service, hostname);
         

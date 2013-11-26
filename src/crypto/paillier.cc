@@ -121,6 +121,41 @@ mpz_class Paillier::random_encryption()
 
     return r;
 }
+
+
+
+mpz_class Paillier::dot_product(const std::vector<mpz_class> &c, const std::vector<mpz_class> &v)
+{
+    assert(c.size() == v.size());
+    mpz_class x = 1;
+    
+    for (size_t i = 0; i < v.size(); i++) {
+        if (v[i] == 0) {
+            continue;
+        }
+
+        x = add(x, constMult(v[i],c[i]));
+    }
+    
+    return x;
+
+}
+
+mpz_class Paillier::dot_product(const std::vector<mpz_class> &c, const std::vector<long> &v)
+{
+    assert(c.size() == v.size());
+    mpz_class x = 1;
+    
+    for (size_t i = 0; i < v.size(); i++) {
+        if (v[i] == 0) {
+            continue;
+        }
+        x = add(x, constMult(v[i],c[i]));
+    }
+    
+    return x;
+}
+
 /*
  * Private-key operations
  */

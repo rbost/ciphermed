@@ -20,6 +20,8 @@ class Paillier {
     void refresh(mpz_class &c);
     mpz_class random_encryption();
 
+    mpz_class dot_product(const std::vector<mpz_class> &c, const std::vector<mpz_class> &v);
+    mpz_class dot_product(const std::vector<mpz_class> &c, const std::vector<long> &v);
     void rand_gen(size_t niter = 100, size_t nmax = 1000);
 
  protected:
