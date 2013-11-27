@@ -100,8 +100,10 @@ void Decision_tree_Classifier_Server_session::run_session()
 
         // evaluate the polynomial
 
+        t = new ScopedTimer("Server: Evaluation");
         Ctxt c_r = evalPoly_FHE(tree_server_->model_poly(), c_b_fhe,ea,useShallowCircuit);
-
+        delete t;
+        
         // send the result back to the client
         send_fhe_ctxt_to_socket(socket_, c_r);
 

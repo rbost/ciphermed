@@ -19,6 +19,22 @@ static vector<long> gen_nursery_query()
     return query;
 }
 
+static vector<long> gen_ecg_query()
+{
+    vector<long> query(5);
+    long modulo = 1; // 2^44
+    modulo <<= 44;
+    
+    query[0] = (1-2*(rand()%2)) * (rand() % modulo);
+    query[1] = (1-2*(rand()%2)) * (rand() % modulo);
+    query[2] = (1-2*(rand()%2)) * (rand() % modulo);
+    query[3] = (1-2*(rand()%2)) * (rand() % modulo);
+    query[4] = (1-2*(rand()%2)) * (rand() % modulo);
+    
+    return query;
+
+}
+
 static void test_tree_classifier_client(const string &hostname)
 {
     try
@@ -36,9 +52,18 @@ static void test_tree_classifier_client(const string &hostname)
         gmp_randseed_ui(randstate,time(NULL));
 
 
-        vector<long> query = gen_nursery_query();
+        vector<long> query;
+        unsigned int n_nodes;
+        
+//        query = gen_nursery_query();
+//        n_nodes = 4;
+        
+        query = gen_ecg_query();
+        n_nodes = 6;
+        
+        
 //        vector<long> query_bits = bitDecomp(query, N_LEVELS);
-        Decision_tree_Classifier_Client client(io_service, randstate,1024,query,4);
+        Decision_tree_Classifier_Client client(io_service, randstate,1024,query,n_nodes);
         
         client.connect(io_service, hostname);
         
