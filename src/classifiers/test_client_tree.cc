@@ -63,7 +63,7 @@ static void test_tree_classifier_client(const string &hostname)
         
         
 //        vector<long> query_bits = bitDecomp(query, N_LEVELS);
-        Decision_tree_Classifier_Client client(io_service, randstate,1024,query,n_nodes);
+        Decision_tree_Classifier_Client client(io_service, randstate,1248,query,n_nodes);
         
         client.connect(io_service, hostname);
         

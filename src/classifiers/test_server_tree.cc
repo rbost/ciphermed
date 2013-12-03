@@ -75,7 +75,7 @@ static void test_tree_classifier_server()
 #endif
 
     cout << "Init server" << endl;
-    Decision_tree_Classifier_Server server(randstate,1024,*t,n_nodes, criteria);
+    Decision_tree_Classifier_Server server(randstate,1248,*t,n_nodes, criteria);
     
     cout << "Start server" << endl;
     server.run();

@@ -162,8 +162,18 @@ Decision_tree_Classifier_Client::Decision_tree_Classifier_Client(boost::asio::io
 
 void Decision_tree_Classifier_Client::run()
 {
+    RESET_BYTE_COUNT
     exchange_keys();
+#ifdef BENCHMARK
+    const double to_kB = 1 << 10;
+    cout << "Key exchange: " <<  (IOBenchmark::byte_count()/to_kB) << " kB" << endl;
+#endif
+
     EncryptedArray ea(*fhe_context_, fhe_G_);
+
+    ScopedTimer *t;
+    RESET_BYTE_COUNT
+    RESET_BENCHMARK_TIMER
 
     // send our query encrypted under paillier
     vector<mpz_class> enc_query(query_.size());
@@ -175,24 +185,36 @@ void Decision_tree_Classifier_Client::run()
     
     // the server computes the criteria for each node and needs our help
     
+    t = new ScopedTimer("Client: Compute criteria");
+
     for (unsigned int i = 0; i < n_nodes_; i++) {
         // for now, do it over 64 bits
         help_enc_comparison_enc_result(64, false);
     }
-    
+    delete t;
+
+    t = new ScopedTimer("Client: Change encryption scheme");
     // now he wants the booleans encrypted under FHE
     for (unsigned int i = 0; i < n_nodes_; i++) {
         run_change_encryption_scheme_slots_helper();
     }
+    delete t;
     
     // we get the result and decrypt it
+    t = new ScopedTimer("Client: Decrypt result");
     Ctxt c_r = read_fhe_ctxt_from_socket(socket_,*fhe_sk_);
     // decrypt and test
     vector<long> res_bits;
     ea.decrypt(c_r, *fhe_sk_, res_bits);
 
     long v = bitDecomp_inv(res_bits);
-    
+    delete t;
+
+#ifdef BENCHMARK
+    cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
+    cout << (IOBenchmark::byte_count()/to_kB) << " exchanged kB" << endl;
+#endif
+
     cout << "Classification result: " << v << endl;
 }
 
