@@ -36,11 +36,30 @@ void Bench_Client::bench_lsic(size_t bit_size, unsigned int iterations)
     send_test_query(Test_Request_Request_Type_TEST_LSIC, bit_size, iterations);
     
     mpz_class a;
+    
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+
+    
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
+        
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+
         LSIC_A lsic(a,bit_size,*server_gm_);
         run_lsic_A(&lsic);
+      
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
     }
+
+    cout << "Client LSIC bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+
 }
 
 void Bench_Client::bench_compare(size_t bit_size, unsigned int iterations)
@@ -56,11 +75,28 @@ void Bench_Client::bench_compare(size_t bit_size, unsigned int iterations)
     
     mpz_class b;
     
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
+        
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+
         Compare_A comparator(b,bit_size,*server_paillier_,*server_gm_,rand_state_);
         run_priv_compare_A(&comparator);
+    
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
     }
+    
+    cout << "Client DGK bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+
 }
 
 void Bench_Client::bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic)
@@ -292,24 +328,45 @@ void Bench_Server_session::run_session()
 void Bench_Server_session::bench_lsic(size_t bit_size, unsigned int iterations)
 {
     mpz_class b;
+    
+    double cpu_time = 0.;
 
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
+        
+        RESET_BENCHMARK_TIMER
+        
         LSIC_B lsic(b,bit_size, server_->gm());
         run_lsic_B(&lsic);
+        
+        cpu_time += GET_BENCHMARK_TIME;
     }
+    
+    cout << id_  << ": Server LSIC bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
+
 }
 
 void Bench_Server_session::bench_compare(size_t bit_size, unsigned int iterations)
-
 {
-
     mpz_class a;
+
+    double cpu_time = 0.;
+
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
+
+        RESET_BENCHMARK_TIMER
+
         Compare_B comparator(a,bit_size,server_->paillier(),server_->gm());
         run_priv_compare_B(&comparator);
+
+        cpu_time += GET_BENCHMARK_TIME;
     }
+
+    cout << id_  << ": Server DGK bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
+
 }
 
 void Bench_Server_session::bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic)

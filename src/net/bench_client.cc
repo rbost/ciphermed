@@ -32,6 +32,8 @@ static void bench_client(const string &hostname, unsigned int key_size, unsigned
         
         client.exchange_keys();
 
+        cout << "\n\n\n";
+        
         client.bench_lsic(bit_size, iterations);
         client.bench_compare(bit_size, iterations);
         
