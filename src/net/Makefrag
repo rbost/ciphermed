@@ -5,6 +5,10 @@ NETOBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
 DEMO_SRC := protocol_tester.cc
 DEMO_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(DEMO_SRC))
 
+BENCH_SRC := protocol_bench.cc
+BENCH_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(BENCH_SRC))
+
+
 all:    $(OBJDIR)/libnet.so
 $(OBJDIR)/libnet.so: $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) -lgmp -lgmpxx -lcrypto
@@ -20,6 +24,22 @@ $(OBJDIR)/net/client: $(OBJDIR)/net/test_client.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJ
 all:	$(OBJDIR)/net/server
 
 $(OBJDIR)/net/server: $(OBJDIR)/net/test_server.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+
+
+all:	$(OBJDIR)/net/bench_client
+
+$(OBJDIR)/net/bench_client: $(OBJDIR)/net/bench_client.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+
+
+all:	$(OBJDIR)/net/bench_server
+
+$(OBJDIR)/net/bench_server: $(OBJDIR)/net/bench_server.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil

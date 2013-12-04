@@ -78,7 +78,7 @@ void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comp
 
 void exec_lsic_B(tcp::socket &socket, LSIC_B *lsic)
 {
-    cout << "Start LSIC B" << endl;
+//    cout << "Start LSIC B" << endl;
 
     LSIC_Packet_A a_packet;
     LSIC_Packet_B b_packet = lsic->setupRound();
@@ -88,7 +88,7 @@ void exec_lsic_B(tcp::socket &socket, LSIC_B *lsic)
     b_message = convert_to_message(b_packet);
     sendMessageToSocket(socket, b_message);
     
-    cout << "LSIC setup sent" << endl;
+//    cout << "LSIC setup sent" << endl;
     
     // wait for packets
     
@@ -102,7 +102,7 @@ void exec_lsic_B(tcp::socket &socket, LSIC_B *lsic)
         sendMessageToSocket(socket, b_message);
     }
     
-    cout << "LSIC B Done" << endl;
+//    cout << "LSIC B Done" << endl;
 }
 
 void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator)
