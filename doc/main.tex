@@ -515,9 +515,32 @@ For the proofs of security, we show that whatever a party can compute from its v
 	\item [Data sets]                                         
 	A website with lots of ML datasets
 	\\ \href{http://archive.ics.uci.edu/ml/datasets.html}{Link}
+
+
+\item [Efficient Privacy-Preserving Face Recognition] (\emph{Ahmad-Reza Sadeghi, Thomas Schneider, and Immo Wehrenberg})
+
+- Efficient privacy-preserving face recognition
+systems. 
+
+The typical scenario here is a client-server application where the client
+needs to know whether a specific face image is contained in the database of a
+server with the following requirements: the client trusts the server to correctly
+perform the matching algorithm for the face recognition but without revealing any useful information to the server about the requested image as well as
+about the outcome of the matching algorithm. The server requires privacy of its
+database beyond the outcome of the matching algorithm to the client
+
+The client has a photo and wants to know which entry in the database at the server matches this photo.  The database at the server contains an eigenface per entry. The server should not learn the photo beyond the  matching result and the client should not learn the database beyond the matching result. 
+
+
+
+Something similar to our argmax: 
+11For
+this, they apply a straight-forward recursive algorithm for minimum selection
+based on a sub-protocol which compares two encrypted distances and returns
+a re-randomized encryption of the minimum and its index to S. For this sub-
+protocol, an optimized version of the homomorphic encryption-based comparison
+protocol of Damg?ard, Geisler and Kr¿igaard (DGK) [10,11,12] is used.''
 \end{description}
-
-
 % section related_work (end)
 
 
