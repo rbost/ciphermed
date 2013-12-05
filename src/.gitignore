@@ -2,6 +2,7 @@
 tags
 *.o
 *.swp
+*.pyc
 config.mk
 
 # proto_src
