@@ -26,6 +26,9 @@ vector<mpz_class> Compare_B::encrypt_bits()
 
 vector<mpz_class> Compare_B::encrypt_bits_parallel(unsigned int n_threads)
 {
+    if (n_threads < 2) {
+        return encrypt_bits();
+    }
 //    ScopedTimer timer("encrypt_bits_parallel");
     vector<mpz_class> c_b(bit_length_);
     
@@ -191,6 +194,10 @@ vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, co
 {
 //    ScopedTimer timer("rerandomize parallel");
  
+    if (n_threads < 2) {
+        return rerandomize(c, rerand_indexes);
+    }
+    
     vector<mpz_class> c_rand(c);
     
     size_t n = rerand_indexes.size();
