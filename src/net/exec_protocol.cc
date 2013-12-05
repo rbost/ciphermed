@@ -308,7 +308,7 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper
         sendIntToSocket(socket,y);
     }
     
-    cout << "Send result" << endl;
+//    cout << "Send result" << endl;
     mpz_class permuted_argmax = helper.permuted_argmax();
     sendIntToSocket(socket, permuted_argmax);
 }

@@ -55,7 +55,7 @@ void Bench_Client::bench_lsic(size_t bit_size, unsigned int iterations)
         total_time += t.lap_ms();
     }
 
-    cout << "Client LSIC bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << "Party A LSIC bench for " << iterations << " rounds, bit size=" << bit_size << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
     cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
@@ -92,7 +92,7 @@ void Bench_Client::bench_compare(size_t bit_size, unsigned int iterations)
         total_time += t.lap_ms();
     }
     
-    cout << "Client DGK bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << "Party A DGK bench for " << iterations << " rounds, bit size=" << bit_size << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
     cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
@@ -106,23 +106,8 @@ void Bench_Client::bench_enc_compare(size_t bit_size, unsigned int iterations, b
 
     mpz_class a, b;
 
-    for (unsigned int i = 0; i < iterations; i++) {
-        mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
-        mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
-        
-        mpz_class c_a, c_b;
-        c_a = server_paillier_->encrypt(a);
-        c_b = server_paillier_->encrypt(b);
-        
-        enc_comparison(c_a,c_b,bit_size, use_lsic);
-    }
-}
-
-void Bench_Client::bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic)
-{
-    send_test_query(Test_Request_Request_Type_TEST_REV_ENC_COMPARE, bit_size, iterations, use_lsic);
-
-    mpz_class a, b;
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
     
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
@@ -131,9 +116,53 @@ void Bench_Client::bench_rev_enc_compare(size_t bit_size, unsigned int iteration
         mpz_class c_a, c_b;
         c_a = server_paillier_->encrypt(a);
         c_b = server_paillier_->encrypt(b);
+        
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+
+        enc_comparison(c_a,c_b,bit_size, use_lsic);
+
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
+    }
+    
+    cout << "Owner Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+}
+
+void Bench_Client::bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic)
+{
+    send_test_query(Test_Request_Request_Type_TEST_REV_ENC_COMPARE, bit_size, iterations, use_lsic);
+
+    mpz_class a, b;
+    
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+
+    for (unsigned int i = 0; i < iterations; i++) {
+        mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
+        mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
+        
+        mpz_class c_a, c_b;
+        c_a = server_paillier_->encrypt(a);
+        c_b = server_paillier_->encrypt(b);
+
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
 
         rev_enc_comparison(c_a,c_b,bit_size, use_lsic);
+        
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
     }
+    cout << "Owner Rev Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
 }
 
 
@@ -145,6 +174,9 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
 
     vector<mpz_class> v(k);
     
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+
     for (unsigned int j = 0; j < iterations; j++) {
         for (size_t i = 0; i < k; i++) {
             mpz_urandom_len(v[i].get_mpz_t(), rand_state_, nbits);
@@ -155,9 +187,22 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
         
         
         Linear_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
-        
+
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+
         run_linear_enc_argmax(owner,use_lsic);
+        
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
     }
+    
+    cout << "Owner Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+
 }
 
 void Bench_Client::bench_change_es(unsigned int iterations)
@@ -172,6 +217,9 @@ void Bench_Client::bench_change_es(unsigned int iterations)
     
     vector<mpz_class> c_gm(bits_query.size());
     
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+    
     for (unsigned int j = 0; j < iterations; j++) {
 
         for (size_t i = 0; i < c_gm.size(); i++) {
@@ -179,8 +227,21 @@ void Bench_Client::bench_change_es(unsigned int iterations)
             c_gm[i] = server_gm_->encrypt(bits_query[i]);
         }
         
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+
         Ctxt c_fhe = change_encryption_scheme(c_gm);
+        
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
     }
+    
+    cout << "Owner Change ES bench for " << iterations << " rounds" << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+
 }
 
 void Bench_Client::disconnect()
@@ -304,6 +365,7 @@ void Bench_Server_session::run_session()
                     cout << id_ << ": Bench Change ES" << endl;
                     bench_change_es(iterations);
                 }
+                    break;
                 default:
                 {
                     cout << id_ << ": Bad Request " << request_type << endl;
@@ -342,7 +404,7 @@ void Bench_Server_session::bench_lsic(size_t bit_size, unsigned int iterations)
         cpu_time += GET_BENCHMARK_TIME;
     }
     
-    cout << id_  << ": Server LSIC bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << id_  << ": Party B LSIC bench for " << iterations << " rounds, bit size=" << bit_size << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 
 }
@@ -364,37 +426,62 @@ void Bench_Server_session::bench_compare(size_t bit_size, unsigned int iteration
         cpu_time += GET_BENCHMARK_TIME;
     }
 
-    cout << id_  << ": Server DGK bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << id_  << ": Party B DGK bench for " << iterations << " rounds, bit size=" << bit_size << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 
 }
 
 void Bench_Server_session::bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic)
 {
+    double cpu_time = 0.;
+
     for (unsigned int i = 0; i < iterations; i++) {
+        RESET_BENCHMARK_TIMER
+
         help_enc_comparison(bit_size,use_lsic);
+        
+        cpu_time += GET_BENCHMARK_TIME;
     }
+    cout << id_  << ": Helper Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
 void Bench_Server_session::bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic)
 {
+    double cpu_time = 0.;
+
     for (unsigned int i = 0; i < iterations; i++) {
+        RESET_BENCHMARK_TIMER
         help_rev_enc_comparison(bit_size,use_lsic);
+        cpu_time += GET_BENCHMARK_TIME;
     }
+    cout << id_  << ": Helper Rev Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
 void Bench_Server_session::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic)
 {
 
+    double cpu_time = 0.;
+    
     for (unsigned int i = 0; i < iterations; i++) {
         Linear_EncArgmax_Helper helper(bit_size,n_elements,server_->paillier());
+        RESET_BENCHMARK_TIMER
         run_linear_enc_argmax(helper,use_lsic);
+        cpu_time += GET_BENCHMARK_TIME;
     }
+    cout << id_  << ": Helper Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
 void Bench_Server_session::bench_change_es(unsigned int iterations)
 {
+    double cpu_time = 0.;
     for (unsigned int i = 0; i < iterations; i++) {
+        RESET_BENCHMARK_TIMER
         run_change_encryption_scheme_slots_helper();
+        cpu_time += GET_BENCHMARK_TIME;
     }
+    cout << id_  << ": Helper Change ES bench for " << iterations << " rounds" << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
