@@ -11,7 +11,7 @@
 
 #include <util/benchmarks.hh>
 
-static void bench_client(const string &hostname, unsigned int key_size, unsigned int bit_size, unsigned int iterations)
+static void bench_client(const string &hostname, unsigned int key_size, unsigned int bit_size, unsigned int iterations, unsigned int n_threads)
 {
     try
     {
@@ -27,6 +27,7 @@ static void bench_client(const string &hostname, unsigned int key_size, unsigned
         gmp_randseed_ui(randstate,time(NULL));
         
         Bench_Client client(io_service, randstate,key_size,100);
+        client.set_n_threads(n_threads);
         
         client.connect(io_service, hostname);
         
@@ -48,17 +49,18 @@ static void bench_client(const string &hostname, unsigned int key_size, unsigned
 
 int main(int argc, char* argv[])
 {
-    if (argc != 5)
+    if (argc != 6)
     {
-        std::cerr << "Usage: bench_client <host> <key_size> <bit_size> <iterations>" << std::endl;
+        std::cerr << "Usage: bench_client <host> <key_size> <bit_size> <iterations> <n_threads>" << std::endl;
         return 1;
     }
     string hostname(argv[1]);
     unsigned int key_size = atoi(argv[2]);
     unsigned int bit_size = atoi(argv[3]);
     unsigned int iterations = atoi(argv[4]);
+    unsigned int n_threads = atoi(argv[5]);
 
-    bench_client(hostname, key_size, bit_size, iterations);
+    bench_client(hostname, key_size, bit_size, iterations, n_threads);
     
     return 0;
 }

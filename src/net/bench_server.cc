@@ -9,7 +9,7 @@
 
 #include <util/benchmarks.hh>
 
-static void bench_server(unsigned int key_size)
+static void bench_server(unsigned int key_size, unsigned int n_threads)
 {
 #ifdef BENCHMARK
     cout << "BENCHMARK flag set" << endl;
@@ -22,6 +22,7 @@ static void bench_server(unsigned int key_size)
     
     cout << "Init server" << endl;
     Bench_Server server(randstate,key_size,100);
+    server.set_threads_per_session(n_threads);
     
     cout << "Start server" << endl;
     server.run();
@@ -29,15 +30,16 @@ static void bench_server(unsigned int key_size)
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
-        std::cerr << "Usage: bench_server <key_size>" << std::endl;
+        std::cerr << "Usage: bench_server <key_size> <n_threads>" << std::endl;
         return 1;
     }
     
     unsigned int key_size = atoi(argv[1]);
+    unsigned int n_threads = atoi(argv[2]);
 
-    bench_server(key_size);
+    bench_server(key_size, n_threads);
         
     return 0;
 }
