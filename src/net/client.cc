@@ -254,7 +254,7 @@ void Client::run_lsic_B(LSIC_B *lsic)
 
 void Client::run_priv_compare_B(Compare_B *comparator)
 {
-    exec_priv_compare_B(socket_,comparator);
+    exec_priv_compare_B(socket_,comparator,n_threads_);
 }
 
 
@@ -268,7 +268,7 @@ void Client::rev_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l
 
 void Client::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 {
-    exec_rev_enc_comparison_owner(socket_, owner, lambda_, true);
+    exec_rev_enc_comparison_owner(socket_, owner, lambda_, true, n_threads_);
 }
 
 
@@ -280,7 +280,7 @@ bool Client::help_rev_enc_comparison(const size_t &l, bool use_lsic)
 
 bool Client::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 {
-    exec_rev_enc_comparison_helper(socket_, helper, true);
+    exec_rev_enc_comparison_helper(socket_, helper, true, n_threads_);
     return helper.output();
 }
 
@@ -295,7 +295,7 @@ bool Client::enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bo
 
 bool Client::run_enc_comparison_owner(EncCompare_Owner &owner)
 {
-    exec_enc_comparison_owner(socket_, owner, lambda_, true);
+    exec_enc_comparison_owner(socket_, owner, lambda_, true, n_threads_);
     return owner.output();
 }
 
@@ -307,7 +307,7 @@ void Client::help_enc_comparison(const size_t &l, bool use_lsic)
 
 void Client::run_enc_comparison_helper(EncCompare_Helper &helper)
 {
-    exec_enc_comparison_helper(socket_,helper, true);
+    exec_enc_comparison_helper(socket_,helper, true, n_threads_);
 }
 
 // same as before, but the result is encrypted under QR
@@ -315,23 +315,23 @@ void Client::run_enc_comparison_helper(EncCompare_Helper &helper)
 
 mpz_class Client::run_rev_enc_comparison_owner_enc_result(Rev_EncCompare_Owner &owner)
 {
-    exec_rev_enc_comparison_owner(socket_, owner, lambda_, false);
+    exec_rev_enc_comparison_owner(socket_, owner, lambda_, false, n_threads_);
     return owner.encrypted_output();
 }
 
 void Client::run_rev_enc_comparison_helper_enc_result(Rev_EncCompare_Helper &helper)
 {
-    exec_rev_enc_comparison_helper(socket_, helper, false);
+    exec_rev_enc_comparison_helper(socket_, helper, false, n_threads_);
 }
 
 void Client::run_enc_comparison_owner_enc_result(EncCompare_Owner &owner)
 {
-    exec_enc_comparison_owner(socket_, owner, lambda_, false);
+    exec_enc_comparison_owner(socket_, owner, lambda_, false, n_threads_);
 }
 
 mpz_class Client::run_enc_comparison_helper_enc_result(EncCompare_Helper &helper)
 {
-    exec_enc_comparison_helper(socket_,helper, false);
+    exec_enc_comparison_helper(socket_,helper, false, n_threads_);
     return helper.encrypted_output();
 }
 
@@ -382,7 +382,7 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsi
         comparator_creator = [this,nbits](){ return new Compare_A(0,nbits,*server_paillier_,*server_gm_,rand_state_); };
     }
 
-    exec_linear_enc_argmax(socket_,owner, comparator_creator, lambda_);
+    exec_linear_enc_argmax(socket_,owner, comparator_creator, lambda_, n_threads_);
     
     return owner.output();
 }
