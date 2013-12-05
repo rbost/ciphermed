@@ -48,6 +48,10 @@ public:
     Key_dependencies_descriptor key_deps_desc() const { return key_deps_desc_; }
     
     unsigned int lambda() const { return lambda_; }
+    
+    unsigned int threads_per_session() const { return threads_per_session_; }
+    void set_threads_per_session(unsigned int n) { assert(n > 0); threads_per_session_ = n; }
+
 protected:
     const Key_dependencies_descriptor key_deps_desc_;
 
@@ -59,7 +63,7 @@ protected:
 
     gmp_randstate_t rand_state_;
     unsigned int n_clients_;
-
+    unsigned int threads_per_session_;
     
     /* statistical security */
     unsigned int lambda_;

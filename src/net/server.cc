@@ -257,7 +257,7 @@ void Server_session::exchange_keys()
 
 mpz_class Server_session::run_comparison_protocol_A(Comparison_protocol_A *comparator)
 {
-    exec_comparison_protocol_A(socket_,comparator,1);
+    exec_comparison_protocol_A(socket_,comparator,server_->threads_per_session());
     return comparator->output();
 }
 
@@ -268,13 +268,13 @@ mpz_class Server_session::run_lsic_A(LSIC_A *lsic)
 }
 mpz_class Server_session::run_priv_compare_A(Compare_A *comparator)
 {
-    exec_priv_compare_A(socket_,comparator,1);
+    exec_priv_compare_A(socket_,comparator,server_->threads_per_session());
     return comparator->output();
 }
 
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
-    exec_comparison_protocol_B(socket_,comparator);
+    exec_comparison_protocol_B(socket_,comparator,server_->threads_per_session());
 }
 
 void Server_session::run_lsic_B(LSIC_B *lsic)
@@ -284,7 +284,7 @@ void Server_session::run_lsic_B(LSIC_B *lsic)
 
 void Server_session::run_priv_compare_B(Compare_B *comparator)
 {
-    exec_priv_compare_B(socket_,comparator);
+    exec_priv_compare_B(socket_,comparator,server_->threads_per_session());
 }
 
 // we suppose that the client already has the server's public key for Paillier
@@ -297,7 +297,7 @@ void Server_session::rev_enc_comparison(const mpz_class &a, const mpz_class &b, 
 
 void Server_session::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
 {
-    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda(), true);
+    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda(), true, server_->threads_per_session());
 }
 
 bool Server_session::help_rev_enc_comparison(const size_t &l, bool use_lsic)
@@ -308,7 +308,7 @@ bool Server_session::help_rev_enc_comparison(const size_t &l, bool use_lsic)
 
 bool Server_session::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper)
 {
-    exec_rev_enc_comparison_helper(socket_, helper, true);
+    exec_rev_enc_comparison_helper(socket_, helper, true, server_->threads_per_session());
     return helper.output();
 }
 
@@ -322,7 +322,7 @@ bool Server_session::enc_comparison(const mpz_class &a, const mpz_class &b, size
 
 bool Server_session::run_enc_comparison_owner(EncCompare_Owner &owner)
 {
-    exec_enc_comparison_owner(socket_, owner, server_->lambda(), true);
+    exec_enc_comparison_owner(socket_, owner, server_->lambda(), true, server_->threads_per_session());
     return owner.output();
 }
 
@@ -334,7 +334,7 @@ void Server_session::help_enc_comparison(const size_t &l, bool use_lsic)
 
 void Server_session::run_enc_comparison_helper(EncCompare_Helper &helper)
 {
-    exec_enc_comparison_helper(socket_,helper, true);
+    exec_enc_comparison_helper(socket_,helper, true, server_->threads_per_session());
 }
 
 
@@ -343,23 +343,23 @@ void Server_session::run_enc_comparison_helper(EncCompare_Helper &helper)
 
 mpz_class Server_session::run_rev_enc_comparison_owner_enc_result(Rev_EncCompare_Owner &owner)
 {
-    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda(), false);
+    exec_rev_enc_comparison_owner(socket_, owner, server_->lambda(), false, server_->threads_per_session());
     return owner.encrypted_output();
 }
 
 void Server_session::run_rev_enc_comparison_helper_enc_result(Rev_EncCompare_Helper &helper)
 {
-    exec_rev_enc_comparison_helper(socket_, helper, false);
+    exec_rev_enc_comparison_helper(socket_, helper, false, server_->threads_per_session());
 }
 
 void Server_session::run_enc_comparison_owner_enc_result(EncCompare_Owner &owner)
 {
-    exec_enc_comparison_owner(socket_, owner, server_->lambda(), false);
+    exec_enc_comparison_owner(socket_, owner, server_->lambda(), false, server_->threads_per_session());
 }
 
 mpz_class Server_session::run_enc_comparison_helper_enc_result(EncCompare_Helper &helper)
 {
-    exec_enc_comparison_helper(socket_,helper, false);
+    exec_enc_comparison_helper(socket_,helper, false, server_->threads_per_session());
     return helper.encrypted_output();
 }
 
@@ -407,7 +407,7 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, bool
     }else{
         comparator_creator = [this,nbits](){ return new Compare_B(0,nbits,server_->paillier(),server_->gm()); };
     }
-    exec_linear_enc_argmax(socket_, helper, comparator_creator);
+    exec_linear_enc_argmax(socket_, helper, comparator_creator, server_->threads_per_session());
 }
 
 Ctxt Server_session::change_encryption_scheme(const vector<mpz_class> &c_gm)

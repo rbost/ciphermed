@@ -67,12 +67,12 @@ void exec_priv_compare_A(tcp::socket &socket, Compare_A *comparator, unsigned in
 
 
 
-void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comparator)
+void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comparator, unsigned int n_threads)
 {
     if(typeid(*comparator) == typeid(LSIC_B)) {
         exec_lsic_B(socket, reinterpret_cast<LSIC_B*>(comparator));
     }else if(typeid(*comparator) == typeid(Compare_B)){
-        exec_priv_compare_B(socket, reinterpret_cast<Compare_B*>(comparator));
+        exec_priv_compare_B(socket, reinterpret_cast<Compare_B*>(comparator), n_threads);
     }
 }
 
@@ -105,13 +105,13 @@ void exec_lsic_B(tcp::socket &socket, LSIC_B *lsic)
 //    cout << "LSIC B Done" << endl;
 }
 
-void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator)
+void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator, unsigned int n_threads)
 {
     vector<mpz_class> c(comparator->bit_length());
     
     
     // send the encrypted bits
-    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits());
+    Protobuf::BigIntArray c_b_message = convert_to_message(comparator->encrypt_bits_parallel(n_threads));
     sendMessageToSocket(socket, c_b_message);
     
     // wait for the answer from the client
@@ -129,7 +129,7 @@ void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator)
     
 }
 
-void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result)
+void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result, unsigned int n_threads)
 {
     size_t l = owner.bit_length();
     mpz_class c_z(owner.setup(lambda));
@@ -139,7 +139,7 @@ void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &ow
     
     // the other party does some computation, we just have to run the comparator
     
-    exec_comparison_protocol_A(socket, owner.comparator());
+    exec_comparison_protocol_A(socket, owner.comparator(), n_threads);
     
     Protobuf::BigInt c_z_l_message = readMessageFromSocket<Protobuf::BigInt>(socket);
     mpz_class c_z_l = convert_from_message(c_z_l_message);
@@ -156,7 +156,7 @@ void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &ow
     sendMessageToSocket(socket, c_t_message);
 }
 
-void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &helper, bool decrypt_result)
+void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &helper, bool decrypt_result, unsigned int n_threads)
 {
     // setup the helper if necessary
     if (!helper.is_set_up()) {
@@ -170,7 +170,7 @@ void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &
     }
     
     // now, we need to run the comparison protocol
-    exec_comparison_protocol_B(socket, helper.comparator());
+    exec_comparison_protocol_B(socket, helper.comparator(), n_threads);
     
     
     mpz_class c_z_l(helper.get_c_z_l());
@@ -189,7 +189,7 @@ void exec_rev_enc_comparison_helper(tcp::socket &socket, Rev_EncCompare_Helper &
     helper.decryptResult(c_t);
 }
 
-void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result)
+void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result, unsigned int n_threads)
 {
     // now run the protocol itself
     size_t l = owner.bit_length();
@@ -200,7 +200,7 @@ void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, uns
     
     // the server does some computation, we just have to run the lsic
     
-    exec_comparison_protocol_B(socket, owner.comparator());
+    exec_comparison_protocol_B(socket, owner.comparator(), n_threads);
     
     mpz_class c_r_l(owner.get_c_r_l());
     Protobuf::BigInt c_r_l_message = convert_to_message(c_r_l);
@@ -217,7 +217,7 @@ void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, uns
     owner.decryptResult(c_t);
 }
 
-void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper, bool decrypt_result)
+void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper, bool decrypt_result, unsigned int n_threads)
 {
     // setup the helper if necessary
     if (!helper.is_set_up()) {
@@ -231,7 +231,7 @@ void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper, 
     }
     
     // now, we need to run the comparison protocol
-    exec_comparison_protocol_A(socket, helper.comparator());
+    exec_comparison_protocol_A(socket, helper.comparator(), n_threads);
     
     Protobuf::BigInt c_r_l_message = readMessageFromSocket<Protobuf::BigInt>(socket);
     mpz_class c_r_l = convert_from_message(c_r_l_message);
@@ -247,7 +247,7 @@ void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper, 
     sendMessageToSocket(socket, c_t_message);
 }
 
-void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda)
+void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda, unsigned int n_threads)
 {
     size_t k = owner.elements_number();
     for (size_t i = 0; i < (k-1); i++) {
@@ -255,7 +255,7 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, 
         
         Rev_EncCompare_Owner rev_enc_owner = owner.create_current_round_rev_enc_compare_owner(comparator);
         
-        exec_rev_enc_comparison_owner(socket, rev_enc_owner, lambda);
+        exec_rev_enc_comparison_owner(socket, rev_enc_owner, lambda, true, n_threads);
         
         mpz_class randomized_enc_max, randomized_value;
         owner.next_round(randomized_enc_max, randomized_value);
@@ -279,7 +279,7 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, 
     owner.unpermuteResult(permuted_argmax.get_ui());
 }
 
-void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator)
+void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator, unsigned int n_threads)
 {
     size_t k = helper.elements_number();
     
@@ -291,7 +291,7 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper
 
         Rev_EncCompare_Helper rev_enc_helper = helper.rev_enc_compare_helper(comparator);
         
-        exec_rev_enc_comparison_helper(socket, rev_enc_helper);
+        exec_rev_enc_comparison_helper(socket, rev_enc_helper, true, n_threads);
         
         mpz_class randomized_enc_max, randomized_value;
         
