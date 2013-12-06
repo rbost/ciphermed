@@ -76,6 +76,7 @@ static void bench_linear_classifier_server(const vector<mpz_class> &model, unsig
     
     cout << "Init server" << endl;
     Bench_Linear_Classifier_Server server(randstate,1024,100,model,nbits_max, nRounds);
+    server.set_threads_per_session(2);
     
     cout << "Start server" << endl;
     server.run();
@@ -88,7 +89,7 @@ static void bench_linear_classifier_server(unsigned int model_size, unsigned int
     assert(nbits_max > model_size + 1);
     unsigned int nbits = nbits_max - model_size - 1;
     
-    long two_nbits = 1 << nbits;
+    long two_nbits = (1 << nbits);
     
     vector<mpz_class> model(model_size+1);
     for (size_t i = 0; i <= model_size; i++) {

@@ -31,7 +31,7 @@ using boost::asio::ip::tcp;
 using namespace std;
 
 Server::Server(gmp_randstate_t state, Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda)
-: key_deps_desc_(key_deps_desc), paillier_(NULL), gm_(NULL), fhe_context_(NULL), fhe_sk_(NULL), n_clients_(0), lambda_(lambda)
+: key_deps_desc_(key_deps_desc), paillier_(NULL), gm_(NULL), fhe_context_(NULL), fhe_sk_(NULL), n_clients_(0), threads_per_session_(1), lambda_(lambda)
 {
     gmp_randinit_set(rand_state_, state);
 
