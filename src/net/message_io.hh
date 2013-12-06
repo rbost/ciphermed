@@ -44,9 +44,10 @@ static void encode_header(std::vector<byte>& buf, unsigned size)
 
 template <class T>
 T readMessageFromSocket(boost::asio::ip::tcp::socket &socket) {
-    PAUSE_BENCHMARK
+//    PAUSE_BENCHMARK
     std::vector<byte> m_readbuf;
     m_readbuf.resize(HEADER_SIZE);
+    PAUSE_BENCHMARK
     boost::asio::read(socket, boost::asio::buffer(m_readbuf));
 //    (cerr << "Got header!\n");
 //    (cerr << show_hex(m_readbuf) << endl);
@@ -58,6 +59,7 @@ T readMessageFromSocket(boost::asio::ip::tcp::socket &socket) {
     
     boost::asio::mutable_buffers_1 buf = boost::asio::buffer(&m_readbuf[HEADER_SIZE], msg_len);
     boost::asio::read(socket, buf);
+    RESUME_BENCHMARK
     
 //    (cerr << "Got body!\n");
 //    (cerr << show_hex(m_readbuf) << endl);
@@ -65,13 +67,13 @@ T readMessageFromSocket(boost::asio::ip::tcp::socket &socket) {
     T m;
     m.ParseFromArray(&m_readbuf[HEADER_SIZE], m_readbuf.size() - HEADER_SIZE);
     
-    RESUME_BENCHMARK
+//    RESUME_BENCHMARK
     return m;
 }
 
 template <class T>
 void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
-    PAUSE_BENCHMARK
+//    PAUSE_BENCHMARK
     
     std::vector<byte> writebuf;
     unsigned msg_size = msg.ByteSize();
@@ -87,7 +89,7 @@ void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
         return;
     }
     boost::asio::write(socket, boost::asio::buffer(writebuf));
-    RESUME_BENCHMARK
+//    RESUME_BENCHMARK
 }
 
 #endif
