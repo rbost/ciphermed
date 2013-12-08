@@ -45,6 +45,9 @@ class discrete_nb_clf(object):
             Y[idx] = np.argmax(xs)
         return Y
 
+    def tojson(self):
+        import json
+        return json.dumps({'prior':self.prior_.tolist(), 'conditionals':[[x.tolist() for x in y] for y in self.posterior_]})
 
 if __name__ == '__main__':
 
@@ -64,3 +67,6 @@ if __name__ == '__main__':
     clf.fit(X, Y)
     print clf.prior_
     print clf.predict(X)
+
+    with open('out.json', 'w') as fp:
+        print >>fp, clf.tojson()
