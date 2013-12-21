@@ -72,6 +72,7 @@ public:
     void help_enc_comparison_enc_result(const size_t &l, bool use_lsic);
     
     vector<bool> multiple_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic);
+    void multiple_help_enc_comparison(const size_t n, const size_t &l, bool use_lsic);
 
     /* other protocols */
 

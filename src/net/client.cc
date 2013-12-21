@@ -384,11 +384,26 @@ vector<bool> Client::multiple_enc_comparison(const vector<mpz_class> &a, const v
     
     for (size_t i = 0; i < n; i++) {
         results[i] = owners[i]->output();
+        delete owners[i];
     }
     
     return results;
 }
 
+void Client::multiple_help_enc_comparison(const size_t n, const size_t &l, bool use_lsic)
+{
+    vector<EncCompare_Helper*> helpers(5);
+    
+    for (size_t i = 0; i < n; i++) {
+        helpers[i] = new EncCompare_Helper(create_enc_comparator_helper(l, use_lsic));
+        
+    }
+    multiple_exec_enc_comparison_helper(socket_, helpers, true, 1);
+    
+    for (size_t i = 0; i < n; i++) {
+        delete helpers[i];
+    }
+}
 
 
 size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic)
