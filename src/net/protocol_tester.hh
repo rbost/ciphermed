@@ -43,6 +43,7 @@ class Tester_Client : public Client{
     mpz_class test_compare(const mpz_class &b, size_t l);
     void test_rev_enc_compare(size_t l);
     void test_enc_compare(size_t l);
+    void test_multiple_enc_compare(size_t l);
     void test_linear_enc_argmax();
     void test_fhe();
     void test_change_es();

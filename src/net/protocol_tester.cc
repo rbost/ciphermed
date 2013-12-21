@@ -69,6 +69,33 @@ void Tester_Client::test_enc_compare(size_t l)
     cout << "Result should be " << (a < b) << endl;
 }
 
+void Tester_Client::test_multiple_enc_compare(size_t l)
+{
+    size_t n = 5;
+    vector<mpz_class> a(n), b(n);
+    
+    for (size_t i = 0; i < n; i++) {
+        mpz_urandom_len(a[i].get_mpz_t(), rand_state_, l);
+        mpz_urandom_len(b[i].get_mpz_t(), rand_state_, l);
+    }
+
+    vector<mpz_class> c_a(n), c_b(n);
+    for (size_t i = 0; i < n; i++) {
+        c_a[i] = server_paillier_->encrypt(a[i]);
+        c_b[i] = server_paillier_->encrypt(b[i]);
+    }
+    
+    send_test_query(Test_Request_Request_Type_TEST_MULTIPLE_COMPARE);
+
+    vector<bool> results = multiple_enc_comparison(c_a, c_b, l, use_lsic__);
+    
+    for (size_t i = 0; i < n; i++) {
+        if ((a[i] < b[i]) != results[i]) {
+            cout << "Result " << i << " is false" << endl;
+        }
+    }
+}
+
 void Tester_Client::test_rev_enc_compare(size_t l)
 {
     mpz_class a, b;
@@ -271,6 +298,15 @@ void Tester_Server_session::run_session()
                     cout << id_ << ": Change ES" << endl;
                     test_change_es();
                 }
+                    break;
+                    
+                case Test_Request_Request_Type_TEST_MULTIPLE_COMPARE:
+                {
+                    cout << id_ << ": Test Multiple Enc Compare" << endl;
+                    multiple_help_enc_comparison(5, 0,use_lsic__);
+                }
+                    break;
+                    
                 default:
                 {
                     cout << id_ << ": Bad Request " << request_type << endl;

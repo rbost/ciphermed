@@ -2,6 +2,9 @@ package Protobuf;
 
 import "bigint.proto";
 
+message SOCKET_READY_Message {
+}
+
 message LSIC_A_Message {
     required uint32 index = 1;
     required BigInt tau = 2;

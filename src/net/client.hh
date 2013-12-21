@@ -71,6 +71,8 @@ public:
     mpz_class enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
     void help_enc_comparison_enc_result(const size_t &l, bool use_lsic);
     
+    vector<bool> multiple_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic);
+
     /* other protocols */
 
     Ctxt change_encryption_scheme(const vector<mpz_class> &c_gm);

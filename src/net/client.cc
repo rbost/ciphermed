@@ -367,6 +367,29 @@ void Client::help_enc_comparison_enc_result(const size_t &l, bool use_lsic)
     run_rev_enc_comparison_helper_enc_result(helper);
 }
 
+vector<bool> Client::multiple_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic)
+{
+    assert(a.size() == b.size());
+    size_t n = a.size();
+    vector<EncCompare_Owner*> owners(5);
+    
+    for (size_t i = 0; i < n; i++) {
+        owners[i] = new EncCompare_Owner(create_enc_comparator_owner(l, use_lsic));
+        owners[i]->set_input(a[i],b[i]);
+    }
+    
+    multiple_exec_enc_comparison_owner(socket_, owners, lambda_, true, 1);
+    
+    vector<bool> results(n);
+    
+    for (size_t i = 0; i < n; i++) {
+        results[i] = owners[i]->output();
+    }
+    
+    return results;
+}
+
+
 
 size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic)
 {
