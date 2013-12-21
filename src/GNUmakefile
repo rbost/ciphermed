@@ -19,8 +19,6 @@ endif
 
 ifeq ($(strip $(BENCHMARK)),1)
 	CXXOPT := $(CXXOPT) -D BENCHMARK
-else
-	CXXOPT := $(CXXOPT) -O3 -D BENCHMARK
 endif
 
 OBJDIR	 := obj

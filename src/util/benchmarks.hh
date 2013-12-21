@@ -65,6 +65,7 @@ public:
 #define RESUME_BENCHMARK
 #define GET_BENCHMARK_TIME 0
 #define RESET_BENCHMARK_TIMER
+#define RESET_BYTE_COUNT
 #define EXCHANGED_BYTES(n)
 
 #endif

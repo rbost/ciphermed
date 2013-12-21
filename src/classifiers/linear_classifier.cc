@@ -8,7 +8,7 @@
 
 #include <protobuf/protobuf_conversion.hh>
 #include <net/message_io.hh>
-
+#include <util/util.hh>
 
 
 Linear_Classifier_Server::Linear_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &model, size_t bit_size)

@@ -7,6 +7,8 @@
 #include <tree/util.hh>
 #include <tree/util_poly.hh>
 
+#include <util/util.hh>
+
 Decision_tree_Classifier_Server::Decision_tree_Classifier_Server(gmp_randstate_t state, unsigned int keysize, const Tree<long> &model, unsigned int n_variables, const vector<pair <vector<long>,long> > &criteria)
 : Server(state, Decision_tree_Classifier_Server::key_deps_descriptor(), keysize, 0), n_variables_(n_variables), criteria_(criteria)
 {
