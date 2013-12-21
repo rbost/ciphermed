@@ -296,17 +296,17 @@ void multiple_exec_enc_comparison_owner(tcp::socket &socket, vector<EncCompare_O
     endpoint.port(PORT+1);
     
     tcp::acceptor acceptor(socket.get_io_service(), endpoint);
-
+    
     for (size_t i = 0; i < owners.size(); i++) {
         shared_ptr<tcp::socket> comp_socket (new tcp::socket(socket.get_io_service()));
-
+        
         if (i == 0) {
             // now that we are ready to accept connexions on this port, notify the client
             sendMessageToSocket<Protobuf::SOCKET_READY_Message>(socket,Protobuf::SOCKET_READY_Message());
         }
         
         acceptor.accept(*comp_socket);
-
+        
         // the socket has been created and the helper connected, now run the comparisons
         comparison_threads[i] = new thread(&multiple_exec_enc_comparison_owner_thread_call,comp_socket,owners[i],lambda,decrypt_result,n_threads);
     }
@@ -314,7 +314,7 @@ void multiple_exec_enc_comparison_owner(tcp::socket &socket, vector<EncCompare_O
     for (size_t i = 0 ; i < owners.size(); i++) {
         comparison_threads[i]->join();
         delete comparison_threads[i];
-}
+    }
     
     delete [] comparison_threads;
 }
@@ -327,11 +327,11 @@ void multiple_exec_enc_comparison_helper_thread_call(shared_ptr<tcp::socket> soc
 void multiple_exec_enc_comparison_helper(tcp::socket &socket, vector<EncCompare_Helper*> &helpers, bool decrypt_result, unsigned int n_threads)
 {
     thread **comparison_threads = new thread* [helpers.size()];
-
+    
     tcp::resolver resolver(socket.get_io_service());
     tcp::endpoint endpoint = socket.remote_endpoint(); // (tcp::v4(), PORT+1);
     endpoint.port(PORT+1);
-
+    
     
     // wait for the owner to be ready
     readMessageFromSocket<Protobuf::SOCKET_READY_Message>(socket);
@@ -339,7 +339,7 @@ void multiple_exec_enc_comparison_helper(tcp::socket &socket, vector<EncCompare_
     for (size_t i = 0; i < helpers.size(); i++) {
         shared_ptr<tcp::socket> comp_socket (new tcp::socket(socket.get_io_service()));
         comp_socket->connect(endpoint);
-
+        
         // the socket has been created and the owner connected, now run the comparisons
         comparison_threads[i] = new thread(&multiple_exec_enc_comparison_helper_thread_call,(comp_socket),(helpers[i]),decrypt_result,n_threads);
     }
@@ -351,6 +351,78 @@ void multiple_exec_enc_comparison_helper(tcp::socket &socket, vector<EncCompare_
     
     delete [] comparison_threads;
 }
+
+void multiple_exec_rev_enc_comparison_owner_thread_call(shared_ptr<tcp::socket> socket, Rev_EncCompare_Owner *owner_ptr, unsigned int lambda, bool decrypt_result, unsigned int n_threads)
+{
+    exec_rev_enc_comparison_owner(*socket,*owner_ptr,lambda,decrypt_result,n_threads);
+}
+
+void multiple_exec_rev_enc_comparison_owner(tcp::socket &socket, vector<Rev_EncCompare_Owner*> &owners, unsigned int lambda, bool decrypt_result, unsigned int n_threads)
+{
+    // when doing multiple executions in parallel, the owner creates the sockets and the helper connects
+    
+    thread **comparison_threads = new thread* [owners.size()];
+    
+    tcp::endpoint endpoint = socket.local_endpoint(); // (tcp::v4(), PORT+1);
+    endpoint.port(PORT+1);
+    
+    tcp::acceptor acceptor(socket.get_io_service(), endpoint);
+    
+    for (size_t i = 0; i < owners.size(); i++) {
+        shared_ptr<tcp::socket> comp_socket (new tcp::socket(socket.get_io_service()));
+        
+        if (i == 0) {
+            // now that we are ready to accept connexions on this port, notify the client
+            sendMessageToSocket<Protobuf::SOCKET_READY_Message>(socket,Protobuf::SOCKET_READY_Message());
+        }
+        
+        acceptor.accept(*comp_socket);
+        
+        // the socket has been created and the helper connected, now run the comparisons
+        comparison_threads[i] = new thread(&multiple_exec_rev_enc_comparison_owner_thread_call,comp_socket,owners[i],lambda,decrypt_result,n_threads);
+    }
+    
+    for (size_t i = 0 ; i < owners.size(); i++) {
+        comparison_threads[i]->join();
+        delete comparison_threads[i];
+    }
+    
+    delete [] comparison_threads;
+}
+
+void multiple_exec_rev_enc_comparison_helper_thread_call(shared_ptr<tcp::socket> socket,Rev_EncCompare_Helper *helper_ptr, bool decrypt_result, unsigned int n_threads)
+{
+    exec_rev_enc_comparison_helper(*socket,*helper_ptr,decrypt_result,n_threads);
+}
+
+void multiple_exec_rev_enc_comparison_helper(tcp::socket &socket, vector<Rev_EncCompare_Helper*> &helpers, bool decrypt_result, unsigned int n_threads)
+{
+    thread **comparison_threads = new thread* [helpers.size()];
+    
+    tcp::resolver resolver(socket.get_io_service());
+    tcp::endpoint endpoint = socket.remote_endpoint(); // (tcp::v4(), PORT+1);
+    endpoint.port(PORT+1);
+    
+    
+    // wait for the owner to be ready
+    readMessageFromSocket<Protobuf::SOCKET_READY_Message>(socket);
+    
+    for (size_t i = 0; i < helpers.size(); i++) {
+        shared_ptr<tcp::socket> comp_socket (new tcp::socket(socket.get_io_service()));
+        comp_socket->connect(endpoint);
+        
+        // the socket has been created and the owner connected, now run the comparisons
+        comparison_threads[i] = new thread(&multiple_exec_rev_enc_comparison_helper_thread_call,(comp_socket),(helpers[i]),decrypt_result,n_threads);
+    }
+    
+    for (size_t i = 0 ; i < helpers.size(); i++) {
+        comparison_threads[i]->join();
+        delete comparison_threads[i];
+    }
+    
+    delete [] comparison_threads;
+}
+
 
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator, unsigned int n_threads)
 {

@@ -399,7 +399,7 @@ vector<bool> Server_session::multiple_enc_comparison(const vector<mpz_class> &a,
 {
     assert(a.size() == b.size());
     size_t n = a.size();
-    vector<EncCompare_Owner*> owners(5);
+    vector<EncCompare_Owner*> owners(n);
     
     for (size_t i = 0; i < n; i++) {
         owners[i] = new EncCompare_Owner(create_enc_comparator_owner(l, use_lsic));
@@ -421,17 +421,58 @@ vector<bool> Server_session::multiple_enc_comparison(const vector<mpz_class> &a,
 
 void Server_session::multiple_help_enc_comparison(const size_t n, const size_t &l, bool use_lsic)
 {
-    vector<EncCompare_Helper*> helpers(5);
-
+    vector<EncCompare_Helper*> helpers(n);
+    
     for (size_t i = 0; i < n; i++) {
         helpers[i] = new EncCompare_Helper(create_enc_comparator_helper(l, use_lsic));
-
+        
     }
     multiple_exec_enc_comparison_helper(socket_, helpers, true, 1);
-
+    
     for (size_t i = 0; i < n; i++) {
         delete helpers[i];
     }
+}
+
+
+void Server_session::multiple_rev_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic)
+{
+    assert(a.size() == b.size());
+    size_t n = a.size();
+    vector<Rev_EncCompare_Owner*> owners(n);
+    
+    for (size_t i = 0; i < n; i++) {
+        owners[i] = new Rev_EncCompare_Owner(create_rev_enc_comparator_owner(l, use_lsic));
+        owners[i]->set_input(a[i],b[i]);
+    }
+    
+    multiple_exec_rev_enc_comparison_owner(socket_, owners, server_->lambda(), true, 1);
+    
+    
+    for (size_t i = 0; i < n; i++) {
+        delete owners[i];
+    }
+    
+}
+
+
+vector<bool> Server_session::multiple_help_rev_enc_comparison(const size_t n, const size_t &l, bool use_lsic)
+{
+    vector<Rev_EncCompare_Helper*> helpers(n);
+    
+    for (size_t i = 0; i < n; i++) {
+        helpers[i] = new Rev_EncCompare_Helper(create_rev_enc_comparator_helper(l, use_lsic));
+        
+    }
+    multiple_exec_rev_enc_comparison_helper(socket_, helpers, true, 1);
+    
+    vector<bool> results(n);
+    for (size_t i = 0; i < n; i++) {
+        results[i] = helpers[i]->output();
+        delete helpers[i];
+    }
+
+    return results;
 }
 
 void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, bool use_lsic)
