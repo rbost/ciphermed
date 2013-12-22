@@ -377,8 +377,9 @@ vector<bool> Client::multiple_enc_comparison(const vector<mpz_class> &a, const v
         owners[i] = new EncCompare_Owner(create_enc_comparator_owner(l, use_lsic));
         owners[i]->set_input(a[i],b[i]);
     }
-    
-    multiple_exec_enc_comparison_owner(socket_, owners, lambda_, true, 1);
+
+    unsigned int thread_per_job = ceilf(((float)n_threads_)/n);
+    multiple_exec_enc_comparison_owner(socket_, owners, lambda_, true, thread_per_job);
     
     vector<bool> results(n);
     
@@ -398,7 +399,9 @@ void Client::multiple_help_enc_comparison(const size_t n, const size_t &l, bool 
         helpers[i] = new EncCompare_Helper(create_enc_comparator_helper(l, use_lsic));
         
     }
-    multiple_exec_enc_comparison_helper(socket_, helpers, true, 1);
+   
+    unsigned int thread_per_job = ceilf(((float)n_threads_)/n);
+    multiple_exec_enc_comparison_helper(socket_, helpers, true, thread_per_job);
     
     for (size_t i = 0; i < n; i++) {
         delete helpers[i];
@@ -416,7 +419,8 @@ void Client::multiple_rev_enc_comparison(const vector<mpz_class> &a, const vecto
         owners[i]->set_input(a[i],b[i]);
     }
     
-    multiple_exec_rev_enc_comparison_owner(socket_, owners, lambda_, true, 1);
+    unsigned int thread_per_job = ceilf(((float)n_threads_)/n);
+multiple_exec_rev_enc_comparison_owner(socket_, owners, lambda_, true, thread_per_job);
     
     
     for (size_t i = 0; i < n; i++) {
@@ -434,7 +438,9 @@ vector<bool> Client::multiple_help_rev_enc_comparison(const size_t n, const size
         helpers[i] = new Rev_EncCompare_Helper(create_rev_enc_comparator_helper(l, use_lsic));
         
     }
-    multiple_exec_rev_enc_comparison_helper(socket_, helpers, true, 1);
+    
+    unsigned int thread_per_job = ceilf(((float)n_threads_)/n);
+    multiple_exec_rev_enc_comparison_helper(socket_, helpers, true, thread_per_job);
     
     vector<bool> results(n);
     for (size_t i = 0; i < n; i++) {

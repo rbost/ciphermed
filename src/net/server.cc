@@ -406,7 +406,8 @@ vector<bool> Server_session::multiple_enc_comparison(const vector<mpz_class> &a,
         owners[i]->set_input(a[i],b[i]);
     }
     
-    multiple_exec_enc_comparison_owner(socket_, owners, server_->lambda(), true, 1);
+    unsigned int thread_per_job = ceilf(((float)server_->threads_per_session())/n);
+    multiple_exec_enc_comparison_owner(socket_, owners, server_->lambda(), true, thread_per_job);
     
     vector<bool> results(n);
     
@@ -427,7 +428,9 @@ void Server_session::multiple_help_enc_comparison(const size_t n, const size_t &
         helpers[i] = new EncCompare_Helper(create_enc_comparator_helper(l, use_lsic));
         
     }
-    multiple_exec_enc_comparison_helper(socket_, helpers, true, 1);
+    
+    unsigned int thread_per_job = ceilf(((float)server_->threads_per_session())/n);
+    multiple_exec_enc_comparison_helper(socket_, helpers, true, thread_per_job);
     
     for (size_t i = 0; i < n; i++) {
         delete helpers[i];
@@ -446,7 +449,8 @@ void Server_session::multiple_rev_enc_comparison(const vector<mpz_class> &a, con
         owners[i]->set_input(a[i],b[i]);
     }
     
-    multiple_exec_rev_enc_comparison_owner(socket_, owners, server_->lambda(), true, 1);
+    unsigned int thread_per_job = ceilf(((float)server_->threads_per_session())/n);
+    multiple_exec_rev_enc_comparison_owner(socket_, owners, server_->lambda(), true, thread_per_job);
     
     
     for (size_t i = 0; i < n; i++) {
@@ -464,7 +468,9 @@ vector<bool> Server_session::multiple_help_rev_enc_comparison(const size_t n, co
         helpers[i] = new Rev_EncCompare_Helper(create_rev_enc_comparator_helper(l, use_lsic));
         
     }
-    multiple_exec_rev_enc_comparison_helper(socket_, helpers, true, 1);
+    
+    unsigned int thread_per_job = ceilf(((float)server_->threads_per_session())/n);
+    multiple_exec_rev_enc_comparison_helper(socket_, helpers, true, thread_per_job);
     
     vector<bool> results(n);
     for (size_t i = 0; i < n; i++) {
