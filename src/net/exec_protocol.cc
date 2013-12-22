@@ -463,7 +463,7 @@ void exec_tree_enc_argmax(tcp::socket &socket, Tree_EncArgmax_Owner &owner, func
 {
     size_t k = owner.elements_number();
     
-    for ( ; k >= 1 ; k/=2) {
+    while (owner.new_round_needed()) {
         vector<Rev_EncCompare_Owner*> rev_enc_owners = owner.create_current_round_rev_enc_compare_owners(comparator_creator);
 
         unsigned int thread_per_job = ceilf(((float)n_threads)/rev_enc_owners.size());
@@ -499,7 +499,7 @@ void exec_tree_enc_argmax(tcp::socket &socket, Tree_EncArgmax_Helper &helper, fu
 {
     size_t k = helper.elements_number();
     
-    for ( ; k >= 1 ; k/=2) {
+    while (helper.new_round_needed()) {
         vector<Rev_EncCompare_Helper*> rev_enc_helpers = helper.create_current_round_rev_enc_compare_helpers(comparator_creator);
         
         unsigned int thread_per_job = ceilf(((float)n_threads)/rev_enc_helpers.size());

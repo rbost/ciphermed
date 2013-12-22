@@ -152,7 +152,8 @@ void runProtocol(Tree_EncArgmax_Owner &owner, Tree_EncArgmax_Helper &helper,func
 {
     size_t k = owner.elements_number();
     
-    for (size_t round_count = 1 ; k >= 1 ; k/=2, round_count++) {
+    while (owner.new_round_needed()) {
+        
         vector<Rev_EncCompare_Owner*> rev_enc_owners = owner.create_current_round_rev_enc_compare_owners(comparator_creator_A);
         
         vector<Rev_EncCompare_Helper*> rev_enc_helpers = helper.create_current_round_rev_enc_compare_helpers(comparator_creator_B);

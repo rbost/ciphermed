@@ -23,6 +23,8 @@ public:
     
     size_t bit_length() const { return bit_length_; }
     size_t elements_number() const { return k_; }
+    
+    bool new_round_needed() const { return local_max_.size() != 1; };
 protected:
     vector<mpz_class> a_;
     map<size_t,size_t> perm_; // the permutation used to hide the real order
@@ -57,6 +59,9 @@ public:
     size_t permuted_argmax() const;
     size_t elements_number() const { return k_; }
     size_t bit_length() const { return bit_length_; }
+    
+    bool new_round_needed() const { return local_argmax_.size() != 1; };
+
 protected:
     size_t k_; // number of elements
     vector<size_t> local_argmax_;
