@@ -12,6 +12,58 @@
 
 #include <util/benchmarks.hh>
 
+static void bench_linear_lsic(Bench_Client &client, unsigned int bit_size, unsigned int iterations, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
+{
+    unsigned int n_elts;
+    cout << "===================================\n";
+    cout << "LINEAR USING LSIC\n\n";
+    
+    for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
+        cout << "\n\n\n";
+        
+        client.bench_linear_enc_argmax(n_elts, bit_size, iterations, true);
+    }
+}
+
+static void bench_linear_dgk(Bench_Client &client, unsigned int bit_size, unsigned int iterations, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
+{
+    unsigned int n_elts;
+    cout << "===================================\n";
+    cout << "LINEAR USING DGK\n\n";
+    
+    for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
+        cout << "\n\n\n";
+        
+        client.bench_linear_enc_argmax(n_elts, bit_size, iterations, false);
+    }
+}
+
+static void bench_tree_lsic(Bench_Client &client, unsigned int bit_size, unsigned int iterations, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
+{
+    unsigned int n_elts;
+    cout << "===================================\n";
+    cout << "TREE USING LSIC\n\n";
+    
+    for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
+        cout << "\n\n\n";
+        
+        client.bench_tree_enc_argmax(n_elts, bit_size, iterations, true);
+    }
+}
+
+static void bench_tree_dgk(Bench_Client &client, unsigned int bit_size, unsigned int iterations, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
+{
+    unsigned int n_elts;
+    cout << "===================================\n";
+    cout << "TREE USING DGK\n\n";
+    
+    for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
+        cout << "\n\n\n";
+        
+        client.bench_tree_enc_argmax(n_elts, bit_size, iterations, false);
+    }
+}
+
 static void bench_client_argmax(const string &hostname, unsigned int key_size, unsigned int bit_size, unsigned int iterations, unsigned int n_threads, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
 {
     assert(n_elts_min <= n_elts_max);
@@ -35,27 +87,12 @@ static void bench_client_argmax(const string &hostname, unsigned int key_size, u
         client.connect(io_service, hostname);
         
         client.exchange_keys();
-
-        unsigned int n_elts;
         
-        cout << "===================================\n";
-        cout << "USING LSIC\n\n";
+        bench_linear_lsic(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+        bench_linear_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+        bench_tree_lsic(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+        bench_tree_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
         
-        for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
-            cout << "\n\n\n";
-            
-            client.bench_linear_enc_argmax(n_elts, bit_size, iterations, true);
-        }
-
-        cout << "===================================\n";
-        cout << "USING DGK\n\n";
-        
-        for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
-            cout << "\n\n\n";
-            
-            client.bench_linear_enc_argmax(n_elts, bit_size, iterations, false);
-        }
-
         client.disconnect();
         
     }

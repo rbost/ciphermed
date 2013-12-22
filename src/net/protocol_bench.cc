@@ -178,12 +178,12 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
     size_t k = n_elements;
     size_t nbits = bit_size;
     send_test_query(Test_Request_Request_Type_TEST_LINEAR_ENC_ARGMAX, nbits, iterations, use_lsic, n_elements);
-
+    
     vector<mpz_class> v(k);
     
     double cpu_time = 0., total_time = 0.;
     Timer t;
-
+    
     for (unsigned int j = 0; j < iterations; j++) {
         for (size_t i = 0; i < k; i++) {
             mpz_urandom_len(v[i].get_mpz_t(), rand_state_, nbits);
@@ -194,11 +194,11 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
         
         
         Linear_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
-
+        
         RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
-
+        
         run_linear_enc_argmax(owner,use_lsic);
         
         cpu_time += GET_BENCHMARK_TIME;
@@ -206,6 +206,46 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
     }
     
     cout << "Owner Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+#ifdef BENCHMARK
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+#endif
+}
+
+void Bench_Client::bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic)
+{
+    size_t k = n_elements;
+    size_t nbits = bit_size;
+    send_test_query(Test_Request_Request_Type_TEST_TREE_ENC_ARGMAX, nbits, iterations, use_lsic, n_elements);
+    
+    vector<mpz_class> v(k);
+    
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+    
+    for (unsigned int j = 0; j < iterations; j++) {
+        for (size_t i = 0; i < k; i++) {
+            mpz_urandom_len(v[i].get_mpz_t(), rand_state_, nbits);
+        }
+        for (size_t i = 0; i < k; i++) {
+            v[i] = server_paillier_->encrypt(v[i]);
+        }
+        
+        
+        Tree_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
+        
+        RESET_BYTE_COUNT
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+        
+        run_tree_enc_argmax(owner,use_lsic);
+        
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
+    }
+    
+    cout << "Owner Tree Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
