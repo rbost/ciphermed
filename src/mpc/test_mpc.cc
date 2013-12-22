@@ -6,6 +6,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_argmax.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/tree_enc_argmax.hh>
 #include <mpc/change_encryption_scheme.hh>
 
 #include <crypto/gm.hh>
@@ -414,6 +415,68 @@ static void test_linear_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,
     assert(real_argmax == mpc_argmax);
 }
 
+static void test_tree_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,unsigned int lambda = 100)
+{
+    cout << "Test tree argmax over encrypted data ..." << endl;
+    cout << k << " integers of " << nbits << " bits, " << lambda << " bits of security\n";
+    ScopedTimer timer("Tree Enc. Argmax");
+    
+    vector<mpz_class> v(k);
+    
+    ScopedTimer *t, *timer_exec;
+    t = new ScopedTimer("Protocol init");
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_p = Paillier_priv_fast::keygen(randstate,1024);
+    Paillier_priv_fast pp(sk_p,randstate);
+    Paillier p(pp.pubkey(),randstate);
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+    
+    size_t real_argmax = 0;
+    for (size_t i = 0; i < k; i++) {
+        mpz_urandom_len(v[i].get_mpz_t(), randstate, nbits);
+//        v[i] = i;
+        if (v[i] > v[real_argmax]) {
+            real_argmax = i;
+        }
+    }
+    
+    for (size_t i = 0; i < k; i++) {
+        v[i] = pp.encrypt(v[i]);
+    }
+    
+    //    auto party_a_creator = [&gm,&p,nbits,&randstate](){ return new Compare_A(0,nbits,p,gm,randstate); };
+    //    auto party_b_creator = [&gm_priv,&pp,nbits](){ return new Compare_B(0,nbits,pp,gm_priv); };
+    auto party_a_creator = [&gm,nbits](){ return new LSIC_A(0,nbits,gm); };
+    auto party_b_creator = [&gm_priv,nbits](){ return new LSIC_B(0,nbits,gm_priv); };
+    
+    
+    Tree_EncArgmax_Owner client(v,nbits,p,randstate, lambda);
+    Tree_EncArgmax_Helper server(nbits,k,pp);
+    
+    delete t;
+    
+    timer_exec = new ScopedTimer("Protocol execution");
+    
+    runProtocol(client,server,party_a_creator, party_b_creator, randstate,lambda);
+    
+    delete timer_exec;
+    
+    vector<mpz_class>::iterator argmax;
+    
+    size_t mpc_argmax = client.output();
+    
+    cout << "Real argmax = " << real_argmax;
+    cout << "\nFound argmax = " << mpc_argmax << endl;
+    assert(real_argmax == mpc_argmax);
+}
+
 static ZZX makeIrredPoly(long p, long d)
 {
     assert(d >= 1);
@@ -524,7 +587,7 @@ int main(int ac, char **av)
     
 
 //    test_lsic(l);
-    test_compare(l);
+//    test_compare(l);
 
 //    cout << "\n\n";
     
@@ -535,8 +598,10 @@ int main(int ac, char **av)
 
 //    cout << "\n\n";
 //    test_enc_argmax(n,l,lambda,t);
-//    cout << "\n\n";
-//    test_linear_enc_argmax(n,l,lambda);
+    cout << "\n\n";
+    test_linear_enc_argmax(n,l,lambda);
+    cout << "\n\n";
+    test_tree_enc_argmax(n,l,lambda);
    
 //    cout << "\n\n";
 //    test_change_ES();
