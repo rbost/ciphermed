@@ -71,6 +71,7 @@ class  Bench_Server_session : public Server_session{
     void bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
     void bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
     void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
+    void bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
     void bench_change_es(unsigned int iterations);
 
 };

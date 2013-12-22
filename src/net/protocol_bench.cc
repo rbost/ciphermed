@@ -395,7 +395,14 @@ void Bench_Server_session::run_session()
                     bench_linear_enc_argmax(argmax_elements, bit_size, iterations, use_lsic);
                 }
                     break;
-                    
+
+                case Test_Request_Request_Type_TEST_TREE_ENC_ARGMAX:
+                {
+                    cout << id_ << ": Bench Linear Enc Argmax" << endl;
+                    bench_tree_enc_argmax(argmax_elements, bit_size, iterations, use_lsic);
+                }
+                    break;
+
                 case Test_Request_Request_Type_TEST_FHE:
                 {
                     cout << id_ << ": Cannot Bench FHE" << endl;
@@ -510,7 +517,7 @@ void Bench_Server_session::bench_rev_enc_compare(size_t bit_size, unsigned int i
 
 void Bench_Server_session::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic)
 {
-
+    
     double cpu_time = 0.;
     
     for (unsigned int i = 0; i < iterations; i++) {
@@ -520,6 +527,21 @@ void Bench_Server_session::bench_linear_enc_argmax(size_t n_elements, size_t bit
         cpu_time += GET_BENCHMARK_TIME;
     }
     cout << id_  << ": Helper Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
+}
+
+void Bench_Server_session::bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic)
+{
+    
+    double cpu_time = 0.;
+    
+    for (unsigned int i = 0; i < iterations; i++) {
+        Tree_EncArgmax_Helper helper(bit_size,n_elements,server_->paillier());
+        RESET_BENCHMARK_TIMER
+        run_tree_enc_argmax(helper,use_lsic);
+        cpu_time += GET_BENCHMARK_TIME;
+    }
+    cout << id_  << ": Helper Tree Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (use_lsic?"LSIC":"DGK") << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
