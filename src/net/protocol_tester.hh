@@ -45,6 +45,7 @@ class Tester_Client : public Client{
     void test_enc_compare(size_t l);
     void test_multiple_enc_compare(size_t l);
     void test_linear_enc_argmax();
+    void test_tree_enc_argmax();
     void test_fhe();
     void test_change_es();
     

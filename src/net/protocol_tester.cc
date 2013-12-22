@@ -3,6 +3,7 @@
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/tree_enc_argmax.hh>
 
 #include <net/protocol_tester.hh>
 
@@ -140,6 +141,40 @@ void Tester_Client::test_linear_enc_argmax()
     ScopedTimer *t = new ScopedTimer("Linear enc argmax");
     
     run_linear_enc_argmax(owner,use_lsic__);
+    delete t;
+    
+    size_t mpc_argmax = owner.output();
+    assert(real_argmax == mpc_argmax);
+    
+    cout << "Real argmax = " << real_argmax;
+    cout << "\nFound argmax = " << mpc_argmax << endl;
+}
+
+void Tester_Client::test_tree_enc_argmax()
+{
+    size_t k = 5;
+    size_t nbits = 100;
+    
+    vector<mpz_class> v(k);
+    size_t real_argmax = 0;
+    for (size_t i = 0; i < k; i++) {
+        mpz_urandom_len(v[i].get_mpz_t(), rand_state_, nbits);
+        //        v[i] = i;
+        if (v[i] > v[real_argmax]) {
+            real_argmax = i;
+        }
+    }
+    for (size_t i = 0; i < k; i++) {
+        v[i] = server_paillier_->encrypt(v[i]);
+    }
+    
+    send_test_query(Test_Request_Request_Type_TEST_TREE_ENC_ARGMAX);
+    
+    Tree_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
+    
+    ScopedTimer *t = new ScopedTimer("Tree enc argmax");
+    
+    run_tree_enc_argmax(owner,use_lsic__);
     delete t;
     
     size_t mpc_argmax = owner.output();
@@ -306,7 +341,15 @@ void Tester_Server_session::run_session()
                     multiple_help_enc_comparison(5, 0,use_lsic__);
                 }
                     break;
-                    
+                 
+                case Test_Request_Request_Type_TEST_TREE_ENC_ARGMAX:
+                {
+                    cout << id_ << ": Test Tree Enc Argmax" << endl;
+                    Tree_EncArgmax_Helper helper(100,5,server_->paillier());
+                    run_tree_enc_argmax(helper,use_lsic__);
+                }
+                    break;
+
                 default:
                 {
                     cout << id_ << ": Bad Request " << request_type << endl;

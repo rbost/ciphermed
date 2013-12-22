@@ -13,6 +13,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/tree_enc_argmax.hh>
 
 #include <math/util_gmp_rand.h>
 
@@ -47,6 +48,8 @@ void multiple_exec_rev_enc_comparison_helper(tcp::socket &socket, vector<Rev_Enc
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda, unsigned int n_threads = 2);
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator, unsigned int n_threads = 2);
 
+void exec_tree_enc_argmax(tcp::socket &socket, Tree_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda, unsigned int n_threads = 2);
+void exec_tree_enc_argmax(tcp::socket &socket, Tree_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator, unsigned int n_threads = 2);
 
 Ctxt exec_change_encryption_scheme_slots(tcp::socket &socket, const vector<mpz_class> &c_gm, GM &gm, const FHEPubKey& publicKey, const EncryptedArray &ea, gmp_randstate_t randstate);
 void exec_change_encryption_scheme_slots_helper(tcp::socket &socket, GM_priv &gm, const FHEPubKey &publicKey, const EncryptedArray &ea);

@@ -3,6 +3,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/tree_enc_argmax.hh>
 
 #include <net/client.hh>
 #include <net/protocol_tester.hh>
@@ -44,11 +45,12 @@ static void test_basic_client(const string &hostname)
         
 //        client.test_rev_enc_compare(64);
 //        client.test_enc_compare(64);
-//        client.test_linear_enc_argmax();
+        client.test_linear_enc_argmax();
+        client.test_tree_enc_argmax();
 //        client.test_fhe();
 //        client.test_change_es();
         
-        client.test_multiple_enc_compare(40);
+//        client.test_multiple_enc_compare(40);
         
         client.disconnect();
         

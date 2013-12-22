@@ -17,6 +17,7 @@
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/tree_enc_argmax.hh>
 
 #include <net/server.hh>
 #include <net/net_utils.hh>
@@ -485,14 +486,28 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, bool
 {
     size_t nbits = helper.bit_length();
     function<Comparison_protocol_B*()> comparator_creator;
-
+    
     if (use_lsic) {
         comparator_creator = [this,nbits](){ return new LSIC_B(0,nbits,server_->gm()); };
-
+        
     }else{
         comparator_creator = [this,nbits](){ return new Compare_B(0,nbits,server_->paillier(),server_->gm()); };
     }
     exec_linear_enc_argmax(socket_, helper, comparator_creator, server_->threads_per_session());
+}
+
+void Server_session::run_tree_enc_argmax(Tree_EncArgmax_Helper &helper, bool use_lsic)
+{
+    size_t nbits = helper.bit_length();
+    function<Comparison_protocol_B*()> comparator_creator;
+    
+    if (use_lsic) {
+        comparator_creator = [this,nbits](){ return new LSIC_B(0,nbits,server_->gm()); };
+        
+    }else{
+        comparator_creator = [this,nbits](){ return new Compare_B(0,nbits,server_->paillier(),server_->gm()); };
+    }
+    exec_tree_enc_argmax(socket_, helper, comparator_creator, server_->threads_per_session());
 }
 
 Ctxt Server_session::change_encryption_scheme(const vector<mpz_class> &c_gm)

@@ -134,6 +134,7 @@ public:
     mpz_class run_enc_comparison_helper_enc_result(EncCompare_Helper &helper);
 
     void run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, bool use_lsic);
+    void run_tree_enc_argmax(Tree_EncArgmax_Helper &helper, bool use_lsic);
     
     /* to build comparators */
     EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);

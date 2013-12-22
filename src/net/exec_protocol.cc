@@ -249,37 +249,6 @@ void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper, 
     sendMessageToSocket(socket, c_t_message);
 }
 
-void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda, unsigned int n_threads)
-{
-    size_t k = owner.elements_number();
-    for (size_t i = 0; i < (k-1); i++) {
-        Comparison_protocol_A *comparator = comparator_creator();
-        
-        Rev_EncCompare_Owner rev_enc_owner = owner.create_current_round_rev_enc_compare_owner(comparator);
-        
-        exec_rev_enc_comparison_owner(socket, rev_enc_owner, lambda, true, n_threads);
-        
-        mpz_class randomized_enc_max, randomized_value;
-        owner.next_round(randomized_enc_max, randomized_value);
-        
-        // send the randomizations to the server
-        sendIntToSocket(socket,randomized_enc_max);
-        sendIntToSocket(socket,randomized_value);
-        
-        // get the server's response
-        mpz_class new_enc_max, x, y;
-        new_enc_max = readIntFromSocket(socket);
-        x = readIntFromSocket(socket);
-        y = readIntFromSocket(socket);
-        
-        owner.update_enc_max(new_enc_max, x, y);
-    }
-    
-    mpz_class permuted_argmax;
-    permuted_argmax = readIntFromSocket(socket);
-    
-    owner.unpermuteResult(permuted_argmax.get_ui());
-}
 
 void multiple_exec_enc_comparison_owner_thread_call(shared_ptr<tcp::socket> socket, EncCompare_Owner *owner_ptr, unsigned int lambda, bool decrypt_result, unsigned int n_threads)
 {
@@ -424,6 +393,38 @@ void multiple_exec_rev_enc_comparison_helper(tcp::socket &socket, vector<Rev_Enc
 }
 
 
+void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda, unsigned int n_threads)
+{
+    size_t k = owner.elements_number();
+    for (size_t i = 0; i < (k-1); i++) {
+        Comparison_protocol_A *comparator = comparator_creator();
+        
+        Rev_EncCompare_Owner rev_enc_owner = owner.create_current_round_rev_enc_compare_owner(comparator);
+        
+        exec_rev_enc_comparison_owner(socket, rev_enc_owner, lambda, true, n_threads);
+        
+        mpz_class randomized_enc_max, randomized_value;
+        owner.next_round(randomized_enc_max, randomized_value);
+        
+        // send the randomizations to the server
+        sendIntToSocket(socket,randomized_enc_max);
+        sendIntToSocket(socket,randomized_value);
+        
+        // get the server's response
+        mpz_class new_enc_max, x, y;
+        new_enc_max = readIntFromSocket(socket);
+        x = readIntFromSocket(socket);
+        y = readIntFromSocket(socket);
+        
+        owner.update_enc_max(new_enc_max, x, y);
+    }
+    
+    mpz_class permuted_argmax;
+    permuted_argmax = readIntFromSocket(socket);
+    
+    owner.unpermuteResult(permuted_argmax.get_ui());
+}
+
 void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator, unsigned int n_threads)
 {
     size_t k = helper.elements_number();
@@ -454,6 +455,79 @@ void exec_linear_enc_argmax(tcp::socket &socket, Linear_EncArgmax_Helper &helper
     }
     
 //    cout << "Send result" << endl;
+    mpz_class permuted_argmax = helper.permuted_argmax();
+    sendIntToSocket(socket, permuted_argmax);
+}
+
+void exec_tree_enc_argmax(tcp::socket &socket, Tree_EncArgmax_Owner &owner, function<Comparison_protocol_A*()> comparator_creator, unsigned int lambda, unsigned int n_threads)
+{
+    size_t k = owner.elements_number();
+    
+    for ( ; k >= 1 ; k/=2) {
+        vector<Rev_EncCompare_Owner*> rev_enc_owners = owner.create_current_round_rev_enc_compare_owners(comparator_creator);
+
+        unsigned int thread_per_job = ceilf(((float)n_threads)/rev_enc_owners.size());
+        multiple_exec_rev_enc_comparison_owner(socket,rev_enc_owners,lambda,true,thread_per_job);
+        
+        // cleanup
+        for (size_t i = 0; i < rev_enc_owners.size(); i++) {
+            delete rev_enc_owners[i];
+        }
+        
+        vector<mpz_class> randomized_enc_max = owner.next_round();
+        
+        // send the randomized values to the helper
+        send_int_array_to_socket(socket,randomized_enc_max);
+        
+        // get the helper's response
+        vector<mpz_class> new_enc_max, x, y;
+        
+        new_enc_max = read_int_array_from_socket(socket);
+        x = read_int_array_from_socket(socket);
+        y = read_int_array_from_socket(socket);
+        
+        owner.update_local_max(new_enc_max, x, y);
+    }
+    
+    mpz_class permuted_argmax;
+    permuted_argmax = readIntFromSocket(socket);
+    
+    owner.unpermuteResult(permuted_argmax.get_ui());
+}
+
+void exec_tree_enc_argmax(tcp::socket &socket, Tree_EncArgmax_Helper &helper, function<Comparison_protocol_B*()> comparator_creator, unsigned int n_threads)
+{
+    size_t k = helper.elements_number();
+    
+    for ( ; k >= 1 ; k/=2) {
+        vector<Rev_EncCompare_Helper*> rev_enc_helpers = helper.create_current_round_rev_enc_compare_helpers(comparator_creator);
+        
+        unsigned int thread_per_job = ceilf(((float)n_threads)/rev_enc_helpers.size());
+       
+        multiple_exec_rev_enc_comparison_helper(socket,rev_enc_helpers,true,thread_per_job);
+        
+        // get result and cleanup
+        vector<bool> results (rev_enc_helpers.size());
+        for (size_t i = 0; i < rev_enc_helpers.size(); i++) {
+            results[i] = rev_enc_helpers[i]->output();
+            delete rev_enc_helpers[i];
+        }
+        
+        // read the values sent by the owner
+        vector<mpz_class> randomized_enc_max = read_int_array_from_socket(socket);
+        
+        
+        vector<mpz_class> new_enc_max, x, y;
+        
+        helper.update_argmax(results, randomized_enc_max, new_enc_max, x, y);
+
+        // and send the server's response
+        send_int_array_to_socket(socket,new_enc_max);
+        send_int_array_to_socket(socket,x);
+        send_int_array_to_socket(socket,y);
+    }
+    
+    // send the permuted result
     mpz_class permuted_argmax = helper.permuted_argmax();
     sendIntToSocket(socket, permuted_argmax);
 }

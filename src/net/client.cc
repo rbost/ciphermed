@@ -14,6 +14,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/tree_enc_argmax.hh>
 
 #include <math/util_gmp_rand.h>
 
@@ -466,6 +467,25 @@ size_t Client::run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsi
     }
 
     exec_linear_enc_argmax(socket_,owner, comparator_creator, lambda_, n_threads_);
+    
+    return owner.output();
+}
+
+size_t Client::run_tree_enc_argmax(Tree_EncArgmax_Owner &owner, bool use_lsic)
+{
+    assert(has_paillier_pk());
+    assert(has_gm_pk());
+    
+    size_t nbits = owner.bit_length();
+    function<Comparison_protocol_A*()> comparator_creator;
+    
+    if (use_lsic) {
+        comparator_creator = [this,nbits](){ return new LSIC_A(0,nbits,*server_gm_); };
+    }else{
+        comparator_creator = [this,nbits](){ return new Compare_A(0,nbits,*server_paillier_,*server_gm_,rand_state_); };
+    }
+    
+    exec_tree_enc_argmax(socket_,owner, comparator_creator, lambda_, n_threads_);
     
     return owner.output();
 }

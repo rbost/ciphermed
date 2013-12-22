@@ -3,6 +3,7 @@
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
+#include <mpc/tree_enc_argmax.hh>
 
 #include <net/client.hh>
 #include <net/protocol_bench.hh>

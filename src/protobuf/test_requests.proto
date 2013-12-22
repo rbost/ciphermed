@@ -10,6 +10,7 @@ message Test_Request
         TEST_FHE = 5;
         TEST_CHANGE_ES = 6;
         TEST_MULTIPLE_COMPARE = 7;
+        TEST_TREE_ENC_ARGMAX = 8;
 
         DISCONNECT = 10;
     }
