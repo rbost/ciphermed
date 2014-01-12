@@ -112,6 +112,7 @@ void Decision_tree_Classifier_Server_session::run_session()
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
         cout << IOBenchmark::byte_count() << " exchanged bytes" << endl;
+        cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
 
         
@@ -169,6 +170,7 @@ void Decision_tree_Classifier_Client::run()
 #ifdef BENCHMARK
     const double to_kB = 1 << 10;
     cout << "Key exchange: " <<  (IOBenchmark::byte_count()/to_kB) << " kB" << endl;
+    cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
 
     EncryptedArray ea(*fhe_context_, fhe_G_);
@@ -215,6 +217,7 @@ void Decision_tree_Classifier_Client::run()
 #ifdef BENCHMARK
     cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
     cout << (IOBenchmark::byte_count()/to_kB) << " exchanged kB" << endl;
+    cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
 
     cout << "Classification result: " << v << endl;

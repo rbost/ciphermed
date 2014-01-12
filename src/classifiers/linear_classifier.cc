@@ -44,6 +44,7 @@ void Linear_Classifier_Server_session::run_session()
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
         cout << IOBenchmark::byte_count() << " exchanged bytes" << endl;
+        cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
 
     } catch (std::exception& e) {
@@ -68,6 +69,7 @@ bool Linear_Classifier_Client::run()
 #ifdef BENCHMARK
     const double to_kB = 1 << 10;
     cout << "Key exchange: " <<  (IOBenchmark::byte_count()/to_kB) << " kB" << endl;
+    cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
     
     ScopedTimer *t;
@@ -90,6 +92,7 @@ bool Linear_Classifier_Client::run()
 #ifdef BENCHMARK
     cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
     cout << (IOBenchmark::byte_count()/to_kB) << " exchanged kB" << endl;
+    cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
     return result;
 }
@@ -152,6 +155,7 @@ void Bench_Linear_Classifier_Client::run()
 #ifdef BENCHMARK
     const double to_kB = 1 << 10;
     cout << "Key exchange: " <<  (IOBenchmark::byte_count()/to_kB) << " kB" << endl;
+    cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
     bool firstResult;
     double compare_time = 0., dot_prod_time = 0., client_time = 0.;
@@ -194,6 +198,7 @@ void Bench_Linear_Classifier_Client::run()
     cout << "Compare time: " << compare_time/nRounds_ << endl;
     cout << "Dot product time: " << dot_prod_time/nRounds_ << endl;
     cout << (IOBenchmark::byte_count()/(to_kB*nRounds_)) << " exchanged kB per round" << endl;
+    cout << IOBenchmark::interaction_count()/nRounds_ << " interactions per round" << endl;
 #endif
 
 }

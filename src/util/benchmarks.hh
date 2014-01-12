@@ -32,11 +32,13 @@ protected:
 class IOBenchmark {
 private:
     static unsigned long byte_count__;
+    static unsigned long interaction_count__;
     
 public:
     static void reset()
     {
         byte_count__ = 0;
+        interaction_count__ = 0;
     }
     
     static void exchanged_bytes(unsigned long n)
@@ -48,6 +50,16 @@ public:
     {
         return byte_count__;
     }
+    
+    static void interaction()
+    {
+        interaction_count__++;
+    }
+    
+    static unsigned long interaction_count()
+    {
+        return interaction_count__;
+    }
 };
 
 #define BENCHMARK_INIT BenchTimer::create();
@@ -58,7 +70,7 @@ public:
 
 #define RESET_BYTE_COUNT IOBenchmark::reset();
 #define EXCHANGED_BYTES(n) IOBenchmark::exchanged_bytes(n);
-
+#define INTERACTION IOBenchmark::interaction();
 #else
 
 #define PAUSE_BENCHMARK
@@ -67,5 +79,6 @@ public:
 #define RESET_BENCHMARK_TIMER
 #define RESET_BYTE_COUNT
 #define EXCHANGED_BYTES(n)
+#define INTERACTION
 
 #endif

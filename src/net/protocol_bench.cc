@@ -60,7 +60,8 @@ void Bench_Client::bench_lsic(size_t bit_size, unsigned int iterations)
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
-    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
 #endif
 }
 
@@ -98,7 +99,8 @@ void Bench_Client::bench_compare(size_t bit_size, unsigned int iterations)
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
-    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
 #endif
 }
 
@@ -134,7 +136,8 @@ void Bench_Client::bench_enc_compare(size_t bit_size, unsigned int iterations, b
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
-    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
 #endif
 }
 
@@ -168,7 +171,8 @@ void Bench_Client::bench_rev_enc_compare(size_t bit_size, unsigned int iteration
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
-    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
 #endif
 }
 
@@ -209,7 +213,8 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
-    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
 #endif
 }
 
@@ -249,7 +254,8 @@ void Bench_Client::bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsi
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
-    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
 #endif
 }
 
@@ -289,7 +295,8 @@ void Bench_Client::bench_change_es(unsigned int iterations)
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
-    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration\n\n" << endl;
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
 #endif
 }
 
