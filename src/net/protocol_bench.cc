@@ -42,10 +42,11 @@ void Bench_Client::bench_lsic(size_t bit_size, unsigned int iterations)
     Timer t;
 
     
+    RESET_BYTE_COUNT
+
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
         
-        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
 
@@ -81,10 +82,11 @@ void Bench_Client::bench_compare(size_t bit_size, unsigned int iterations)
     double cpu_time = 0., total_time = 0.;
     Timer t;
 
+    RESET_BYTE_COUNT
+
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
         
-        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
 
@@ -114,6 +116,8 @@ void Bench_Client::bench_enc_compare(size_t bit_size, unsigned int iterations, b
     double cpu_time = 0., total_time = 0.;
     Timer t;
     
+    RESET_BYTE_COUNT
+
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
         mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
@@ -122,7 +126,6 @@ void Bench_Client::bench_enc_compare(size_t bit_size, unsigned int iterations, b
         c_a = server_paillier_->encrypt(a);
         c_b = server_paillier_->encrypt(b);
         
-        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
 
@@ -150,6 +153,7 @@ void Bench_Client::bench_rev_enc_compare(size_t bit_size, unsigned int iteration
     double cpu_time = 0., total_time = 0.;
     Timer t;
 
+    RESET_BYTE_COUNT
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
         mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
@@ -158,7 +162,6 @@ void Bench_Client::bench_rev_enc_compare(size_t bit_size, unsigned int iteration
         c_a = server_paillier_->encrypt(a);
         c_b = server_paillier_->encrypt(b);
 
-        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
 
@@ -188,6 +191,8 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
     double cpu_time = 0., total_time = 0.;
     Timer t;
     
+    RESET_BYTE_COUNT
+
     for (unsigned int j = 0; j < iterations; j++) {
         for (size_t i = 0; i < k; i++) {
             mpz_urandom_len(v[i].get_mpz_t(), rand_state_, nbits);
@@ -199,7 +204,6 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
         
         Linear_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
         
-        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
         
@@ -229,6 +233,8 @@ void Bench_Client::bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsi
     double cpu_time = 0., total_time = 0.;
     Timer t;
     
+    RESET_BYTE_COUNT
+
     for (unsigned int j = 0; j < iterations; j++) {
         for (size_t i = 0; i < k; i++) {
             mpz_urandom_len(v[i].get_mpz_t(), rand_state_, nbits);
@@ -240,7 +246,6 @@ void Bench_Client::bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsi
         
         Tree_EncArgmax_Owner owner(v,nbits,*server_paillier_,rand_state_, lambda_);
         
-        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
         
@@ -274,6 +279,8 @@ void Bench_Client::bench_change_es(unsigned int iterations)
     double cpu_time = 0., total_time = 0.;
     Timer t;
     
+    RESET_BYTE_COUNT
+
     for (unsigned int j = 0; j < iterations; j++) {
 
         for (size_t i = 0; i < c_gm.size(); i++) {
@@ -281,7 +288,6 @@ void Bench_Client::bench_change_es(unsigned int iterations)
             c_gm[i] = server_gm_->encrypt(bits_query[i]);
         }
         
-        RESET_BYTE_COUNT
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
 
