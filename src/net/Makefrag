@@ -29,9 +29,9 @@ $(OBJDIR)/net/server: $(OBJDIR)/net/test_server.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJ
        -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 
-all:	$(OBJDIR)/net/bench_client
+all:	$(OBJDIR)/net/bench_client_compare
 
-$(OBJDIR)/net/bench_client: $(OBJDIR)/net/bench_client.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+$(OBJDIR)/net/bench_client_compare: $(OBJDIR)/net/bench_client_compare.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil
@@ -39,6 +39,13 @@ $(OBJDIR)/net/bench_client: $(OBJDIR)/net/bench_client.o $(BENCH_OBJ) $(PROTO_OB
 all:	$(OBJDIR)/net/bench_client_argmax
 
 $(OBJDIR)/net/bench_client_argmax: $(OBJDIR)/net/bench_client_argmax.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+
+all:	$(OBJDIR)/net/bench_client_change
+
+$(OBJDIR)/net/bench_client_change: $(OBJDIR)/net/bench_client_change.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil

@@ -44,12 +44,7 @@ static void bench_client(const string &hostname, unsigned int key_size, unsigned
         
         client.bench_rev_enc_compare(bit_size, iterations, true);
         client.bench_rev_enc_compare(bit_size, iterations, false);
-        
-//        client.bench_linear_enc_argmax(5, bit_size, iterations, true);
-//        client.bench_linear_enc_argmax(5, bit_size, iterations, false);
-        
-        client.bench_change_es(iterations);
-        
+                
         client.disconnect();
         
     }
