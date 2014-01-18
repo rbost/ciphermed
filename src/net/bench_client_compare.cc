@@ -27,7 +27,7 @@ static void bench_client(const string &hostname, unsigned int key_size, unsigned
         gmp_randinit_default(randstate);
         gmp_randseed_ui(randstate,time(NULL));
         
-        Bench_Client client(io_service, randstate,key_size,bit_size);
+        Bench_Client client(io_service, randstate,key_size,100);
         client.set_n_threads(n_threads);
         
         client.connect(io_service, hostname);
