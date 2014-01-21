@@ -18,6 +18,12 @@ Protobuf::BigInt convert_to_message(const mpz_class &v);
 std::vector<mpz_class> convert_from_message(const Protobuf::BigIntArray &m);
 Protobuf::BigIntArray convert_to_message(const std::vector<mpz_class> &v);
 
+std::vector< std::vector <mpz_class> > convert_from_message(const Protobuf::BigIntMatrix &m);
+Protobuf::BigIntMatrix convert_to_message(const std::vector< std::vector <mpz_class> > &v);
+
+std::vector< std::vector< std::vector <mpz_class> >> convert_from_message(const Protobuf::BigIntMatrix_Collection &m);
+Protobuf::BigIntMatrix_Collection convert_to_message(const std::vector< std::vector< std::vector <mpz_class> >> &v);
+
 /* LSIC Packets */
 LSIC_Packet_A convert_from_message(const Protobuf::LSIC_A_Message &m);
 LSIC_Packet_B convert_from_message(const Protobuf::LSIC_B_Message &m);

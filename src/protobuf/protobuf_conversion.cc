@@ -59,6 +59,54 @@ Protobuf::BigIntArray convert_to_message(const std::vector<mpz_class> &v)
     return m;
 }
 
+std::vector< std::vector <mpz_class> > convert_from_message(const Protobuf::BigIntMatrix &m)
+{
+    size_t n = m.lines_size();
+    std::vector< std::vector <mpz_class> > v(n);
+    
+    for (size_t i = 0; i < n; i++) {
+        v[i] = convert_from_message(m.lines(i));
+    }
+    
+    return v;
+}
+
+Protobuf::BigIntMatrix convert_to_message(const std::vector< std::vector <mpz_class> > &v)
+{
+    Protobuf::BigIntMatrix m;
+    
+    for (size_t i = 0; i < v.size(); i++) {
+        Protobuf::BigIntArray *bia_ptr = m.add_lines();
+        *bia_ptr = convert_to_message(v[i]);
+    }
+    
+    return m;
+}
+
+std::vector< std::vector< std::vector <mpz_class> > > convert_from_message(const Protobuf::BigIntMatrix_Collection &m)
+{
+    size_t n = m.matrices_size();
+    std::vector< std::vector< std::vector <mpz_class> >> v(n);
+    
+    for (size_t i = 0; i < n; i++) {
+        v[i] = convert_from_message(m.matrices(i));
+    }
+    
+    return v;
+}
+
+Protobuf::BigIntMatrix_Collection convert_to_message(const std::vector< std::vector< std::vector <mpz_class> >> &v)
+{
+    Protobuf::BigIntMatrix_Collection col;
+    
+    for (size_t i = 0; i < v.size(); i++) {
+        Protobuf::BigIntMatrix *bim_ptr = col.add_matrices();
+        *bim_ptr = convert_to_message(v[i]);
+    }
+    
+    return col;
+}
+
 LSIC_Packet_A convert_from_message(const Protobuf::LSIC_A_Message &m)
 {
     LSIC_Packet_A p;

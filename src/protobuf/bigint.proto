@@ -7,3 +7,11 @@ message BigInt {
 message BigIntArray {
     repeated BigInt values = 1;
 }
+
+message BigIntMatrix {
+    repeated BigIntArray lines = 1;
+}
+
+message BigIntMatrix_Collection {
+    repeated BigIntMatrix matrices = 1;
+}
