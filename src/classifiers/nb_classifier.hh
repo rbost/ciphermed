@@ -54,12 +54,14 @@ class  Naive_Bayes_Classifier_Server_session : public Server_session{
 
 class Naive_Bayes_Classifier_Client : public Client{
 public:
-    Naive_Bayes_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size);
+    Naive_Bayes_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<unsigned int> &features_value);
 
     bool run();
-    
+    vector<mpz_class> cat_probabilities() const;
+
 protected:
     size_t bit_size_;
-    vector<mpz_class> values_;
-    vector<mpz_class> model_;
+    const vector<unsigned int> features_value_;
+    vector<mpz_class> enc_prior_vec_;
+    vector<vector<vector<mpz_class>>> enc_conditionals_vec_;
 };

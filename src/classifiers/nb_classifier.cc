@@ -10,6 +10,7 @@
 #include <net/message_io.hh>
 #include <util/util.hh>
 
+static const bool use_lsic__ = true;
 
 Naive_Bayes_Classifier_Server::Naive_Bayes_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<vector<vector<double>>> &conditionals_vec, const vector<double> &prior_vec)
 : Server(state, Naive_Bayes_Classifier_Server::key_deps_descriptor(), keysize, lambda)
@@ -110,7 +111,7 @@ void Naive_Bayes_Classifier_Server_session::run_session()
         
         // help for the encrypted argmax
         Tree_EncArgmax_Helper helper(54,nb_server_->categories_count(),server_->paillier());
-        run_tree_enc_argmax(helper,false);
+        run_tree_enc_argmax(helper,use_lsic__);
         
 
 #ifdef BENCHMARK
@@ -127,8 +128,8 @@ void Naive_Bayes_Classifier_Server_session::run_session()
 }
 
 
-Naive_Bayes_Classifier_Client::Naive_Bayes_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<mpz_class> &vals, size_t bit_size)
-: Client(io_service,state,Naive_Bayes_Classifier_Server::key_deps_descriptor(),keysize,lambda), bit_size_(bit_size),values_(vals)
+Naive_Bayes_Classifier_Client::Naive_Bayes_Classifier_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<unsigned int> &features_value)
+: Client(io_service,state,Naive_Bayes_Classifier_Server::key_deps_descriptor(),keysize,lambda), features_value_(features_value)
 {
     
 }
@@ -147,24 +148,50 @@ bool Naive_Bayes_Classifier_Client::run()
     ScopedTimer *t;
     RESET_BYTE_COUNT
     RESET_BENCHMARK_TIMER
-    // prepare data
-//    vector <mpz_class> x = values_;
-//    x.push_back(-1);
     
-//    t = new ScopedTimer("Client: Compute dot product");
-//    // compute the dot product
-//    mpz_class v = compute_dot_product(x);
-//    mpz_class w = 1; // encryption of 0
-//    delete t;
-//
-//    t = new ScopedTimer("Client: Compare enc data");
-//    // build the comparator over encrypted data
-//    bool result = enc_comparison(v,w,bit_size_,false);
-//    delete t;
+    // get the prior and the conditionnal probabilities
+    t = new ScopedTimer("Model transmission");
+    enc_prior_vec_ = convert_from_message(readMessageFromSocket<Protobuf::BigIntArray>(socket_));
+    enc_conditionals_vec_ = convert_from_message(readMessageFromSocket<Protobuf::BigIntMatrix_Collection>(socket_));
+    delete t;
+    
+    t = new ScopedTimer("Prob computation");
+    
+    vector<mpz_class> cat_prob = cat_probabilities();
+
+    delete t;
+    
+    t = new ScopedTimer("Argmax");
+    
+    Tree_EncArgmax_Owner owner(cat_prob,54,*server_paillier_,rand_state_, lambda_);
+    run_tree_enc_argmax(owner,use_lsic__);
+
+    delete t;
+    
 #ifdef BENCHMARK
     cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
     cout << (IOBenchmark::byte_count()/to_kB) << " exchanged kB" << endl;
     cout << IOBenchmark::interaction_count() << " interactions" << endl;
 #endif
     return true;
+}
+
+vector<mpz_class> Naive_Bayes_Classifier_Client::cat_probabilities() const
+{
+    // for each category, compute the probabily to be in this category given the features values
+    
+    vector<mpz_class> cat_prob(enc_prior_vec_);
+    
+    for (size_t i = 0; i < cat_prob.size(); i++) {
+        // loop over the categories
+        for (size_t j = 0; j < enc_conditionals_vec_[0].size(); j++) {
+            // loop over features
+            
+            unsigned int val = features_value_[j];
+            // cat_prob[i] = cat_prob[i] + enc_prior_vec_[i][j][val]
+            cat_prob[i] = server_paillier_->add(cat_prob[i],enc_conditionals_vec_[i][j][val]);
+        }
+    }
+    
+    return cat_prob;
 }

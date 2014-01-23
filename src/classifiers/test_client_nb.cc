@@ -52,10 +52,10 @@ static void test_nb_classifier_client(const string &hostname)
         gmp_randseed_ui(randstate,time(NULL));
 
 
-        vector<mpz_class> query;
+        vector<unsigned int> query;
         unsigned int n_nodes;
         
-        Naive_Bayes_Classifier_Client client(io_service, randstate,1024,100, query,64);
+        Naive_Bayes_Classifier_Client client(io_service, randstate,1024,100, query);
         
         client.connect(io_service, hostname);
         
