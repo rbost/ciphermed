@@ -20,6 +20,7 @@ class  Naive_Bayes_Classifier_Server : public Server{
     Server_session* create_new_server_session(tcp::socket &socket);
     
     size_t categories_count() const { return enc_conditionals_vec_.size(); }
+    size_t features_count() const { return enc_conditionals_vec_[0].size(); }
     
     const vector<mpz_class>& enc_prior_prob() const { return enc_prior_vec_; }
     const vector<vector<vector<mpz_class>>>& enc_cond_prob() const { return enc_conditionals_vec_; }
@@ -27,7 +28,7 @@ class  Naive_Bayes_Classifier_Server : public Server{
     
     static Key_dependencies_descriptor key_deps_descriptor()
     {
-        return Key_dependencies_descriptor(false,true,false,true,true,false);
+        return Key_dependencies_descriptor(true,true,false,false,false,false);
     }
     
     protected:
@@ -58,10 +59,12 @@ public:
 
     bool run();
     vector<mpz_class> cat_probabilities() const;
+    void generate_random_feature_values();
 
 protected:
     size_t bit_size_;
-    const vector<unsigned int> features_value_;
+    
+    vector<unsigned int> features_value_;
     vector<mpz_class> enc_prior_vec_;
     vector<vector<vector<mpz_class>>> enc_conditionals_vec_;
 };

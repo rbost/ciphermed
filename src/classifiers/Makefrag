@@ -53,7 +53,7 @@ all:	$(OBJDIR)/classifiers/server_nb
 
 $(OBJDIR)/classifiers/server_nb: $(OBJDIR)/classifiers/test_server_nb.o $(NB_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
-	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) -ljsoncpp\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 

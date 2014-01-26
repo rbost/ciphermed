@@ -27,6 +27,9 @@ Naive_Bayes_Classifier_Server::Naive_Bayes_Classifier_Server(gmp_randstate_t sta
 
         }
     }
+    
+    prepare_model(conditionals_vec,prior_vec);
+    encrypt_model();
 }
 
 void Naive_Bayes_Classifier_Server::prepare_model(const vector<vector<vector<double>>> &conditionals_vec, const vector<double> &prior_vec)
@@ -110,10 +113,17 @@ void Naive_Bayes_Classifier_Server_session::run_session()
         sendMessageToSocket(socket_, cond_prob_message);
         
         // help for the encrypted argmax
-        Tree_EncArgmax_Helper helper(54,nb_server_->categories_count(),server_->paillier());
-        run_tree_enc_argmax(helper,use_lsic__);
+        unsigned int cat_count = nb_server_->categories_count();
+        cout << "Categories count " << cat_count << endl;
         
-
+        unsigned int features_count = nb_server_->features_count();
+        
+//        Tree_EncArgmax_Helper helper(54+cat_count,cat_count,server_->paillier());
+//        run_tree_enc_argmax(helper,use_lsic__);
+        
+        Linear_EncArgmax_Helper helper(54+features_count,cat_count,server_->paillier());
+        run_linear_enc_argmax(helper,use_lsic__);
+        
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
         cout << IOBenchmark::byte_count() << " exchanged bytes" << endl;
@@ -155,16 +165,26 @@ bool Naive_Bayes_Classifier_Client::run()
     enc_conditionals_vec_ = convert_from_message(readMessageFromSocket<Protobuf::BigIntMatrix_Collection>(socket_));
     delete t;
     
+    if (features_value_.size() == 0) {
+        generate_random_feature_values();
+    }
+    
     t = new ScopedTimer("Prob computation");
     
     vector<mpz_class> cat_prob = cat_probabilities();
 
     delete t;
     
+    unsigned int features_count = enc_conditionals_vec_[0].size();
+
+    unsigned int cat_count = cat_prob.size();
     t = new ScopedTimer("Argmax");
     
-    Tree_EncArgmax_Owner owner(cat_prob,54,*server_paillier_,rand_state_, lambda_);
-    run_tree_enc_argmax(owner,use_lsic__);
+//    Tree_EncArgmax_Owner owner(cat_prob,54+cat_count,*server_paillier_,rand_state_, lambda_);
+//    run_tree_enc_argmax(owner,use_lsic__);
+
+    Linear_EncArgmax_Owner owner(cat_prob,54+features_count,*server_paillier_,rand_state_, lambda_);
+    run_linear_enc_argmax(owner,use_lsic__);
 
     delete t;
     
@@ -176,6 +196,18 @@ bool Naive_Bayes_Classifier_Client::run()
     return true;
 }
 
+void Naive_Bayes_Classifier_Client::generate_random_feature_values()
+{
+    assert(features_value_.size() == 0);
+    
+    unsigned int features_count = enc_conditionals_vec_[0].size();
+    features_value_ = vector<unsigned int>(features_count);
+    
+    for (size_t i = 0; i < features_count; i++) {
+        features_value_[i] = rand() % enc_conditionals_vec_[0][i].size();
+    }
+}
+
 vector<mpz_class> Naive_Bayes_Classifier_Client::cat_probabilities() const
 {
     // for each category, compute the probabily to be in this category given the features values
@@ -184,6 +216,7 @@ vector<mpz_class> Naive_Bayes_Classifier_Client::cat_probabilities() const
     
     for (size_t i = 0; i < cat_prob.size(); i++) {
         // loop over the categories
+        
         for (size_t j = 0; j < enc_conditionals_vec_[0].size(); j++) {
             // loop over features
             
