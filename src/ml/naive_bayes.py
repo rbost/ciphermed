@@ -6,7 +6,7 @@ class discrete_nb_clf(object):
     def __init__(self, alpha=0.01):
         self.alpha_ = alpha
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, feature_categories=None):
         # not idiomatic at all-- my bad
 
         self.n_classes_ = int(Y.max()) + 1
@@ -15,10 +15,13 @@ class discrete_nb_clf(object):
             self.prior_[y] += 1
 
         self.n_features_ = X.shape[1]
-        feature_categories = X.max(axis=0) + 1
+        if feature_categories is None:
+            feature_categories = X.max(axis=0) + 1
+        else:
+            feature_categories = np.vstack((X.max(axis=0) + 1, feature_categories)).max(axis=0)
         def mk(sz):
             r = np.zeros(sz)
-            r.fill(self.alpha_)
+            r.fill(self.alpha_) # laplace smooth this shit
             return r
         self.posterior_ = [
             [mk(feature_categories[i]) for i in xrange(self.n_features_)]
@@ -39,6 +42,10 @@ class discrete_nb_clf(object):
     def predict(self, X):
         Y = np.zeros(X.shape[0])
         for idx, x in enumerate(X):
+            #for i, f in enumerate(x):
+            #    for y in xrange(self.n_classes_):
+            #        assert len(self.posterior_[y]) >= len(x)
+            #        assert f < len(self.posterior_[y][i])
             xs = [
               (self.prior_[y] + np.sum(self.posterior_[y][i][f] for i, f in enumerate(x)))
               for y in xrange(self.n_classes_)]
