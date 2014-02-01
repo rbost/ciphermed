@@ -118,11 +118,11 @@ void Naive_Bayes_Classifier_Server_session::run_session()
         
         unsigned int features_count = nb_server_->features_count();
         
-//        Tree_EncArgmax_Helper helper(54+cat_count,cat_count,server_->paillier());
-//        run_tree_enc_argmax(helper,use_lsic__);
+        Tree_EncArgmax_Helper helper(54+cat_count,cat_count,server_->paillier());
+        run_tree_enc_argmax(helper,use_lsic__);
         
-        Linear_EncArgmax_Helper helper(54+features_count,cat_count,server_->paillier());
-        run_linear_enc_argmax(helper,use_lsic__);
+//        Linear_EncArgmax_Helper helper(54+features_count,cat_count,server_->paillier());
+//        run_linear_enc_argmax(helper,use_lsic__);
         
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
@@ -180,11 +180,11 @@ bool Naive_Bayes_Classifier_Client::run()
     unsigned int cat_count = cat_prob.size();
     t = new ScopedTimer("Argmax");
     
-//    Tree_EncArgmax_Owner owner(cat_prob,54+cat_count,*server_paillier_,rand_state_, lambda_);
-//    run_tree_enc_argmax(owner,use_lsic__);
+    Tree_EncArgmax_Owner owner(cat_prob,54+cat_count,*server_paillier_,rand_state_, lambda_);
+    run_tree_enc_argmax(owner,use_lsic__);
 
-    Linear_EncArgmax_Owner owner(cat_prob,54+features_count,*server_paillier_,rand_state_, lambda_);
-    run_linear_enc_argmax(owner,use_lsic__);
+//    Linear_EncArgmax_Owner owner(cat_prob,54+features_count,*server_paillier_,rand_state_, lambda_);
+//    run_linear_enc_argmax(owner,use_lsic__);
 
     delete t;
     
