@@ -477,6 +477,7 @@ static void test_tree_enc_argmax(unsigned int k = 5, unsigned int nbits = 256,un
     assert(real_argmax == mpc_argmax);
 }
 
+/*
 static ZZX makeIrredPoly(long p, long d)
 {
     assert(d >= 1);
@@ -488,6 +489,7 @@ static ZZX makeIrredPoly(long p, long d)
     zz_p::init(p);
     return to_ZZX(BuildIrred_zz_pX(d));
 }
+*/
 
 static void test_change_ES()
 {    

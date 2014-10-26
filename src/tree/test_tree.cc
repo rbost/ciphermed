@@ -67,17 +67,6 @@ static void test_poly()
 
 }
 
-static ZZX makeIrredPoly(long p, long d)
-{
-    assert(d >= 1);
-    assert(ProbPrime(p));
-    
-    if (d == 1) return ZZX(1, 1); // the monomial X
-    
-    zz_pBak bak; bak.save();
-    zz_p::init(p);
-    return to_ZZX(BuildIrred_zz_pX(d));
-}
 
 struct configuration {
     long p;
@@ -174,10 +163,10 @@ static void fun_with_fhe()
 //    p0.mul(p2); c0.multiplyBy(c2);
     
     cerr << "Levels, KeyId :\n";
-    cerr << "c0 -> " << c0.getLevel() << " , " << c0.getKeyID() << "\n";
-    cerr << "c1 -> " << c1.getLevel() << " , " << c1.getKeyID() << "\n";
-    cerr << "c2 -> " << c2.getLevel() << " , " << c2.getKeyID() << "\n";
-    cerr << "c3 -> " << c3.getLevel() << " , " << c3.getKeyID() << "\n";
+    cerr << "c0 -> " << c0.findBaseLevel() << " , " << c0.getKeyID() << "\n";
+    cerr << "c1 -> " << c1.findBaseLevel() << " , " << c1.getKeyID() << "\n";
+    cerr << "c2 -> " << c2.findBaseLevel() << " , " << c2.getKeyID() << "\n";
+    cerr << "c3 -> " << c3.findBaseLevel() << " , " << c3.getKeyID() << "\n";
     
     PlaintextArray pp0(ea);
     PlaintextArray pp1(ea);
@@ -317,7 +306,7 @@ static void test_selector(size_t n_levels = 3, bool useShallowCircuit = true)
     
     cerr << endl;
     
-    cerr << "Level of final cyphertext: " << c_r.getLevel() << endl;
+    cerr << "Level of final cyphertext: " << c_r.findBaseLevel() << endl;
     vector<long> res_bits;
     
     timer = new ScopedTimer("Decrypt");
@@ -406,7 +395,7 @@ static void test_selector_tree(size_t n_levels = 3)
     
     cerr << endl;
     
-    cerr << "Level of final cyphertext: " << c_r.getLevel() << endl;
+    cerr << "Level of final cyphertext: " << c_r.findBaseLevel() << endl;
     vector<long> res_bits;
     
     timer = new ScopedTimer("Decrypt");
