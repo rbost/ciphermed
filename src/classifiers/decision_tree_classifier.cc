@@ -205,10 +205,10 @@ void Decision_tree_Classifier_Client::run()
     delete t;
     
     // we get the result and decrypt it
-    t = new ScopedTimer("Client: Decrypt result");
     Ctxt c_r = read_fhe_ctxt_from_socket(socket_,*fhe_sk_);
     // decrypt and test
     vector<long> res_bits;
+    t = new ScopedTimer("Client: Decrypt result");
     ea.decrypt(c_r, *fhe_sk_, res_bits);
 
     long v = bitDecomp_inv(res_bits);
