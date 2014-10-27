@@ -273,3 +273,57 @@ Protobuf::FHE_Context convert_to_message(const FHEcontext &c)
     
     return m;
 }
+
+
+block* read_garbled_table(const Protobuf::GarbledTable &m_gt)
+{
+    block* gt = (block *)malloc(10*sizeof(block));
+    
+    union{
+        __m128i v;
+        uint8_t a[sizeof(__m128i)];
+    }u;
+    
+    std::string str = m_gt.data_stream();
+    
+    size_t k = 0;
+    
+    for (size_t i = 0; i<10; i++) {
+        for (size_t j = 0; j < sizeof(__m128i); j++) {
+            u.a[j] = str[k];
+            k++;
+        }
+        gt[i] = u.v;
+    }
+    
+    return gt;
+}
+
+Protobuf::GarbledTable write_garbled_table(const block* gt)
+{
+    char *data = (char *)malloc(10*sizeof(block));
+//    std::string data;
+    
+    union{
+        __m128i v;
+        uint8_t a[sizeof(__m128i)];
+    }u;
+
+    size_t k = 0;
+
+    for (size_t i = 0; i<10; i++) {
+        u.v = gt[i];
+        for (size_t j = 0; j < sizeof(__m128i); j++) {
+            data[k] = u.a[j];
+            k++;
+        }
+    }
+    
+    Protobuf::GarbledTable m_gt;
+    
+    m_gt.set_data_stream(data,10*sizeof(block));
+
+    //free(data);
+    
+    return m_gt;
+}

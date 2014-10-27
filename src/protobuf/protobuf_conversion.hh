@@ -53,3 +53,14 @@ Protobuf::FHE_Ctxt convert_to_message(const Ctxt &c);
 
 FHEcontext* create_from_message(const Protobuf::FHE_Context &m);
 Protobuf::FHE_Context convert_to_message(const FHEcontext &c);
+
+/* Import and export garbled tables */
+
+#include <xmmintrin.h>
+#include <emmintrin.h>
+#include <smmintrin.h>
+
+typedef __m128i block;
+
+block* read_garbled_table(const Protobuf::GarbledTable &m_gt);
+Protobuf::GarbledTable write_garbled_table(const block* gt);

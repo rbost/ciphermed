@@ -1,0 +1,10 @@
+package Protobuf;
+
+message block {
+    required bytes lsb = 1;
+    required bytes msb = 2;
+}
+
+message GarbledTable {
+    required bytes data_stream = 1;
+}

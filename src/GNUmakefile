@@ -6,6 +6,11 @@ NTLINCPATH ?= $(HOME)/ntl-6.0.0-bin/include
 GF2XLIBPATH ?= $(HOME)/gf2x-1.1-bin/lib
 JSONCPP ?= /usr/include/jsoncpp
 
+JUST_GARBLE ?= $(HOME)/justGarble
+JG_LIB ?= $(JUST_GARBLE)/lib
+JG_INCLUDE ?= $(JUST_GARBLE)/include
+
+
 L_BOOST_SYSTEM ?= -lboost_system
 L_BOOST_THREAD ?= -lboost_thread
 
@@ -26,12 +31,13 @@ OBJDIR	 := obj
 TOP	 := $(shell echo $${PWD-`pwd`})
 CXX	 ?= g++
 CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
-	    -Wall -Wpointer-arith -Wendif-labels -Wformat=2  \
+        -maes -msse4 \
+        -Wall -Wpointer-arith -Wendif-labels -Wformat=2  \
 	    -Wextra -Wwrite-strings -Wno-unused-parameter \
 	    -Wno-ignored-qualifiers \
 	    -Wmissing-declarations -Woverloaded-virtual  \
 	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x -I$(TOP) \
-	    -fno-omit-frame-pointer -I$(SHAIFHEPATH) -I$(NTLINCPATH) -I$(JSONCPP)
+	    -fno-omit-frame-pointer -I$(SHAIFHEPATH) -I$(NTLINCPATH) -I$(JSONCPP) -I$(JG_INCLUDE)
 LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
 LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)
 

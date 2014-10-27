@@ -6,3 +6,4 @@
 #include "keys.pb.h"
 #include "lsic_messages.pb.h"
 #include "fhe.pb.h"
+#include "garbled.pb.h"
