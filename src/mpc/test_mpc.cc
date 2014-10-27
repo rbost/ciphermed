@@ -2,6 +2,7 @@
 #include <vector>
 #include <mpc/millionaire.hh>
 #include <mpc/lsic.hh>
+#include <mpc/garbled_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_argmax.hh>
@@ -555,6 +556,41 @@ static void test_change_ES()
     }
 }
 
+static void test_gc(unsigned int nbits = 256)
+{
+    cout << "Test compare with Garbled Circuits ..." << endl;
+    ScopedTimer timer("Compare");
+    
+    ScopedTimer *t;
+    t = new ScopedTimer("Compare init");
+    
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+    
+    mpz_class a, b;
+    mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
+    mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
+    
+    //    cout << "a = " << a.get_str(2) << endl;
+    //    cout << "b = " << b.get_str(2) << endl;
+    
+    GC_Compare_A party_a(a, nbits, gm, randstate);
+    GC_Compare_B party_b(b, nbits, gm_priv);
+    
+    delete t;
+    
+    t = new ScopedTimer("Compare execution");
+    
+    runProtocol(party_a, party_b,randstate);
+
+}
+
 static void usage(char *prog)
 {
     cerr << "Usage: "<<prog<<" [ optional parameters ]...\n";
@@ -589,9 +625,9 @@ int main(int ac, char **av)
     
 
 //    test_lsic(l);
-//    test_compare(l);
-
-//    cout << "\n\n";
+    test_compare(l);
+//    test_gc(l);
+    cout << "\n\n";
     
     
 //    test_enc_compare(l,lambda);
@@ -600,11 +636,11 @@ int main(int ac, char **av)
 
 //    cout << "\n\n";
 //    test_enc_argmax(n,l,lambda,t);
-    cout << "\n\n";
-    test_linear_enc_argmax(n,l,lambda);
-    cout << "\n\n";
-    test_tree_enc_argmax(n,l,lambda);
-   
+//    cout << "\n\n";
+//    test_linear_enc_argmax(n,l,lambda);
+//    cout << "\n\n";
+//    test_tree_enc_argmax(n,l,lambda);
+//   
 //    cout << "\n\n";
 //    test_change_ES();
 	return 0;
