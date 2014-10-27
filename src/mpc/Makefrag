@@ -1,13 +1,12 @@
 OBJDIRS     += mpc
-MPCSRC  := millionaire.cc comparison_protocol.cc lsic.cc svm_classifier.cc private_comparison.cc garbled_comparison.cc enc_comparison.cc rev_enc_comparison.cc enc_argmax.cc linear_enc_argmax.cc tree_enc_argmax.cc change_encryption_scheme.cc
+MPCSRC  := millionaire.cc comparison_protocol.cc  lsic.cc svm_classifier.cc private_comparison.cc garbled_comparison.cc enc_comparison.cc rev_enc_comparison.cc enc_argmax.cc linear_enc_argmax.cc tree_enc_argmax.cc change_encryption_scheme.cc
 
 all:    $(OBJDIR)/libmpc.so
 $(OBJDIR)/libmpc.so: $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC)) $(OBJDIR)/libcrypto.so
-	$(CXX) -shared -o $@ $^ $(SHAIFHEPATH)/fhe.a $(JG_LIB)/justGarble.a $(LDFLAGS) -lgmp -lgmpxx -lcrypto
+	$(CXX) -shared -o $@ $^ $(SHAIFHEPATH)/fhe.a $(JG_LIB)/justGarble.a -Wl,--no-as-needed $(LDFLAGS) -lgmp -lgmpxx -lcrypto
 
 all:	$(OBJDIR)/mpc/test_mpc 
 $(OBJDIR)/mpc/test_mpc: $(OBJDIR)/mpc/test_mpc.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so
-	$(CXX) $< $(SHAIFHEPATH)/fhe.a $(JG_LIB)/justGarble.a $(LDFLAGS) -lmpc -lcrypto\
-	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x\
-	   -o $@
+	$(CXX) $< -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto\
+	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x 
 # vim: set noexpandtab:
