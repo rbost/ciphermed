@@ -206,10 +206,10 @@ static void test_gc(unsigned int nbits = 256)
 {
 //    nbits = 128;
     cout << "Test compare with Garbled Circuits ..." << endl;
-    ScopedTimer timer("Compare");
+    ScopedTimer timer("GC Compare");
     
     ScopedTimer *t;
-    t = new ScopedTimer("Compare init");
+    t = new ScopedTimer("GC Compare init");
     
     
     gmp_randstate_t randstate;
@@ -232,15 +232,16 @@ static void test_gc(unsigned int nbits = 256)
     
     delete t;
     
-    t = new ScopedTimer("Compare execution");
+    t = new ScopedTimer("GC Compare execution");
     
     runProtocol(party_a, party_b,randstate);
  
     bool result = party_b.gm().decrypt(party_a.output());
 
+    delete t;
     assert( result == (a < b));
     
-    cout << "Test Compare passed" << endl;
+    cout << "Test GC Compare passed" << endl;
 
 }
 

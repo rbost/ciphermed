@@ -142,6 +142,8 @@ GC_Compare_A::GC_Compare_A(const mpz_class &x, const size_t &l, GM &gm, gmp_rand
 {
     s_ = 1 - 2*gmp_urandomb_ui(state,1);
     gmp_randinit_set(randstate_, state);
+    
+    prepare_circuit();
 }
 
 void GC_Compare_A::prepare_circuit()
@@ -151,12 +153,21 @@ void GC_Compare_A::prepare_circuit()
     gc_ = create_comparison_circuit(&garblingContext, bit_length_, NULL);
 }
 
-int GC_Compare_A::evaluateGC(InputLabels extractedLabels, OutputMap outputMap)
+int GC_Compare_A::evaluateGC(InputLabels a_inputLabels, InputLabels b_inputLabels, OutputMap outputMap)
 {
     int n = gc_->n;
     int m = gc_->m;
     block computedOutputMap[m];
     int outputVals[m];
+    
+    block extractedLabels[n];
+    
+    for (size_t i = 0; i < bit_length_; i++) {
+        extractedLabels[2*i] = b_inputLabels[i];
+        extractedLabels[2*i+1] = a_inputLabels[i];
+    }
+    extractedLabels[n-1] = b_inputLabels[bit_length_];
+
     
     evaluate(gc_, extractedLabels, computedOutputMap);
     mapOutputs(outputMap, computedOutputMap, outputVals, m);
@@ -174,11 +185,24 @@ void GC_Compare_A::unblind(const mpz_class &enc_mask)
     }
 }
 
+vector<bool> GC_Compare_A::get_a_bits()
+{
+    vector<bool> bits(bit_length_);
+    
+    for (size_t i = 0; i < bit_length_; i++) {
+        bits[i] = mpz_tstbit(a_.get_mpz_t(), i);
+    }
+    
+    return bits;
+}
+
 
 GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm, gmp_randstate_t state)
 : b_(y), bit_length_(l), gm_(gm), mask_(0)
 {
     mask_ = gmp_urandomb_ui(state,1);
+    
+    prepare_circuit();
 }
 
 
@@ -238,9 +262,6 @@ mpz_class GC_Compare_B::get_enc_mask()
 
 void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t state)
 {
-    party_a.prepare_circuit();
-    party_b.prepare_circuit();
-    
     GarbledCircuit *gc_a = party_a.get_garbled_circuit();
     GarbledCircuit *gc_b = party_b.get_garbled_circuit();
     
@@ -253,18 +274,10 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     int *a_inputs = (int *)malloc(l*sizeof(int));
     
     char *bits_a = mpz_get_str(NULL,2,party_a.a_.get_mpz_t());
-    char *bits_b = mpz_get_str(NULL,2,party_b.b_.get_mpz_t());
-                              
+    
     mpz_class a = party_a.a_;
     mpz_class b = party_b.b_;
     
-    size_t i;
-    for (i = 0; i < l; i++) {
-        inputs[2*i+1] = mpz_tstbit(a.get_mpz_t(), i);
-        inputs[2*i] = mpz_tstbit(b.get_mpz_t(), i);
-        
-        a_inputs[i] = mpz_tstbit(a.get_mpz_t(), i);
-    }
     
     party_a.set_global_key(party_b.get_global_key());
     GarbledTable *gt = party_b.get_garbled_table();
@@ -276,20 +289,18 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     block *all_a_labels;
     block a_labels[l];
     
+    // to get a_labels, you HAVE TO run some OT with B
+    vector<bool> a_bits = party_a.get_a_bits();
+    for (size_t i = 0; i < l; i++) {
+        a_inputs[i] = a_bits[i];
+    }
     all_a_labels = party_b.get_all_a_input_labels();
     extractLabels(a_labels, all_a_labels, a_inputs, l);
     
-
-    block extractedLabels[n];
     int outputVals[m];
 
-    for (size_t i = 0; i < l; i++) {
-        extractedLabels[2*i] = b_labels[i];
-        extractedLabels[2*i+1] = a_labels[i];
-    }
-    extractedLabels[n-1] = b_labels[l];
-    
-    outputVals[0] = party_a.evaluateGC(extractedLabels, party_b.get_output_map());
+
+    outputVals[0] = party_a.evaluateGC(a_labels, b_labels, party_b.get_output_map());
     
     party_a.unblind(party_b.get_enc_mask());
 }

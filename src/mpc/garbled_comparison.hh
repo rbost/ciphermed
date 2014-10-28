@@ -28,10 +28,11 @@ public:
 
     void prepare_circuit();
     
+    std::vector<bool> get_a_bits();
     
     void set_garbled_table(GarbledTable* gt){ gc_->garbledTable = gt; };
     void set_global_key(block key){ gc_->globalKey = key; };
-    int evaluateGC(InputLabels inputLabels, OutputMap outputMap);
+    int evaluateGC(InputLabels a_inputLabels, InputLabels b_inputLabels, OutputMap outputMap);
 
     void unblind(const mpz_class &enc_mask);
 
