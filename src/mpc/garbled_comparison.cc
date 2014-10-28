@@ -144,6 +144,35 @@ GC_Compare_A::GC_Compare_A(const mpz_class &x, const size_t &l, GM &gm, gmp_rand
     gmp_randinit_set(randstate_, state);
 }
 
+void GC_Compare_A::prepare_circuit()
+{
+    GarblingContext garblingContext;
+    
+    gc_ = create_comparison_circuit(&garblingContext, bit_length_, NULL);
+}
+
+int GC_Compare_A::evaluateGC(InputLabels extractedLabels, OutputMap outputMap)
+{
+    int n = gc_->n;
+    int m = gc_->m;
+    block computedOutputMap[m];
+    int outputVals[m];
+    
+    evaluate(gc_, extractedLabels, computedOutputMap);
+    mapOutputs(outputMap, computedOutputMap, outputVals, m);
+    
+    return outputVals[0];
+}
+
+
+
+GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm)
+: b_(y), bit_length_(l), gm_(gm), mask_(0)
+{
+    
+}
+
+
 void GC_Compare_B::prepare_circuit()
 {
     GarblingContext garblingContext;
@@ -155,33 +184,40 @@ void GC_Compare_B::prepare_circuit()
     garbleCircuit(gc_, gc_->inputLabels, outputMap_);
 }
 
-
-GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm)
-: b_(y), bit_length_(l), gm_(gm)
+InputLabels GC_Compare_B::get_b_input_labels()
 {
+    block *b_ins = (block *)malloc((bit_length_+1)*sizeof(block));
     
+//    int *inputs = (int *)malloc(2*bit_length_*sizeof(int));
+//
+//    
+//    for (size_t i = 0; i < bit_length_; i++) {
+//        inputs[2*i+1] = 0;
+//        inputs[2*i] = mpz_tstbit(b_.get_mpz_t(), i);
+//    }
+
+    int bit = 0;
+    for (size_t i = 0; i < bit_length_; i++) {
+        bit = mpz_tstbit(b_.get_mpz_t(), i);
+        b_ins[i] = gc_->inputLabels[2*2*i + bit];
+    }
+    
+    b_ins[bit_length_] = gc_->inputLabels[2*2*bit_length_ + mask_];
+    return b_ins;
 }
 
-
-void GC_Compare_A::prepare_circuit()
+InputLabels GC_Compare_B::get_all_a_input_labels()
 {
-    GarblingContext garblingContext;
+    block *a_ins = (block *)malloc(2*bit_length_*sizeof(block));
+
+    for (size_t i = 0; i < bit_length_; i++) {
+        a_ins[2*i] = gc_->inputLabels[2*(2*i+1)];
+        a_ins[2*i+1] = gc_->inputLabels[2*(2*i+1) + 1];
+    }
+
     
-    gc_ = create_comparison_circuit(&garblingContext, bit_length_, NULL);
+    return a_ins;
 }
-
-void GC_Compare_A::evaluateGC(InputLabels extractedLabels, OutputMap outputMap)
-{
-    int n = gc_->n;
-    int m = gc_->m;
-    block computedOutputMap[m];
-    int outputVals[m];
-
-    evaluate(gc_, extractedLabels, computedOutputMap);
-    mapOutputs(outputMap, computedOutputMap, outputVals, m);
-    
-}
-
 void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t state)
 {
     party_a.prepare_circuit();
@@ -196,6 +232,7 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     int m = 1;
 
     int *inputs = (int *)malloc(n*sizeof(int));
+    int *a_inputs = (int *)malloc(l*sizeof(int));
     
     char *bits_a = mpz_get_str(NULL,2,party_a.a_.get_mpz_t());
     char *bits_b = mpz_get_str(NULL,2,party_b.b_.get_mpz_t());
@@ -205,8 +242,10 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     
     size_t i;
     for (i = 0; i < l; i++) {
-        inputs[2*i] = mpz_tstbit(a.get_mpz_t(), i);
-        inputs[2*i+1] = mpz_tstbit(b.get_mpz_t(), i);
+        inputs[2*i+1] = mpz_tstbit(a.get_mpz_t(), i);
+        inputs[2*i] = mpz_tstbit(b.get_mpz_t(), i);
+        
+        a_inputs[i] = mpz_tstbit(a.get_mpz_t(), i);
     }
 
     for (i = 0; i < l; i++) {
@@ -220,20 +259,32 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
 
     inputs[2*l] = 0; // set to one to reverse the comparison result
     
-    block extractedLabels[n];
-    block computedOutputMap[m];
-    int outputVals[m];
-
-    gc_a->globalKey = gc_b->globalKey;
+    
+    party_a.set_global_key(party_b.get_global_key());
     GarbledTable *gt = party_b.get_garbled_table();
     party_a.set_garbled_table(gt);
     
 
-    extractLabels(extractedLabels, gc_b->inputLabels, inputs, n);
-    evaluate(gc_a, extractedLabels, computedOutputMap);
     
-    mapOutputs(party_b.get_output_map(), computedOutputMap, outputVals, m);
+    block *b_labels = party_b.get_b_input_labels();
+    block *all_a_labels;
+    block a_labels[l];
+    
+    all_a_labels = party_b.get_all_a_input_labels();
+    extractLabels(a_labels, all_a_labels, a_inputs, l);
+    
 
+    block extractedLabels[n];
+    int outputVals[m];
+
+    for (size_t i = 0; i < l; i++) {
+        extractedLabels[2*i] = b_labels[i];
+        extractedLabels[2*i+1] = a_labels[i];
+    }
+    extractedLabels[n-1] = b_labels[l];
+    
+    outputVals[0] = party_a.evaluateGC(extractedLabels, party_b.get_output_map());
+    
     cout << a << " LES " << b << " = " << outputVals[0] << endl;
-    cout << a << " < " << b << " = " << (a > b) << endl;
+    cout << a << " < " << b << " = " << (a < b) << endl;
 }
