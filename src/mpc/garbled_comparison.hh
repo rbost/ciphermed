@@ -43,8 +43,8 @@ public:
     mpz_class output() const { return res_; }
     
 
-protected:
     mpz_class a_;
+protected:
     long s_;
     size_t bit_length_; // bit length of the numbers to compare
     
@@ -78,14 +78,14 @@ public:
     virtual void set_bit_length(size_t l) {bit_length_ = l;}
     
 
-protected:
     mpz_class b_;
+protected:
     size_t bit_length_; // bit length of the numbers to compare
     GarbledCircuit *gc_;
     GM_priv gm_;
 };
 
-GarbledCircuit* create_comparison_circuit(GarblingContext *garblingContext, size_t l, OutputMap *om);
+int CompareCircuit(GarbledCircuit *gc, GarblingContext *garblingContext, int n,               int* inputs, int* outputs);
 
 void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t state);
 inline void runProtocol(GC_Compare_A *party_a, GC_Compare_B *party_b, gmp_randstate_t state)

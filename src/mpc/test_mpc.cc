@@ -202,6 +202,42 @@ static void test_compare(unsigned int nbits = 256)
     cout << "Test Compare passed" << endl;
 }
 
+static void test_gc(unsigned int nbits = 256)
+{
+//    nbits = 128;
+    cout << "Test compare with Garbled Circuits ..." << endl;
+    ScopedTimer timer("Compare");
+    
+    ScopedTimer *t;
+    t = new ScopedTimer("Compare init");
+    
+    
+    gmp_randstate_t randstate;
+    gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate,time(NULL));
+    
+    auto sk_gm = GM_priv::keygen(randstate);
+    GM_priv gm_priv(sk_gm,randstate);
+    GM gm(gm_priv.pubkey(),randstate);
+    
+    mpz_class a, b;
+    mpz_urandomb(a.get_mpz_t(), randstate, nbits);
+    mpz_urandomb(b.get_mpz_t(), randstate, nbits);
+    
+    //    cout << "a = " << a.get_str(2) << endl;
+    //    cout << "b = " << b.get_str(2) << endl;
+    
+    GC_Compare_A party_a(a, nbits, gm, randstate);
+    GC_Compare_B party_b(b, nbits, gm_priv);
+    
+    delete t;
+    
+    t = new ScopedTimer("Compare execution");
+    
+    runProtocol(party_a, party_b,randstate);
+    
+}
+
 static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)
 {
     cout << "Test comparison over encrypted data ..." << endl;
@@ -556,40 +592,6 @@ static void test_change_ES()
     }
 }
 
-static void test_gc(unsigned int nbits = 256)
-{
-    cout << "Test compare with Garbled Circuits ..." << endl;
-    ScopedTimer timer("Compare");
-    
-    ScopedTimer *t;
-    t = new ScopedTimer("Compare init");
-    
-    
-    gmp_randstate_t randstate;
-    gmp_randinit_default(randstate);
-    gmp_randseed_ui(randstate,time(NULL));
-    
-    auto sk_gm = GM_priv::keygen(randstate);
-    GM_priv gm_priv(sk_gm,randstate);
-    GM gm(gm_priv.pubkey(),randstate);
-    
-    mpz_class a, b;
-    mpz_urandom_len(a.get_mpz_t(), randstate, nbits);
-    mpz_urandom_len(b.get_mpz_t(), randstate, nbits);
-    
-    //    cout << "a = " << a.get_str(2) << endl;
-    //    cout << "b = " << b.get_str(2) << endl;
-    
-    GC_Compare_A party_a(a, nbits, gm, randstate);
-    GC_Compare_B party_b(b, nbits, gm_priv);
-    
-    delete t;
-    
-    t = new ScopedTimer("Compare execution");
-    
-    runProtocol(party_a, party_b,randstate);
-
-}
 
 static void usage(char *prog)
 {
@@ -625,9 +627,12 @@ int main(int ac, char **av)
     
 
 //    test_lsic(l);
-    test_compare(l);
-//    test_gc(l);
-    cout << "\n\n";
+//    test_compare(l);
+    
+    for (int i = 0; i < 1; i++) {
+        test_gc(l);
+        cout << "\n\n";
+    }
     
     
 //    test_enc_compare(l,lambda);
