@@ -64,7 +64,7 @@ protected:
 class GC_Compare_B : public Comparison_protocol_B {
 public:
     
-    GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm);
+    GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm, gmp_randstate_t state);
     void set_value(const mpz_class &y) { b_ = y; };
     
     void prepare_circuit();
@@ -80,6 +80,7 @@ public:
     InputLabels get_all_a_input_labels();
     InputLabels get_b_input_labels();
 
+    int get_mask(){ return mask_; }
     
     GM_priv gm() const { return gm_; };
     size_t bit_length() const { return bit_length_; }

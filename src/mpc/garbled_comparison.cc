@@ -166,10 +166,10 @@ int GC_Compare_A::evaluateGC(InputLabels extractedLabels, OutputMap outputMap)
 
 
 
-GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm)
+GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm, gmp_randstate_t state)
 : b_(y), bit_length_(l), gm_(gm), mask_(0)
 {
-    
+    mask_ = gmp_urandomb_ui(state,1);
 }
 
 
@@ -246,19 +246,7 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
         inputs[2*i] = mpz_tstbit(b.get_mpz_t(), i);
         
         a_inputs[i] = mpz_tstbit(a.get_mpz_t(), i);
-    }
-
-    for (i = 0; i < l; i++) {
-        cout << inputs[2*i];
-    }
-    cout << endl;
-    for (i = 0; i < l; i++) {
-        cout << inputs[2*i+1];
-    }
-    cout << endl;
-
-    inputs[2*l] = 0; // set to one to reverse the comparison result
-    
+    }    
     
     party_a.set_global_key(party_b.get_global_key());
     GarbledTable *gt = party_b.get_garbled_table();
@@ -286,5 +274,6 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     outputVals[0] = party_a.evaluateGC(extractedLabels, party_b.get_output_map());
     
     cout << a << " LES " << b << " = " << outputVals[0] << endl;
-    cout << a << " < " << b << " = " << (a < b) << endl;
+    int mask = party_b.get_mask();
+    cout << a << " < " << b << " = " << ((a < b)^(mask)) << endl;
 }

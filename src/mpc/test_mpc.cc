@@ -228,7 +228,7 @@ static void test_gc(unsigned int nbits = 256)
     //    cout << "b = " << b.get_str(2) << endl;
     
     GC_Compare_A party_a(a, nbits, gm, randstate);
-    GC_Compare_B party_b(b, nbits, gm_priv);
+    GC_Compare_B party_b(b, nbits, gm_priv, randstate);
     
     delete t;
     
