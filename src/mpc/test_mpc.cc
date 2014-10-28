@@ -235,7 +235,13 @@ static void test_gc(unsigned int nbits = 256)
     t = new ScopedTimer("Compare execution");
     
     runProtocol(party_a, party_b,randstate);
+ 
+    bool result = party_b.gm().decrypt(party_a.output());
+
+    assert( result == (a < b));
     
+    cout << "Test Compare passed" << endl;
+
 }
 
 static void test_enc_compare(unsigned int nbits = 256,unsigned int lambda = 100)

@@ -161,9 +161,18 @@ int GC_Compare_A::evaluateGC(InputLabels extractedLabels, OutputMap outputMap)
     evaluate(gc_, extractedLabels, computedOutputMap);
     mapOutputs(outputMap, computedOutputMap, outputVals, m);
     
-    return outputVals[0];
+    blinded_res_ = outputVals[0];
+    return blinded_res_;
 }
 
+void GC_Compare_A::unblind(const mpz_class &enc_mask)
+{
+    if (blinded_res_ == 0) {
+        res_ = enc_mask;
+    }else{
+        res_ = gm_.neg(enc_mask);
+    }
+}
 
 
 GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm, gmp_randstate_t state)
@@ -218,6 +227,15 @@ InputLabels GC_Compare_B::get_all_a_input_labels()
     
     return a_ins;
 }
+
+mpz_class GC_Compare_B::get_enc_mask()
+{
+    return gm_.encrypt(mask_);
+}
+
+
+
+
 void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t state)
 {
     party_a.prepare_circuit();
@@ -246,7 +264,7 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
         inputs[2*i] = mpz_tstbit(b.get_mpz_t(), i);
         
         a_inputs[i] = mpz_tstbit(a.get_mpz_t(), i);
-    }    
+    }
     
     party_a.set_global_key(party_b.get_global_key());
     GarbledTable *gt = party_b.get_garbled_table();
@@ -273,7 +291,5 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     
     outputVals[0] = party_a.evaluateGC(extractedLabels, party_b.get_output_map());
     
-    cout << a << " LES " << b << " = " << outputVals[0] << endl;
-    int mask = party_b.get_mask();
-    cout << a << " < " << b << " = " << ((a < b)^(mask)) << endl;
+    party_a.unblind(party_b.get_enc_mask());
 }

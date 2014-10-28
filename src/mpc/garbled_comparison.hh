@@ -33,7 +33,8 @@ public:
     void set_global_key(block key){ gc_->globalKey = key; };
     int evaluateGC(InputLabels inputLabels, OutputMap outputMap);
 
-    
+    void unblind(const mpz_class &enc_mask);
+
     GarbledCircuit* get_garbled_circuit(){ return gc_; };
 
     
@@ -56,6 +57,7 @@ protected:
     gmp_randstate_t randstate_;
     
     mpz_class res_;
+    int blinded_res_;
 
 };
 
@@ -81,6 +83,7 @@ public:
     InputLabels get_b_input_labels();
 
     int get_mask(){ return mask_; }
+    mpz_class get_enc_mask();
     
     GM_priv gm() const { return gm_; };
     size_t bit_length() const { return bit_length_; }
