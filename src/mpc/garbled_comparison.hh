@@ -27,10 +27,11 @@ public:
     void set_value(const mpz_class &x) { a_ = x; };
 
     void prepare_circuit();
-    GarbledTable* get_garbled_table(){ return gc_->garbledTable; };
-    OutputMap get_output_map(){ return outputMap_; };
-    InputLabels get_input_labels(){ return gc_->inputLabels; };
     
+    
+    void set_garbled_table(GarbledTable* gt){ gc_->garbledTable = gt; };
+    void evaluateGC(InputLabels inputLabels, OutputMap outputMap);
+
     
     GarbledCircuit* get_garbled_circuit(){ return gc_; };
 
@@ -49,7 +50,6 @@ protected:
     size_t bit_length_; // bit length of the numbers to compare
     
     GarbledCircuit *gc_;
-    OutputMap outputMap_;
     
     GM gm_;
     gmp_randstate_t randstate_;
@@ -67,10 +67,13 @@ public:
     void set_value(const mpz_class &y) { b_ = y; };
     
     void prepare_circuit();
-    void set_garbled_table(GarbledTable* gt){ gc_->garbledTable = gt; };
-    void evaluateGC(InputLabels inputLabels, OutputMap outputMap);
+    
     
     GarbledCircuit* get_garbled_circuit(){ return gc_; };
+    
+    GarbledTable* get_garbled_table(){ return gc_->garbledTable; };
+    OutputMap get_output_map(){ return outputMap_; };
+    InputLabels get_input_labels(){ return gc_->inputLabels; };
 
     
     GM_priv gm() const { return gm_; };
@@ -83,9 +86,16 @@ protected:
     size_t bit_length_; // bit length of the numbers to compare
     GarbledCircuit *gc_;
     GM_priv gm_;
+
+    OutputMap outputMap_;
+
 };
 
 int CompareCircuit(GarbledCircuit *gc, GarblingContext *garblingContext, int n,               int* inputs, int* outputs);
+int OneBitCompareCircuit(GarbledCircuit *gc, GarblingContext *garblingContext, int* inputs, int* outputs);
+int FirstRound_OneBitCompareCircuit(GarbledCircuit *garbledCircuit, GarblingContext *garblingContext, int* inputs, int* outputs);
+
+GarbledCircuit* create_comparison_circuit(GarblingContext *garblingContext, size_t l, OutputMap *om);
 
 void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t state);
 inline void runProtocol(GC_Compare_A *party_a, GC_Compare_B *party_b, gmp_randstate_t state)

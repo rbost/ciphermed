@@ -15,8 +15,6 @@ using namespace std;
 extern "C"{
     #include "gates.h"
 }
-int OneBitCompareCircuit(GarbledCircuit *gc, GarblingContext *garblingContext, int* inputs, int* outputs);
-GarbledCircuit* create_comparison_circuit(GarblingContext *garblingContext, size_t l, OutputMap *om);
 
 int OneBitCompareCircuit(GarbledCircuit *garbledCircuit, GarblingContext *garblingContext, int* inputs, int* outputs) {
     
@@ -83,7 +81,6 @@ int CompareCircuit(GarbledCircuit *gc, GarblingContext *garblingContext, int n, 
     FirstRound_OneBitCompareCircuit(gc, garblingContext, inputs, outputs);
 
     int in[3];
-//    outputs[0] = inputs[2*n];
     
     int i = 0;
     for (i = 1; i < n; i++) {
@@ -147,7 +144,7 @@ GC_Compare_A::GC_Compare_A(const mpz_class &x, const size_t &l, GM &gm, gmp_rand
     gmp_randinit_set(randstate_, state);
 }
 
-void GC_Compare_A::prepare_circuit()
+void GC_Compare_B::prepare_circuit()
 {
     GarblingContext garblingContext;
     
@@ -166,14 +163,14 @@ GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm)
 }
 
 
-void GC_Compare_B::prepare_circuit()
+void GC_Compare_A::prepare_circuit()
 {
     GarblingContext garblingContext;
     
     gc_ = create_comparison_circuit(&garblingContext, bit_length_, NULL);
 }
 
-void GC_Compare_B::evaluateGC(InputLabels extractedLabels, OutputMap outputMap)
+void GC_Compare_A::evaluateGC(InputLabels extractedLabels, OutputMap outputMap)
 {
     int n = gc_->n;
     int m = gc_->m;
@@ -190,13 +187,9 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     party_a.prepare_circuit();
     party_b.prepare_circuit();
     
-    GarbledTable *gt = party_a.get_garbled_table();
-    party_b.set_garbled_table(gt);
-    
     GarbledCircuit *gc_a = party_a.get_garbled_circuit();
     GarbledCircuit *gc_b = party_b.get_garbled_circuit();
     
-    gc_b->globalKey = gc_a->globalKey;
     
     int l = party_a.bit_length();
     int n = 2*l+1;
@@ -205,7 +198,7 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     int *inputs = (int *)malloc(n*sizeof(int));
     
     char *bits_a = mpz_get_str(NULL,2,party_a.a_.get_mpz_t());
-    char *bits_b =mpz_get_str(NULL,2,party_b.b_.get_mpz_t());
+    char *bits_b = mpz_get_str(NULL,2,party_b.b_.get_mpz_t());
                               
     mpz_class a = party_a.a_;
     mpz_class b = party_b.b_;
@@ -231,10 +224,15 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     block computedOutputMap[m];
     int outputVals[m];
 
-    extractLabels(extractedLabels, gc_a->inputLabels, inputs, n);
-    evaluate(gc_b, extractedLabels, computedOutputMap);
+    gc_a->globalKey = gc_b->globalKey;
+    GarbledTable *gt = party_b.get_garbled_table();
+    party_a.set_garbled_table(gt);
     
-    mapOutputs(party_a.get_output_map(), computedOutputMap, outputVals, m);
+
+    extractLabels(extractedLabels, gc_b->inputLabels, inputs, n);
+    evaluate(gc_a, extractedLabels, computedOutputMap);
+    
+    mapOutputs(party_b.get_output_map(), computedOutputMap, outputVals, m);
 
     cout << a << " LES " << b << " = " << outputVals[0] << endl;
     cout << a << " < " << b << " = " << (a > b) << endl;
