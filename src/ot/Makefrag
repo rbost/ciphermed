@@ -1,0 +1,9 @@
+OBJDIRS     += ot
+OTSRC  := baseOT.cc cbitvector.cc naor-pinkas.cc
+OTOBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC))
+
+all:    $(OBJDIR)/libot.so
+$(OBJDIR)/libot.so: $(patsubst %.cc,$(OBJDIR)/ot/%.o,$(OTSRC))
+	$(CXX) -shared -o $@ $^ $(LDFLAGS) $(MIRACL_LIB) -lssl -lgmp -lgmpxx -lcrypto
+
+# vim: set noexpandtab:
