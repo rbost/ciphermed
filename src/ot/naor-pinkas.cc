@@ -2,7 +2,7 @@
 
 #ifdef OTEXT_USE_GMP
 
-BOOL NaorPinkas::ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, CSocket& socket, BYTE* ret)
+BOOL NaorPinkas::ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, tcp::socket& socket, BYTE* ret)
 {
 
 	BYTE* pBuf = new BYTE[nOTs*m_NPState.field_size];
@@ -29,8 +29,9 @@ BOOL NaorPinkas::ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, CSocke
 		br.powerMod(PK_sigma[k], pK[k]);
 	}
 
-	socket.Receive(pBuf, nBufSize);
-
+//	socket.Receive(pBuf, nBufSize);
+    readByteStringFromSocket(socket, pBuf, nBufSize);
+    
 	BYTE* pBufIdx = pBuf;
 
 	mpz_t pC[nSndVals];
@@ -64,7 +65,8 @@ BOOL NaorPinkas::ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, CSocke
 		pBufIdx += m_NPState.field_size; 
 	}
 
-	socket.Send(pBuf, nOTs * m_NPState.field_size); 
+//	socket.Send(pBuf, nOTs * m_NPState.field_size); 
+    writeByteStringFromSocket(socket, pBuf, nOTs * m_NPState.field_size);
 
 	delete pBuf;
 	pBuf = new BYTE[m_NPState.field_size];
@@ -81,7 +83,7 @@ BOOL NaorPinkas::ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, CSocke
 	return true;
 }
 
-BOOL NaorPinkas::SenderIFC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret)
+BOOL NaorPinkas::SenderIFC(int nSndVals, int nOTs, tcp::socket& socket, BYTE* ret)
 {
 
 	BYTE* pBuf = new BYTE[m_NPState.field_size * nOTs];
@@ -122,7 +124,8 @@ BOOL NaorPinkas::SenderIFC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret)
 		mpz_export_padded(pBufIdx, m_NPState.field_size, pC[u]);
 		pBufIdx += m_NPState.field_size;
 	}
-	socket.Send(pBuf, nBufSize);
+//	socket.Send(pBuf, nBufSize);
+    writeByteStringFromSocket(socket, pBuf, nBufSize);
 
 	//====================================================
 	// compute C^R
@@ -134,7 +137,8 @@ BOOL NaorPinkas::SenderIFC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret)
 	//====================================================
 	// N-P sender: receive pk0
 	nBufSize = m_NPState.field_size * nOTs;
-	socket.Receive(pBuf, nBufSize); //receive the d_j's
+//	socket.Receive(pBuf, nBufSize); //receive the d_j's
+    readByteStringFromSocket(socket, pBuf, nBufSize);
 
 	pBufIdx = pBuf;
 	mpz_t pPK0[nOTs];
@@ -181,7 +185,7 @@ BOOL NaorPinkas::SenderIFC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret)
 
 
 BOOL NaorPinkas::ReceiverECC(int nSndVals, int nOTs, CBitVector& choices,
-		CSocket& socket, BYTE* ret) {
+		tcp::socket& socket, BYTE* ret) {
 
 #ifdef USE_PRIME_FIELD
 	ECn PK_sigma[nOTs], PK0, ecctmp, invtmp, pDec[nOTs], pC[nSndVals], g;
@@ -214,7 +218,8 @@ BOOL NaorPinkas::ReceiverECC(int nSndVals, int nOTs, CBitVector& choices,
 		//PK_sigma[k] *= pK[k];
 	}
 
-	socket.Receive(pBuf, nBufSize);
+//	socket.Receive(pBuf, nBufSize);
+    readByteStringFromSocket(socket, pBuf, nBufSize);
 
 	BYTE* pBufIdx = pBuf;
 
@@ -245,7 +250,8 @@ BOOL NaorPinkas::ReceiverECC(int nSndVals, int nOTs, CBitVector& choices,
 		pBufIdx += (coordSize + 1);
 	}
 
-	socket.Send(pBuf, nOTs * (coordSize + 1)); 
+//	socket.Send(pBuf, nOTs * (coordSize + 1)); 
+    writeByteStringFromSocket(socket, pBuf, nOTs * (coordSize + 1));
 
 	delete [] pBuf;
 	pBuf = new BYTE[coordSize+2];
@@ -271,7 +277,7 @@ BOOL NaorPinkas::ReceiverECC(int nSndVals, int nOTs, CBitVector& choices,
 	return true;
 }
 
-BOOL NaorPinkas::SenderECC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret) 
+BOOL NaorPinkas::SenderECC(int nSndVals, int nOTs, tcp::socket& socket, BYTE* ret) 
 {
 	Big alpha, PKr, bigtmp, x, y, xtmp, ytmp;
 #ifdef USE_PRIME_FIELD
@@ -304,7 +310,8 @@ BOOL NaorPinkas::SenderECC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret)
 		PointToByteArray(pBufIdx, coordSize, pC[u]);
 		pBufIdx += coordSize + 1;
 	}
-	socket.Send(pBuf, nBufSize);
+//	socket.Send(pBuf, nBufSize);
+    writeByteStringFromSocket(socket, pBuf, nBufSize);
 
 	//====================================================
 	// compute C^R
@@ -318,7 +325,8 @@ BOOL NaorPinkas::SenderECC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret)
 	//====================================================
 	// N-P sender: receive pk0
 	nBufSize = (coordSize + 1) * nOTs;
-	socket.Receive(pBuf, nBufSize);
+//	socket.Receive(pBuf, nBufSize);
+    readByteStringFromSocket(socket, pBuf, nBufSize);
 
 	pBufIdx = pBuf;
 #ifdef USE_PRIME_FIELD

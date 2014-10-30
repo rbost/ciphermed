@@ -19,13 +19,13 @@ class NaorPinkas : public BaseOT
 
 	// Sender and receiver method using GMP
 #ifdef OTEXT_USE_GMP
-	BOOL ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, CSocket& sock, BYTE* ret);
-	BOOL SenderIFC(int nSndVals, int nOTs, CSocket& sock,  BYTE* ret);
+	BOOL ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, tcp::socket& sock, BYTE* ret);
+	BOOL SenderIFC(int nSndVals, int nOTs, tcp::socket& sock,  BYTE* ret);
 #endif
 	
 	// Sender and receiver method using Miracl
-	BOOL ReceiverECC(int nSndVals, int nOTs, CBitVector& choices, CSocket& sock, BYTE* ret);
-	BOOL SenderECC(int nSndVals, int nOTs, CSocket& sock, BYTE* ret);
+	BOOL ReceiverECC(int nSndVals, int nOTs, CBitVector& choices, tcp::socket& sock, BYTE* ret);
+	BOOL SenderECC(int nSndVals, int nOTs, tcp::socket& sock, BYTE* ret);
 
 	
 };

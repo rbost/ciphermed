@@ -29,7 +29,7 @@ static unsigned decode_header(const std::vector<byte>& buf)
     return 0;
     unsigned msg_size = 0;
     for (unsigned i = 0; i < HEADER_SIZE; ++i)
-    msg_size = msg_size * 256 + (static_cast<unsigned>(buf[i]) & 0xFF);
+        msg_size = msg_size * 256 + (static_cast<unsigned>(buf[i]) & 0xFF);
     return msg_size;
 }
 
@@ -94,4 +94,25 @@ void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
 //    RESUME_BENCHMARK
 }
 
+static void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
+{
+    PAUSE_BENCHMARK
+    boost::asio::read(socket, boost::asio::buffer(buffer, byte_count));
+    
+    EXCHANGED_BYTES(byte_count)
+    INTERACTION
+    
+    RESUME_BENCHMARK
+}
+
+static void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
+{
+    PAUSE_BENCHMARK
+    boost::asio::write(socket, boost::asio::buffer(buffer, byte_count));
+    
+    EXCHANGED_BYTES(byte_count)
+    INTERACTION
+    
+    RESUME_BENCHMARK
+}
 #endif

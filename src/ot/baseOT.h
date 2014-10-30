@@ -10,7 +10,13 @@
 
 #include "typedefs.h"
 #include "cbitvector.h"
-#include "socket.h"
+
+//#include "socket.h"
+#include <boost/asio.hpp>
+#include <net/message_io.hh>
+using boost::asio::ip::tcp;
+
+
 #include <ctime>
 //#include "../util/Miracl/ecn.h"
 //#include "../util/Miracl/big.h"
@@ -52,7 +58,7 @@ class BaseOT
 		BaseOT(){};
 		virtual ~BaseOT(){};
 
-		BOOL Receiver(int nSndVals, int nOTs, CBitVector& choices, CSocket& sock, BYTE* ret)
+		BOOL Receiver(int nSndVals, int nOTs, CBitVector& choices, tcp::socket& sock, BYTE* ret)
 		{
 #ifdef OTEXT_USE_GMP
 			if(m_bUseECC)
@@ -64,7 +70,7 @@ class BaseOT
 #endif
 		};
 		
-		BOOL Sender(int nSndVals, int nOTs, CSocket& sock, BYTE* ret)
+		BOOL Sender(int nSndVals, int nOTs, tcp::socket& sock, BYTE* ret)
 		{
 #ifdef OTEXT_USE_GMP
 			if(m_bUseECC)
@@ -103,11 +109,11 @@ class BaseOT
 
 protected: 
 #ifdef OTEXT_USE_GMP
-		virtual BOOL 			SenderIFC(int nSndVals, int nOTs, CSocket& sock, BYTE* ret) = 0;
-		virtual BOOL 			ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, CSocket& sock, BYTE* ret) = 0;
+		virtual BOOL 			SenderIFC(int nSndVals, int nOTs, tcp::socket& sock, BYTE* ret) = 0;
+		virtual BOOL 			ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, tcp::socket& sock, BYTE* ret) = 0;
 #endif
-		virtual BOOL 			SenderECC(int nSndVals, int nOTs, CSocket& sock, BYTE* ret) = 0;
-		virtual BOOL 			ReceiverECC(int nSndVals, int nOTs, CBitVector& choices, CSocket& sock, BYTE* ret) = 0;
+		virtual BOOL 			SenderECC(int nSndVals, int nOTs, tcp::socket& sock, BYTE* ret) = 0;
+		virtual BOOL 			ReceiverECC(int nSndVals, int nOTs, CBitVector& choices, tcp::socket& sock, BYTE* ret) = 0;
 
 
 		int m_SecParam;
