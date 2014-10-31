@@ -11,50 +11,50 @@ BENCH_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(BENCH_SRC))
 
 all:    $(OBJDIR)/libnet.so
 $(OBJDIR)/libnet.so: $(patsubst %.cc,$(OBJDIR)/net/%.o,$(NETSRC)) $(OBJDIR)/libprotobuf_defs.so
-	$(CXX) -shared -o $@ $^ $(LDFLAGS) -lgmp -lgmpxx -lcrypto -lssl
+	$(CXX) -shared -o $@ $^ $(LDFLAGS) -lgmp -lgmpxx -lcipher -lssl -lcrypto
 
 all:	$(OBJDIR)/net/client
 
-$(OBJDIR)/net/client: $(OBJDIR)/net/test_client.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
+$(OBJDIR)/net/client: $(OBJDIR)/net/test_client.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil -lssl -lcrypto
 
 
 all:	$(OBJDIR)/net/server
 
-$(OBJDIR)/net/server: $(OBJDIR)/net/test_server.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
+$(OBJDIR)/net/server: $(OBJDIR)/net/test_server.o $(DEMO_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+       -lprotobuf -lprotobuf_defs -lnet -lfheutil -lssl -lcrypto
 
 
 all:	$(OBJDIR)/net/bench_client_compare
 
-$(OBJDIR)/net/bench_client_compare: $(OBJDIR)/net/bench_client_compare.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
+$(OBJDIR)/net/bench_client_compare: $(OBJDIR)/net/bench_client_compare.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 all:	$(OBJDIR)/net/bench_client_argmax
 
-$(OBJDIR)/net/bench_client_argmax: $(OBJDIR)/net/bench_client_argmax.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
+$(OBJDIR)/net/bench_client_argmax: $(OBJDIR)/net/bench_client_argmax.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 all:	$(OBJDIR)/net/bench_client_change
 
-$(OBJDIR)/net/bench_client_change: $(OBJDIR)/net/bench_client_change.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
+$(OBJDIR)/net/bench_client_change: $(OBJDIR)/net/bench_client_change.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil
 
 
 all:	$(OBJDIR)/net/bench_server
 
-$(OBJDIR)/net/bench_server: $(OBJDIR)/net/bench_server.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree -lmath -lfheutil\
+$(OBJDIR)/net/bench_server: $(OBJDIR)/net/bench_server.o $(BENCH_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree -lmath -lfheutil\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lfheutil
 

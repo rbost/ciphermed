@@ -1,12 +1,12 @@
 OBJDIRS     += crypto
 CRYPTO2SRC  := elgamal.cc paillier.cc gm.cc 
 
-all:    $(OBJDIR)/libcrypto.so
-$(OBJDIR)/libcrypto.so: $(patsubst %.cc,$(OBJDIR)/crypto/%.o,$(CRYPTO2SRC)) $(OBJDIR)/libmath.so
+all:    $(OBJDIR)/libcipher.so
+$(OBJDIR)/libcipher.so: $(patsubst %.cc,$(OBJDIR)/crypto/%.o,$(CRYPTO2SRC)) $(OBJDIR)/libmath.so
 	$(CXX) -shared -o $@ $^ $(LDFLAGS) -lmath -lfheutil
 
 all:	$(OBJDIR)/crypto/test_crypto 
-$(OBJDIR)/crypto/test_crypto: $(OBJDIR)/crypto/test_crypto.o $(OBJDIR)/libcrypto.so $(OBJDIR)/libmath.so
-	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lfheutil -lcrypto \
+$(OBJDIR)/crypto/test_crypto: $(OBJDIR)/crypto/test_crypto.o $(OBJDIR)/libcipher.so $(OBJDIR)/libmath.so
+	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lfheutil -lcipher \
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgmpxx
 # vim: set noexpandtab:

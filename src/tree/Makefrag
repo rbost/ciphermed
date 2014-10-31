@@ -2,11 +2,11 @@ OBJDIRS += tree
 TREESRC  := tree.cc m_variate_poly.cc util_poly.cc util.cc
 
 all:    $(OBJDIR)/libtree.so
-$(OBJDIR)/libtree.so: $(patsubst %.cc,$(OBJDIR)/tree/%.o,$(TREESRC)) $(OBJDIR)/libcrypto.so
-	$(CXX) -shared -o $@ $^ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lgmp -lgmpxx -lcrypto
+$(OBJDIR)/libtree.so: $(patsubst %.cc,$(OBJDIR)/tree/%.o,$(TREESRC)) $(OBJDIR)/libcipher.so
+	$(CXX) -shared -o $@ $^ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lgmp -lgmpxx -lcipher
 
 all:	$(OBJDIR)/tree/test_tree 
-$(OBJDIR)/tree/test_tree: $(OBJDIR)/tree/test_tree.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcrypto.so $(OBJDIR)/libtree.so
+$(OBJDIR)/tree/test_tree: $(OBJDIR)/tree/test_tree.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so
 	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcrypto -ltree\
 	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x
 # vim: set noexpandtab:
