@@ -18,3 +18,26 @@ inline mpz_class mpz_class_crt_2(const mpz_class &v1, const mpz_class &v2, const
 {
     return mpz_class_crt({v1,v2},{m1,m2});
 }
+
+class FixedPointExp {
+public:
+    
+    FixedPointExp(mpz_t& g, mpz_t& p, int fieldsize);
+    ~FixedPointExp();
+    
+public:
+    void powerMod(mpz_t& result, mpz_t& e);
+    
+private:
+    //create table
+    void init();
+    
+private:
+    mpz_t m_p;
+    mpz_t m_g;
+    bool m_isInitialized;
+    unsigned m_numberOfElements;
+    mpz_t* m_table;
+};
+
+

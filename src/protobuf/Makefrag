@@ -25,6 +25,8 @@ $(OBJ) : $(PROTO_H)
 .PRECIOUS: $(PROTO_H)
 .PRECIOUS: $(PROTO_CC)
 
+protobufs : $(PROTO_OBJ)
+
 all:    $(OBJDIR)/libprotobuf_defs.so
 $(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(OBJ)  $(OBJDIR)/libcrypto.so
 	$(CXX) -shared -o $@ $^ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf -lgmp -lgmpxx -lcrypto

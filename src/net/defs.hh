@@ -13,3 +13,5 @@
 #define FHE_s 1
 #define FHE_k 80
 #define FHE_m 0 // XXX: check?
+
+#define OT_SECPARAM 1024

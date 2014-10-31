@@ -31,6 +31,8 @@ using boost::asio::ip::tcp;
 
 using namespace std;
 
+#define OT_SECPARAM 1024
+
 Server::Server(gmp_randstate_t state, Key_dependencies_descriptor key_deps_desc, unsigned int keysize, unsigned int lambda)
 : key_deps_desc_(key_deps_desc), paillier_(NULL), gm_(NULL), fhe_context_(NULL), fhe_sk_(NULL), n_clients_(0), threads_per_session_(1), lambda_(lambda)
 {
@@ -137,6 +139,8 @@ Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned i
 : server_(server), socket_(std::move(socket)), client_gm_(NULL), client_paillier_(NULL), client_fhe_pk_(NULL), id_(id)
 {
     gmp_randinit_set(rand_state_, state);
+    
+    ot_ = new ObliviousTransfer(OT_SECPARAM);
 }
 
 Server_session::~Server_session()

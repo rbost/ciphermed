@@ -105,6 +105,11 @@ static void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsig
     RESUME_BENCHMARK
 }
 
+static void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
+{
+    readByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
+}
+
 static void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
 {
     PAUSE_BENCHMARK
@@ -115,4 +120,11 @@ static void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsi
     
     RESUME_BENCHMARK
 }
+
+static void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
+{
+    writeByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
+}
+
+
 #endif

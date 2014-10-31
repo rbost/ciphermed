@@ -39,6 +39,8 @@ Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state,Key_de
     gmp_randinit_set(rand_state_, state);
     
     init_needed_keys(keysize);
+    
+    ot_ = new ObliviousTransfer(OT_SECPARAM);
 }
 
 Client::~Client()
