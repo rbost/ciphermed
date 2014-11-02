@@ -47,6 +47,7 @@ class Bench_Client : public Client{
     void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
     void bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
     void bench_change_es(unsigned int iterations);
+    void bench_ot(size_t n_elements ,unsigned int iterations);
     
     void disconnect();
     
@@ -73,5 +74,6 @@ class  Bench_Server_session : public Server_session{
     void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
     void bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
     void bench_change_es(unsigned int iterations);
+    void bench_ot(size_t n_elements ,unsigned int iterations);
 
 };

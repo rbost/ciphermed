@@ -17,6 +17,9 @@
 #include <FHE.h>
 #include <EncryptedArray.h>
 
+
+#include <iomanip>
+
 const bool use_lsic__ = true;
 
 void Tester_Client::send_test_query(enum Test_Request_Request_Type type)
@@ -352,7 +355,7 @@ void Tester_Server_session::run_session()
                 case Test_Request_Request_Type_TEST_OT:
                 {
                     cout << id_ << ": Test OT" << endl;
-                    test_ot();
+                    test_ot(15);
                 }
                     break;
 
@@ -431,53 +434,67 @@ void Tester_Server_session::decrypt_fhe()
 
 
 
-void Tester_Client::test_ot()
+void Tester_Client::test_ot(unsigned int nOTs)
 {
-    const int nOTs = 2;
-    int choices[nOTs] = {0,1};
+//    unsigned int nOTs = 2;
+    int *choices = new int[nOTs];
     
-    char *messages = new char[nOTs*SHA1_BYTES];
+    unsigned char *messages = new unsigned char[nOTs*SHA1_BYTES];
     
+    
+    for (size_t i = 0; i < nOTs; i++) {
+        choices[i] = gmp_urandomb_ui(rand_state_,1);
+        cout << choices[i] << ";";
+    }
+    cout << endl;
+
     
     send_test_query(Test_Request_Request_Type_TEST_OT);
 
-    ot_->receiver(nOTs, choices, messages, socket_);
+    ot_->receiver(nOTs, choices, (char *)messages, socket_);
     
     
     for (size_t i = 0; i < nOTs; i++) {
         for (size_t j = 0; j < SHA1_BYTES; j++) {
-            cout << (int)messages[i*SHA1_BYTES + j];
+            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[i*SHA1_BYTES + j];
+//            cout << (dec) << "|";
         }
+        cout << ";";
     }
-    cout << endl;
+    cout << (dec) << endl;
 
 }
 
-void Tester_Server_session::test_ot()
+void Tester_Server_session::test_ot(unsigned int nOTs)
 {
-    const int nOTs = 2;
-    char *messages = new char [2*nOTs*SHA1_BYTES];
+    unsigned char *messages = new unsigned char [2*nOTs*SHA1_BYTES];
     
     for (size_t i = 0; i < 2*nOTs; i++) {
         for (size_t j = 0; j < SHA1_BYTES; j++) {
-            messages[i*SHA1_BYTES + j] = i;
+            unsigned long v =gmp_urandomb_ui(rand_state_,8);
+            cout << v << ";";
+            messages[i*SHA1_BYTES + j] = (unsigned char)v;
         }
     }
+    cout << endl;
     
+ 
     for (size_t i = 0; i < nOTs; i++) {
         for (size_t j = 0; j < SHA1_BYTES; j++) {
-            cout << (int) messages[2*i*SHA1_BYTES + j];
+            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[2*i*SHA1_BYTES + j];
+//            cout << (dec) << "|";
         }
         cout << ";";
     }
     cout << endl;
     for (size_t i = 0; i < nOTs; i++) {
         for (size_t j = 0; j < SHA1_BYTES; j++) {
-            cout << (int) messages[(2*i+1)*SHA1_BYTES + j];
+            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[(2*i+1)*SHA1_BYTES + j];
+//            cout << "|";
         }
         cout << ";";
     }
-    cout << endl;
+    cout << (dec) << endl;
 
-    ot_->sender(nOTs, messages, socket_);
+    ot_->sender(nOTs, (char *)messages, socket_);
 }

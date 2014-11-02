@@ -52,7 +52,7 @@ static void test_basic_client(const string &hostname)
         
 //        client.test_multiple_enc_compare(40);
         
-        client.test_ot();
+        client.test_ot(15);
         
         client.disconnect();
         

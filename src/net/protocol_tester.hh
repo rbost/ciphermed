@@ -48,7 +48,7 @@ class Tester_Client : public Client{
     void test_tree_enc_argmax();
     void test_fhe();
     void test_change_es();
-    void test_ot();
+    void test_ot(unsigned int nOTs);
 
     void disconnect();
     
@@ -73,6 +73,6 @@ class  Tester_Server_session : public Server_session{
     void test_change_es();
     void decrypt_gm(const mpz_class &c);
     void decrypt_fhe();
-    void test_ot();
+    void test_ot(unsigned int nOTs);
 
 };

@@ -306,6 +306,47 @@ void Bench_Client::bench_change_es(unsigned int iterations)
 #endif
 }
 
+
+void Bench_Client::bench_ot(size_t n_elements ,unsigned int iterations)
+{
+    send_test_query(Test_Request_Request_Type_TEST_OT, BIT_SIZE_DEFAULT, iterations, false, n_elements);
+
+    const int nOTs = n_elements;
+    int choices[n_elements];
+    
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+    
+    RESET_BYTE_COUNT
+
+    for (unsigned int k = 0; k < iterations; k++) {
+
+        for (size_t i = 0; i < nOTs; i++) {
+            choices[i] = gmp_urandomb_ui(rand_state_,1);
+        }
+        
+        char *messages = new char[nOTs*SHA1_BYTES];
+        
+        
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+        
+        ot_->receiver(nOTs, choices, messages, socket_);
+        
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
+    }
+    
+    cout << "OT receiver for " << iterations << " iterations" << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+#ifdef BENCHMARK
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
+#endif
+
+}
+
 void Bench_Client::disconnect()
 {
     cout << "Disconnect" << endl;
@@ -433,6 +474,11 @@ void Bench_Server_session::run_session()
                 {
                     cout << id_ << ": Bench Change ES" << endl;
                     bench_change_es(iterations);
+                }
+                case Test_Request_Request_Type_TEST_OT:
+                {
+                    cout << id_ << ": Bench OT" << endl;
+                    bench_ot(argmax_elements,iterations);
                 }
                     break;
                 default:
@@ -568,4 +614,28 @@ void Bench_Server_session::bench_change_es(unsigned int iterations)
     }
     cout << id_  << ": Helper Change ES bench for " << iterations << " rounds" << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
+}
+
+
+void Bench_Server_session::bench_ot(size_t n_elements, unsigned int iterations)
+{
+    const int nOTs = n_elements;
+    char *messages = new char [2*nOTs*SHA1_BYTES];
+    double cpu_time = 0.;
+
+    for (unsigned int k = 0; k < iterations; k++) {
+
+        for (size_t i = 0; i < 2*nOTs; i++) {
+            for (size_t j = 0; j < SHA1_BYTES; j++) {
+                messages[i*SHA1_BYTES + j] = gmp_urandomb_ui(rand_state_,8);
+            }
+        }
+
+        RESET_BENCHMARK_TIMER
+        ot_->sender(nOTs, messages, socket_);
+        cpu_time += GET_BENCHMARK_TIME;
+    }
+    cout << id_  << ": Sender OT bench for " << iterations << " iterations" << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
+
 }
