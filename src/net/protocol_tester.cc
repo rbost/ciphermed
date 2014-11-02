@@ -349,6 +349,12 @@ void Tester_Server_session::run_session()
                     run_tree_enc_argmax(helper,use_lsic__);
                 }
                     break;
+                case Test_Request_Request_Type_TEST_OT:
+                {
+                    cout << id_ << ": Test OT" << endl;
+                    test_ot();
+                }
+                    break;
 
                 default:
                 {
@@ -419,3 +425,59 @@ void Tester_Server_session::decrypt_fhe()
     cout << endl;
 }
 
+
+
+
+
+
+
+void Tester_Client::test_ot()
+{
+    const int nOTs = 2;
+    int choices[nOTs] = {0,1};
+    
+    char *messages = new char[nOTs*SHA1_BYTES];
+    
+    
+    send_test_query(Test_Request_Request_Type_TEST_OT);
+
+    ot_->receiver(nOTs, choices, messages, socket_);
+    
+    
+    for (size_t i = 0; i < nOTs; i++) {
+        for (size_t j = 0; j < SHA1_BYTES; j++) {
+            cout << (int)messages[i*SHA1_BYTES + j];
+        }
+    }
+    cout << endl;
+
+}
+
+void Tester_Server_session::test_ot()
+{
+    const int nOTs = 2;
+    char *messages = new char [2*nOTs*SHA1_BYTES];
+    
+    for (size_t i = 0; i < 2*nOTs; i++) {
+        for (size_t j = 0; j < SHA1_BYTES; j++) {
+            messages[i*SHA1_BYTES + j] = i;
+        }
+    }
+    
+    for (size_t i = 0; i < nOTs; i++) {
+        for (size_t j = 0; j < SHA1_BYTES; j++) {
+            cout << (int) messages[2*i*SHA1_BYTES + j];
+        }
+        cout << ";";
+    }
+    cout << endl;
+    for (size_t i = 0; i < nOTs; i++) {
+        for (size_t j = 0; j < SHA1_BYTES; j++) {
+            cout << (int) messages[(2*i+1)*SHA1_BYTES + j];
+        }
+        cout << ";";
+    }
+    cout << endl;
+
+    ot_->sender(nOTs, messages, socket_);
+}

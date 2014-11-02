@@ -37,6 +37,8 @@ struct security_parameters {
 #define HASH_UPDATE(sha, buf, bufsize) SHA_Update(sha, buf, bufsize)
 #define HASH_FINAL(sha, sha_buf) SHA_Final(sha_buf, sha)
 
+#define SHA1_BYTES				20
+
 
 typedef struct security_parameters NPState;
 
