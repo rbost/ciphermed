@@ -15,7 +15,6 @@
 using boost::asio::ip::tcp;
 
 #include <gmpxx.h>
-#include "brick.h"
 
 
 struct security_parameters {
@@ -30,7 +29,7 @@ struct security_parameters {
 
 #include <openssl/evp.h>
 #include <openssl/sha.h>
-#include <openssl/aes.h>
+//#include <openssl/aes.h>
 
 #define AES_KEY_CTX EVP_CIPHER_CTX
 #define HASH_INIT(sha) SHA_Init(sha)

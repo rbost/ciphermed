@@ -13,7 +13,7 @@ using namespace std;
 #include<iostream>
 
 extern "C"{
-    #include "gates.h"
+    #include <justGarble/gates.h>
 }
 
 int OneBitCompareCircuit(GarbledCircuit *garbledCircuit, GarblingContext *garblingContext, int* inputs, int* outputs) {

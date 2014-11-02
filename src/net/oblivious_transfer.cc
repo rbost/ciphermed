@@ -76,7 +76,7 @@ bool ObliviousTransfer::GMP_Cleanup()
 {
     //TODO: Further cleanup
     gmp_randclear(m_NPState.rnd_state);
-    return TRUE;
+    return true;
 }
 
 
