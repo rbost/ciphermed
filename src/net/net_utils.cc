@@ -125,3 +125,36 @@ Ctxt read_fhe_ctxt_from_socket(boost::asio::ip::tcp::socket &socket, const FHEPu
     Protobuf::FHE_Ctxt msg = readMessageFromSocket<Protobuf::FHE_Ctxt>(socket);
     return convert_from_message(msg,pubkey);
 }
+
+
+void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
+{
+    PAUSE_BENCHMARK
+    boost::asio::read(socket, boost::asio::buffer(buffer, byte_count));
+    
+    EXCHANGED_BYTES(byte_count)
+    INTERACTION
+    
+    RESUME_BENCHMARK
+}
+
+void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
+{
+    readByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
+}
+
+void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
+{
+    PAUSE_BENCHMARK
+    boost::asio::write(socket, boost::asio::buffer(buffer, byte_count));
+    
+    EXCHANGED_BYTES(byte_count)
+    INTERACTION
+    
+    RESUME_BENCHMARK
+}
+
+void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
+{
+    writeByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
+}

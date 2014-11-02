@@ -94,37 +94,4 @@ void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
 //    RESUME_BENCHMARK
 }
 
-static void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
-{
-    PAUSE_BENCHMARK
-    boost::asio::read(socket, boost::asio::buffer(buffer, byte_count));
-    
-    EXCHANGED_BYTES(byte_count)
-    INTERACTION
-    
-    RESUME_BENCHMARK
-}
-
-static void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
-{
-    readByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
-}
-
-static void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
-{
-    PAUSE_BENCHMARK
-    boost::asio::write(socket, boost::asio::buffer(buffer, byte_count));
-    
-    EXCHANGED_BYTES(byte_count)
-    INTERACTION
-    
-    RESUME_BENCHMARK
-}
-
-static void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
-{
-    writeByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
-}
-
-
 #endif

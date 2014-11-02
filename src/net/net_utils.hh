@@ -35,3 +35,9 @@ vector<mpz_class> read_int_array_from_socket(boost::asio::ip::tcp::socket &socke
 
 void send_fhe_ctxt_to_socket(boost::asio::ip::tcp::socket &socket, const Ctxt &c);
 Ctxt read_fhe_ctxt_from_socket(boost::asio::ip::tcp::socket &socket, const FHEPubKey &pubkey);
+
+
+void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count);
+void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);
+void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count);
+void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);
