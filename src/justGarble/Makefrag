@@ -5,7 +5,7 @@ SOURCES  := $(wildcard $(SRCDIR)/*.c)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
 OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/justGarble/%.o)
 
-JG_CFLAGS= -g -lm -lrt -lpthread -maes -msse4 -lmsgpack -march=native -fPIC
+JG_CFLAGS= -g -lm -lrt -lpthread -maes -msse4 -lmsgpack -fPIC
 
 all:    $(OBJDIR)/libjustGarble.so
 $(OBJDIR)/libjustGarble.so: $(OBJECTS)
@@ -16,6 +16,6 @@ $(OBJDIR)/libjustGarble.a: $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/justGarble/%.o : $(SRCDIR)/%.c
 	@mkdir -p $(@D)
-	cc -c $< -o $@ $(LIBS) $(JG_CFLAGS)
+	cc -MD -c $< -o $@ $(LIBS) $(JG_CFLAGS)
 
 # vim: set noexpandtab:

@@ -48,6 +48,11 @@
  * ====================================================================
  *
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #ifndef HEADER_AES_H
 #define HEADER_AES_H
 
@@ -156,3 +161,7 @@ void aesni_cbc_encrypt(const unsigned char *in, unsigned char *out,
 #endif
 
 #endif /* !HEADER_AES_H */
+
+#ifdef __cplusplus
+}
+#endif

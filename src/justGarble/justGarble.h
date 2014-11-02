@@ -17,6 +17,10 @@
 */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #ifndef justGarble
 #define justGarble 1
 #include "dkcipher.h"
@@ -168,7 +172,10 @@ int readCircuitFromFile(GarbledCircuit *garbledCircuit, char *fileName);
 
 #include "garble.h"
 #include "circuits.h"
-#include "check.h"
 #include "util.h"
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

@@ -42,11 +42,15 @@
 // Author Kipp Owens, Rajiv Parikh
 ////////////////////////////////////////////////////////////////////////
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #ifndef UTIL_H_
 #define UTIL_H_
 
 #include "common.h"
-#include "emmintrin.h"
+#include <emmintrin.h>
 
 int countToN(int *a, int N);
 int dbgBlock(block a);
@@ -59,3 +63,7 @@ double doubleMean(double A[], int n);
 void srand_sse(unsigned int seed);
 
 #endif /* UTIL_H_ */
+
+#ifdef __cplusplus
+}
+#endif

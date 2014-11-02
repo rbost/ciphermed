@@ -16,6 +16,11 @@
 
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+
 #ifndef CIRCUITS_H_
 #define CIRCUITS_H_
 
@@ -67,5 +72,10 @@ int GF4SCLN2Circuit(GarbledCircuit *gc, GarblingContext *garblingContext,  int* 
 int RANDCircuit(GarbledCircuit *garbledCircuit, GarblingContext *garblingContext, int n, int* inputs, int* outputs, int q, int qf);
 
 
+int GF256InvCircuit(GarbledCircuit *gc, GarblingContext *garblingContext, int* inputs, int* outputs);
+int GF16INVCircuit(GarbledCircuit *gc, GarblingContext *garblingContext, int* inputs, int* outputs);
 #endif /* CIRCUITS_H_ */
 
+#ifdef __cplusplus
+}
+#endif

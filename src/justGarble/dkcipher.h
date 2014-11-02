@@ -16,6 +16,10 @@
 
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #include <xmmintrin.h>              /* SSE instructions and _mm_malloc */
 #include <emmintrin.h>              /* SSE2 instructions               */
 #include "aes.h"
@@ -86,4 +90,8 @@ void DKCipherKSSEncryptFull(block *key1, block *key2, block *ctext,
 
 //#define	DOUBLE(B) B
 #define DOUBLE(B) _mm_slli_epi64(B,1)
+#endif
+
+#ifdef __cplusplus
+}
 #endif

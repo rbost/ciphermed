@@ -81,8 +81,8 @@ int getNextWire(GarblingContext *garblingContext) {
 
 int createEmptyGarbledCircuit(GarbledCircuit *garbledCircuit, int n, int m,
 		int q, int r, InputLabels inputLabels) {
-	startTime = RDTSC;
-	garbledCircuit->id = getNextId();
+
+    garbledCircuit->id = getNextId();
 	garbledCircuit->garbledGates = (GarbledGate *) memalign(128,
 			sizeof(GarbledGate) * q);
 	garbledCircuit->garbledTable = (GarbledTable *) memalign(128,
@@ -132,8 +132,8 @@ int startBuilding(GarbledCircuit *garbledCircuit,
 	garblingContext->fixedWires = (int *) malloc(
 			sizeof(int) * garbledCircuit->r);
 	garbledCircuit->globalKey = key;
-	startTime = RDTSC;
-	DKCipherInit(&key, &(garblingContext->dkCipherContext));
+
+    DKCipherInit(&key, &(garblingContext->dkCipherContext));
 
 	return 0;
 }
@@ -157,8 +157,7 @@ int finishBuilding(GarbledCircuit *garbledCircuit,
 	}
 
 	garbledCircuit->q = garbledContext->gateIndex;
-	endTime = RDTSC;
-	return (int) (endTime - startTime);
+    return 0;
 }
 
 int extractLabels(ExtractedLabels extractedLabels, InputLabels inputLabels,
@@ -195,8 +194,8 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels, Outp
 	int input0, input1, output;
 	srand_sse(time(NULL ));
 
-	startTime = RDTSC;
 
+    
 	createInputLabels(inputLabels, garbledCircuit->n);
 
 	garbledCircuit->id = getFreshId();
@@ -427,8 +426,7 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels, Outp
 		outputMap[2 * i] = garbledCircuit->wires[garbledCircuit->outputs[i]].label0;
 		outputMap[2 * i + 1] = garbledCircuit->wires[garbledCircuit->outputs[i]].label1;
 	}
-	endTime = RDTSC;
-	return (endTime - startTime);
+	return 0;
 }
 
 #else
@@ -451,8 +449,8 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels, Outp
 	int input0, input1,output;
 	srand_sse( time(NULL));
 
-	startTime = RDTSC;
 
+    
 	createInputLabels(inputLabels, garbledCircuit->n);
 
 	garbledCircuit->id = getFreshId();
@@ -609,8 +607,7 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels, Outp
 		outputMap[2*i+1] = garbledCircuit->wires[garbledCircuit->outputs[i]].label1;
 	}
 
-	endTime = RDTSC;
-	return (endTime - startTime);
+	return 0;
 }
 #endif
 #else
@@ -635,8 +632,8 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels, Outp
 	int input0, input1, output;
 	srand_sse( time(NULL));
 
-	startTime = RDTSC;
 
+    
 	createInputLabels(inputLabels, garbledCircuit->n);
 
 	garbledCircuit->id = getFreshId();
@@ -811,8 +808,7 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels, Outp
 		outputMap[2*i] = garbledCircuit->wires[garbledCircuit->outputs[i]].label0;
 		outputMap[2*i+1] = garbledCircuit->wires[garbledCircuit->outputs[i]].label1;
 	}
-	endTime = RDTSC;
-	return (endTime - startTime);
+	return 0;
 }
 
 #else
@@ -836,8 +832,8 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels,
 	int input0, input1, output;
 	srand_sse(time(NULL));
 
-	startTime = RDTSC;
 
+    
 	createInputLabels(inputLabels, garbledCircuit->n);
 	garbledCircuit->id = getFreshId();
 
@@ -936,8 +932,7 @@ long garbleCircuit(GarbledCircuit *garbledCircuit, InputLabels inputLabels,
 		outputMap[2 * i + 1] =
 				garbledCircuit->wires[garbledCircuit->outputs[i]].label1;
 	}
-	endTime = RDTSC;
-	return (endTime - startTime);
+	return 0;
 }
 
 #endif

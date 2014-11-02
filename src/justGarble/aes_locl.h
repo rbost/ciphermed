@@ -48,6 +48,10 @@
  * ====================================================================
  *
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 
 #ifndef HEADER_AES_LOCL_H
 #define HEADER_AES_LOCL_H
@@ -87,3 +91,8 @@ typedef unsigned char u8;
 #undef FULL_UNROLL
 
 #endif /* !HEADER_AES_LOCL_H */
+
+    
+#ifdef __cplusplus
+}
+#endif

@@ -17,6 +17,10 @@
 */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #ifndef common
 #define common 1
 #include <stdio.h>
@@ -131,4 +135,7 @@ void inline TRUNC_COPY(char *X, char *Y);
 block randomBlock();
 
 
+#endif
+#ifdef __cplusplus
+}
 #endif

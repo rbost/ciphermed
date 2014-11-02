@@ -49,6 +49,10 @@
  *
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _AES_
 #define _AES_
 
@@ -94,5 +98,9 @@ inline void AES_encrypt(const unsigned char *in, unsigned char *out, const AES_K
 inline void AES_decrypt(const unsigned char *in, unsigned char *out, const AES_KEY *key);
 inline void AES_ecb_encrypt_blks(block *blks, unsigned nblks, AES_KEY *key);
 inline void AES_ecb_decrypt_blks(block *blks, unsigned nblks, AES_KEY *key);
-
+inline void AES_ecb_encrypt_blks_4(block *blks, AES_KEY *key);
+#endif
+    
+#ifdef __cplusplus
+}
 #endif

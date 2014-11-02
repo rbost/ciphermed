@@ -17,6 +17,10 @@
 */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #ifndef garble
 #define garble 0
 
@@ -42,6 +46,8 @@ int createNewWire(Wire *in, GarblingContext *garblingContext, int id);
 int getNextWire(GarblingContext *garblingContext);
 void removeGarbledCircuit(GarbledCircuit *garbledCircuit);
 
-unsigned long startTime, endTime;
+#endif
 
+#ifdef __cplusplus
+}
 #endif

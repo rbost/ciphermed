@@ -16,9 +16,7 @@
 
 #include <mpc/comparison_protocol.hh>
 
-extern "C" {
-    #include <justGarble/justGarble.h>
-}
+#include <justGarble/justGarble.h>
 
 class GC_Compare_A : public Comparison_protocol_A {
 public:

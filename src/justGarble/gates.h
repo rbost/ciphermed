@@ -16,6 +16,10 @@
 
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 #ifndef GATES_H_
 #define GATES_H_
 
@@ -28,3 +32,7 @@ int fixedOneWire(GarbledCircuit *garbledCircuit, GarblingContext *garblingContex
 int NOTGate(GarbledCircuit *garbledCircuit, GarblingContext *garblingContext,  int input0, int output);
 
 #endif /* GATES_H_ */
+
+#ifdef __cplusplus
+}
+#endif
