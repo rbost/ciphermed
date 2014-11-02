@@ -27,12 +27,12 @@ const char* ifcq3072 = "95729504467608377623766753562217147614989054519467474668
 
 
 
-static void hashReturn(byte* ret, byte* val, int val_len, int ctr) {
+static void hashReturn(char* ret, char* val, int val_len, int ctr) {
     SHA_CTX sha;
     HASH_INIT(&sha);
     HASH_UPDATE(&sha, (char*) val, val_len);
     HASH_UPDATE(&sha, (char*) &ctr, sizeof(int));
-    HASH_FINAL(&sha, ret);
+    HASH_FINAL(&sha, (unsigned char *)ret);
     
 }
 
@@ -164,7 +164,7 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
     {
         pbr.powerMod(pDec[k], pK[k]);
         mpz_export_padded(pBuf, m_NPState.field_size, pDec[k]);
-        hashReturn((byte *)retPtr, (byte *)pBuf, m_NPState.field_size, k);
+        hashReturn(retPtr, pBuf, m_NPState.field_size, k);
         retPtr += SHA1_BYTES;
     }
     
@@ -300,7 +300,7 @@ bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket)
             }
             
             // compute the hash of PK_u^r
-            hashReturn((byte *)hashBufPtr, (byte *)pBufIdx, m_NPState.field_size, k);
+            hashReturn(hashBufPtr, pBufIdx, m_NPState.field_size, k);
 
             for (int i = 0; i < SHA1_BYTES; i++) {
                 hashBufPtr[i] ^= messagePtr[i];
