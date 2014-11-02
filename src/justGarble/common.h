@@ -107,17 +107,17 @@ static inline block RIGHTSHIFT(block bl) {
                          "=r"(out.lo64), "=r"(out.hi64) :       \
                          "emr" (in2.lo64), "emr"(in2.hi64),     \
                          "0" (in1.lo64), "1" (in1.hi64));
-
-char *__ct;
-short *__msks;
-int *__mski;
-int __itc;
-char *__itc_src;
-char *__itc_dst;
-
-void inline TRUNCATE(char *X);
-
-void inline TRUNC_COPY(char *X, char *Y);
+//
+//char *__ct;
+//short *__msks;
+//int *__mski;
+//int __itc;
+//char *__itc_src;
+//char *__itc_dst;
+//
+//void inline TRUNCATE(char *X);
+//
+//void inline TRUNC_COPY(char *X, char *Y);
 //#define TRUNCATE(X) {__ct = (char*)X; __msks = (short*)( &__ct[10]);__mski = (int*)( &__ct[10]); __mski[0]=0; __msks[2]=0;}
 //#define TRUNC_COPY(X, Y) {__itc_src = (char*)X; __itc_dst = (char*)Y; for(__itc=0;__itc<10;__itc++)__itc_dst[__itc] = __itc_src[__itc];}
 #define SUCCESS 0
