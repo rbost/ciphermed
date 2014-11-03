@@ -10,6 +10,10 @@
 
 #include <FHE.h>
 
+#include <xmmintrin.h>
+#include <emmintrin.h>
+#include <smmintrin.h>
+
 using namespace std;
 
 ostream& operator<<(ostream& out, const LSIC_Packet_A& p);
@@ -41,3 +45,6 @@ void read_byte_string_from_socket(boost::asio::ip::tcp::socket &socket, unsigned
 void read_byte_string_from_socket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);
 void write_byte_string_to_socket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count);
 void write_byte_string_to_socket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);
+
+__m128i read_block_from_socket(boost::asio::ip::tcp::socket &socket);
+void write_block_to_socket(__m128i block, boost::asio::ip::tcp::socket &socket);

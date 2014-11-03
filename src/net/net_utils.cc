@@ -159,4 +159,26 @@ void write_byte_string_to_socket(boost::asio::ip::tcp::socket &socket, char *buf
     write_byte_string_to_socket(socket, (unsigned char *)buffer, byte_count);
 }
 
+__m128i read_block_from_socket(boost::asio::ip::tcp::socket &socket)
+{
+    union{
+        __m128i v;
+        unsigned char a[sizeof(__m128i)];
+    }u;
+
+    read_byte_string_from_socket(socket, (unsigned char*)u.a, sizeof(__m128i));
+
+    return u.v;
+}
+
+void write_block_to_socket(__m128i block, boost::asio::ip::tcp::socket &socket)
+{
+    union{
+        __m128i v;
+        unsigned char a[sizeof(__m128i)];
+    }u;
+    
+    u.v = block;
+    
+    write_byte_string_to_socket(socket, (unsigned char*)u.a, sizeof(__m128i));
 }
