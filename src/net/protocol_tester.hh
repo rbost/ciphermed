@@ -5,6 +5,7 @@
 #include <vector>
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
+#include <mpc/garbled_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>

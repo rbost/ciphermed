@@ -14,6 +14,7 @@
 #include <crypto/paillier.hh>
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
+#include <mpc/garbled_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
@@ -277,6 +278,12 @@ mpz_class Server_session::run_priv_compare_A(Compare_A *comparator)
     return comparator->output();
 }
 
+mpz_class Server_session::run_garbled_compare_A(GC_Compare_A *comparator)
+{
+    exec_garbled_compare_A(socket_,comparator);
+    return comparator->output();
+}
+
 void Server_session::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
     exec_comparison_protocol_B(socket_,comparator,server_->threads_per_session());
@@ -290,6 +297,11 @@ void Server_session::run_lsic_B(LSIC_B *lsic)
 void Server_session::run_priv_compare_B(Compare_B *comparator)
 {
     exec_priv_compare_B(socket_,comparator,server_->threads_per_session());
+}
+
+void Server_session::run_garbled_compare_B(GC_Compare_B *comparator)
+{
+    exec_garbled_compare_B(socket_,comparator);
 }
 
 // we suppose that the client already has the server's public key for Paillier

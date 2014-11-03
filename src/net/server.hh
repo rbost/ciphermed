@@ -90,10 +90,12 @@ public:
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
     mpz_class run_lsic_A(LSIC_A *lsic);
     mpz_class run_priv_compare_A(Compare_A *comparator);
+    mpz_class run_garbled_compare_A(GC_Compare_A *comparator);
 
     void run_comparison_protocol_B(Comparison_protocol_B *comparator);
     void run_lsic_B(LSIC_B *lsic);
     void run_priv_compare_B(Compare_B *comparator);
+    void run_garbled_compare_B(GC_Compare_B *comparator);
 
     bool enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
     void help_enc_comparison(const size_t &l, bool use_lsic);

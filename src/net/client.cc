@@ -11,6 +11,7 @@
 #include <crypto/gm.hh>
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
+#include <mpc/garbled_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
@@ -244,6 +245,12 @@ mpz_class Client::run_priv_compare_A(Compare_A *comparator)
     return comparator->output();
 }
 
+mpz_class Client::run_garbled_compare_A(GC_Compare_A *comparator)
+{
+    exec_garbled_compare_A(socket_,comparator);
+    return comparator->output();
+}
+
 
 
 void Client::run_comparison_protocol_B(Comparison_protocol_B *comparator)
@@ -259,6 +266,11 @@ void Client::run_lsic_B(LSIC_B *lsic)
 void Client::run_priv_compare_B(Compare_B *comparator)
 {
     exec_priv_compare_B(socket_,comparator,n_threads_);
+}
+
+void Client::run_garbled_compare_B(GC_Compare_B *comparator)
+{
+    exec_garbled_compare_B(socket_,comparator);
 }
 
 
