@@ -3,7 +3,6 @@
 SHAIFHEPATH ?= $(HOME)/HElib/src
 NTLLIBPATH ?= $(HOME)/ntl-6.0.0-bin/lib
 NTLINCPATH ?= $(HOME)/ntl-6.0.0-bin/include
-GF2XLIBPATH ?= $(HOME)/gf2x-1.1-bin/lib
 JSONCPP ?= /usr/include/jsoncpp
 
 L_BOOST_SYSTEM ?= -lboost_system
@@ -24,6 +23,9 @@ endif
 
 OBJDIR	 := obj
 TOP	 := $(shell echo $${PWD-`pwd`})
+SHARED_OBJDIR = $(TOP)/$(OBJDIR)
+
+
 CXX	 ?= g++
 CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
         -maes -msse4 \
@@ -31,10 +33,10 @@ CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
 	    -Wextra -Wwrite-strings -Wno-unused-parameter \
 	    -Wno-ignored-qualifiers \
 	    -Wmissing-declarations -Woverloaded-virtual  \
-	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x -I$(TOP) \
-	    -fno-omit-frame-pointer -I$(SHAIFHEPATH) -I$(NTLINCPATH) -I$(JSONCPP)
+	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x  \
+	    -fno-omit-frame-pointer -I$(TOP) -I$(SHAIFHEPATH) -I$(NTLINCPATH) -I$(JSONCPP)
 LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
-LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)
+LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR)
 
 PROTOC ?= protoc
 
@@ -64,13 +66,11 @@ $(OBJDIR)/%.o: %.cc
 	@mkdir -p $(@D)
 	$(CXX) -MD $(CXXFLAGS) -c $< -o $@
 
+include math/Makefrag
 include justGarble/Makefrag
 include util/Makefrag
-include math/Makefrag
 include crypto/Makefrag
 include mpc/Makefrag
-#include fhe/Makefrag
-#include shaifhe/Makefrag
 include tree/Makefrag
 include protobuf/Makefrag
 include net/Makefrag

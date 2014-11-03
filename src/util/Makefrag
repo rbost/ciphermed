@@ -4,7 +4,7 @@ UTILOBJ   := $(patsubst %.cc,$(OBJDIR)/util/%.o,$(UTILSRC))
 
 all:    $(OBJDIR)/libfheutil.so
 $(OBJDIR)/libfheutil.so: $(UTILOBJ) 
-	$(CXX) -shared -o $@ $(UTILOBJ) $(LDFLAGS) -lgmpxx -lgmp 
+	$(CXX) -shared -o $@ $(UTILOBJ) $(LDFLAGS)
 
 install: install_util
 

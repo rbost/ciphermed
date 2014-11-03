@@ -6,16 +6,16 @@ MATHSRC   :=  math_util.cc num_th_alg.cc prime_seq.cc
 MATHOBJ   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC))
 
 all:    $(OBJDIR)/libmath.so
-$(OBJDIR)/libmath.so: $(MATHOBJ) $(OBJDIR)/libfheutil.so
-	$(CXX) -shared -o $@ $(MATHOBJ) $(LDFLAGS) -lgmpxx -lgmp -lfheutil
+$(OBJDIR)/libmath.so: $(MATHOBJ)
+	$(CXX) -shared -o $@ $(MATHOBJ) $(LDFLAGS) -lgmpxx -lgmp
 
 test_math:    $(OBJDIR)/math/r
 $(OBJDIR)/math/r: $(OBJDIR)/math/r.o $(MATHOBJ_OTHER) $(OBJDIR)/libmath.so
-	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lfheutil
+	$(CXX) $< -o $@ $(LDFLAGS) -lmath
 
 all:    $(OBJDIR)/math/test_algo
-$(OBJDIR)/math/test_algo: $(OBJDIR)/math/test_algo.o 
-	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lfheutil -lntl
+$(OBJDIR)/math/test_algo: $(OBJDIR)/math/test_algo.o $(OBJDIR)/libmath.so
+	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lntl
 
 install: install_math
 

@@ -1,12 +1,14 @@
 OBJDIRS     += mpc
 MPCSRC  := millionaire.cc comparison_protocol.cc  lsic.cc svm_classifier.cc private_comparison.cc garbled_comparison.cc enc_comparison.cc rev_enc_comparison.cc enc_argmax.cc linear_enc_argmax.cc tree_enc_argmax.cc change_encryption_scheme.cc
 
+MPCOBJS := $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC))
+
 all:    $(OBJDIR)/libmpc.so
-$(OBJDIR)/libmpc.so: $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC)) $(OBJDIR)/libcipher.so $(OBJDIR)/libjustGarble.so
-	$(CXX) -shared -o $@ $^ $(SHAIFHEPATH)/fhe.a -Wl,--no-as-needed $(LDFLAGS) -lgmp -lgmpxx -lcipher -ljustGarble
+$(OBJDIR)/libmpc.so: $(MPCOBJS) $(OBJDIR)/libcipher.so $(OBJDIR)/libjustGarble.so
+	$(CXX) -shared -o $@ $(MPCOBJS) $(SHAIFHEPATH)/fhe.a -Wl,--no-as-needed $(LDFLAGS) -lgmp -lgmpxx -lcipher -ljustGarble
 
 all:	$(OBJDIR)/mpc/test_mpc 
 $(OBJDIR)/mpc/test_mpc: $(OBJDIR)/mpc/test_mpc.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so
 	$(CXX) $< -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher\
-	   -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl -lgmp -lgf2x 
+	   -L$(NTLLIBPATH) -lntl -lgmp -lgf2x 
 # vim: set noexpandtab:

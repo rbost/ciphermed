@@ -10,12 +10,12 @@ all:    $(OBJDIR)/shaifhe/test $(OBJDIR)/shaifhe/shiftfun
 
 $(OBJDIR)/shaifhe/test: $(OBJDIR)/shaifhe/test.o 
 	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) \
-	  -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl \
+	  -L$(NTLLIBPATH) -lntl \
 	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH) -lgf2x -lgmp
 
 $(OBJDIR)/shaifhe/shiftfun: $(OBJDIR)/shaifhe/shiftfun.o 
 	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) \
-	  -Wl,-rpath=$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl \
+	  -L$(NTLLIBPATH) -lntl \
 	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH) -lgf2x -lgmp
 
 # vim: set noexpandtab:
