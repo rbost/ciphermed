@@ -14,6 +14,8 @@ void exec_comparison_protocol_A(tcp::socket &socket, Comparison_protocol_A *comp
         exec_lsic_A(socket, reinterpret_cast<LSIC_A*>(comparator));
     }else if(typeid(*comparator) == typeid(Compare_A)){
         exec_priv_compare_A(socket, reinterpret_cast<Compare_A*>(comparator),n_threads);
+    }else if(typeid(*comparator) == typeid(GC_Compare_A)) {
+        exec_garbled_compare_A(socket, reinterpret_cast<GC_Compare_A*>(comparator));
     }
 }
 
@@ -67,7 +69,27 @@ void exec_priv_compare_A(tcp::socket &socket, Compare_A *comparator, unsigned in
     comparator->unblind(c_t_prime);
 }
 
-
+void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator)
+{
+    int l = comparator->bit_length();
+    
+    block a_labels[l], b_labels[l+1];
+    
+    // first get the global key ...
+    
+    // ... and then the garbled table ...
+    
+    // to finish with b's labels
+    
+    // initiate OT to get our labels
+    
+    // evaluate GC
+    
+    // unblind
+    Protobuf::BigInt mask_m = readMessageFromSocket<Protobuf::BigInt>(socket);
+    mpz_class mask = convert_from_message(mask_m);
+    comparator->unblind(mask);
+}
 
 void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comparator, unsigned int n_threads)
 {
@@ -75,6 +97,8 @@ void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comp
         exec_lsic_B(socket, reinterpret_cast<LSIC_B*>(comparator));
     }else if(typeid(*comparator) == typeid(Compare_B)){
         exec_priv_compare_B(socket, reinterpret_cast<Compare_B*>(comparator), n_threads);
+    }else if(typeid(*comparator) == typeid(GC_Compare_B)) {
+        exec_garbled_compare_B(socket, reinterpret_cast<GC_Compare_B*>(comparator));
     }
 }
 
@@ -128,6 +152,11 @@ void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator, unsigned in
     // send the blinded result
     Protobuf::BigInt c_t_prime_message = convert_to_message(c_t_prime);
     sendMessageToSocket(socket, c_t_prime_message);
+    
+}
+
+void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator)
+{
     
 }
 

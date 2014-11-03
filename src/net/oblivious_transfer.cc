@@ -112,7 +112,7 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
     }
     
 //    socket.Receive(pBuf, nBufSize);
-    readByteStringFromSocket(socket, pBuf, nBufSize);
+    read_byte_string_from_socket(socket, pBuf, nBufSize);
 
     char* pBufIdx = pBuf;
     
@@ -151,7 +151,7 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
     }
     
 //    socket.Send(pBuf, nOTs * m_NPState.field_size);
-    writeByteStringFromSocket(socket, pBuf, nOTs * m_NPState.field_size);
+    write_byte_string_to_socket(socket, pBuf, nOTs * m_NPState.field_size);
 
     delete pBuf;
     pBuf = new char[m_NPState.field_size];
@@ -170,7 +170,7 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
     delete [] pBuf;
 
     char *hashBuf = new char[nOTs * SHA1_BYTES * nSndVals];
-    readByteStringFromSocket(socket, hashBuf, nOTs * SHA1_BYTES * nSndVals);
+    read_byte_string_from_socket(socket, hashBuf, nOTs * SHA1_BYTES * nSndVals);
 
     
     char *hashBufPtr = hashBuf;
@@ -246,7 +246,7 @@ bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket)
         pBufIdx += m_NPState.field_size;
     }
 //    socket.Send(pBuf, nBufSize);
-    writeByteStringFromSocket(socket, pBuf, nBufSize);
+    write_byte_string_to_socket(socket, pBuf, nBufSize);
 
     //====================================================
     // compute C^R
@@ -259,7 +259,7 @@ bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket)
     // N-P sender: receive pk0
     nBufSize = m_NPState.field_size * nOTs;
 //    socket.Receive(pBuf, nBufSize); //receive the d_j's
-    readByteStringFromSocket(socket, pBuf, nBufSize);
+    read_byte_string_from_socket(socket, pBuf, nBufSize);
 
     pBufIdx = pBuf;
     mpz_t pPK0[nOTs];
@@ -310,7 +310,7 @@ bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket)
         }
     }
     
-    writeByteStringFromSocket(socket, hashBuf, nOTs * SHA1_BYTES * nSndVals);
+    write_byte_string_to_socket(socket, hashBuf, nOTs * SHA1_BYTES * nSndVals);
 
     delete [] hashBuf;
     delete [] pBuf;

@@ -37,7 +37,7 @@ void send_fhe_ctxt_to_socket(boost::asio::ip::tcp::socket &socket, const Ctxt &c
 Ctxt read_fhe_ctxt_from_socket(boost::asio::ip::tcp::socket &socket, const FHEPubKey &pubkey);
 
 
-void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count);
-void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);
-void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count);
-void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);
+void read_byte_string_from_socket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count);
+void read_byte_string_from_socket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);
+void write_byte_string_to_socket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count);
+void write_byte_string_to_socket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count);

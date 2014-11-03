@@ -127,7 +127,7 @@ Ctxt read_fhe_ctxt_from_socket(boost::asio::ip::tcp::socket &socket, const FHEPu
 }
 
 
-void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
+void read_byte_string_from_socket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
 {
     PAUSE_BENCHMARK
     boost::asio::read(socket, boost::asio::buffer(buffer, byte_count));
@@ -138,12 +138,12 @@ void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned cha
     RESUME_BENCHMARK
 }
 
-void readByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
+void read_byte_string_from_socket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
 {
-    readByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
+    read_byte_string_from_socket(socket, (unsigned char *)buffer, byte_count);
 }
 
-void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
+void write_byte_string_to_socket(boost::asio::ip::tcp::socket &socket, unsigned char *buffer, size_t byte_count)
 {
     PAUSE_BENCHMARK
     boost::asio::write(socket, boost::asio::buffer(buffer, byte_count));
@@ -154,7 +154,9 @@ void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, unsigned ch
     RESUME_BENCHMARK
 }
 
-void writeByteStringFromSocket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
+void write_byte_string_to_socket(boost::asio::ip::tcp::socket &socket, char *buffer, size_t byte_count)
 {
-    writeByteStringFromSocket(socket, (unsigned char *)buffer, byte_count);
+    write_byte_string_to_socket(socket, (unsigned char *)buffer, byte_count);
+}
+
 }
