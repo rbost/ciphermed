@@ -59,6 +59,18 @@ mpz_class Tester_Client::test_compare(const mpz_class &b, size_t l)
     return run_priv_compare_A(&comparator);
 }
 
+mpz_class Tester_Client::test_garbled_compare(const mpz_class &b, size_t l)
+{
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    // send the start message
+    send_test_query(Test_Request_Request_Type_TEST_GARBLED_COMPARE);
+    
+    GC_Compare_A comparator(b,l,*server_gm_,rand_state_);
+    return run_garbled_compare_A(&comparator);
+}
+
 void Tester_Client::test_enc_compare(size_t l)
 {
     mpz_class a, b;
@@ -298,6 +310,14 @@ void Tester_Server_session::run_session()
                 }
                     break;
 
+                case Test_Request_Request_Type_TEST_GARBLED_COMPARE:
+                {
+                    cout << id_ << ": Test Garbled Compare" << endl;
+                    mpz_class b(20);
+                    test_garbled_compare(b,100);
+                }
+                    break;
+
                 case Test_Request_Request_Type_TEST_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Enc Compare" << endl;
@@ -397,6 +417,14 @@ void Tester_Server_session::test_compare(const mpz_class &a,size_t l)
     Compare_B comparator(a,l,server_->paillier(),server_->gm());
     run_priv_compare_B(&comparator);
 }
+
+void Tester_Server_session::test_garbled_compare(const mpz_class &a,size_t l)
+{
+    cout << id_ << ": Test garbled compare" << endl;
+    GC_Compare_B comparator(a,l,server_->gm(),rand_state_);
+    run_garbled_compare_B(&comparator);
+}
+
 
 void Tester_Server_session::test_change_es()
 {

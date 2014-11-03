@@ -42,6 +42,8 @@ class Tester_Client : public Client{
 
     mpz_class test_lsic(const mpz_class &a, size_t l);
     mpz_class test_compare(const mpz_class &b, size_t l);
+    mpz_class test_garbled_compare(const mpz_class &b, size_t l);
+    
     void test_rev_enc_compare(size_t l);
     void test_enc_compare(size_t l);
     void test_multiple_enc_compare(size_t l);
@@ -71,6 +73,8 @@ class  Tester_Server_session : public Server_session{
     /* Test functions */
     void test_lsic(const mpz_class &b,size_t l);
     void test_compare(const mpz_class &a,size_t l);
+    void test_garbled_compare(const mpz_class &a,size_t l);
+
     void test_change_es();
     void decrypt_gm(const mpz_class &c);
     void decrypt_fhe();

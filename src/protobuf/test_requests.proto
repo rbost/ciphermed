@@ -4,16 +4,17 @@ message Test_Request
     enum Request_Type {
         TEST_LSIC = 0;
         TEST_COMPARE = 1;
-        TEST_ENC_COMPARE = 2;
-        TEST_REV_ENC_COMPARE = 3;
-        TEST_LINEAR_ENC_ARGMAX = 4;
-        TEST_FHE = 5;
-        TEST_CHANGE_ES = 6;
-        TEST_MULTIPLE_COMPARE = 7;
-        TEST_TREE_ENC_ARGMAX = 8;
-        TEST_OT = 9;
+        TEST_GARBLED_COMPARE = 2;
+        TEST_ENC_COMPARE = 3;
+        TEST_REV_ENC_COMPARE = 4;
+        TEST_LINEAR_ENC_ARGMAX = 5;
+        TEST_FHE = 6;
+        TEST_CHANGE_ES = 7;
+        TEST_MULTIPLE_COMPARE = 8;
+        TEST_TREE_ENC_ARGMAX = 9;
+        TEST_OT = 10;
 
-        DISCONNECT = 10;
+        DISCONNECT = 15;
     }
     required Request_Type type = 1;
     optional uint32 bit_size = 2;

@@ -31,19 +31,19 @@ static void test_basic_client(const string &hostname)
         
         // server has b = 20
         
-//        ScopedTimer *t_lsic = new ScopedTimer("LSIC");
-//        mpz_class res_lsic = client.test_lsic(40,100);
-//        delete t_lsic;
+        ScopedTimer *t_lsic = new ScopedTimer("LSIC");
+        mpz_class res_lsic = client.test_lsic(40,100);
+        delete t_lsic;
 //        client.test_decrypt_gm(res_lsic);
-//
-//        ScopedTimer *t_comp = new ScopedTimer("Comp");
-//        mpz_class res_comp = client.test_compare(40,100);
-//        delete t_comp;
+
+        ScopedTimer *t_comp = new ScopedTimer("Comp");
+        mpz_class res_comp = client.test_compare(40,100);
+        delete t_comp;
         
-        
-        
-        
-        
+        ScopedTimer *t_garbled_comp = new ScopedTimer("Garbled Comp");
+        mpz_class res_garbled_comp = client.test_garbled_compare(40,100);
+        delete t_garbled_comp;
+
 //        client.test_rev_enc_compare(64);
 //        client.test_enc_compare(64);
 //        client.test_linear_enc_argmax();
@@ -53,7 +53,7 @@ static void test_basic_client(const string &hostname)
         
 //        client.test_multiple_enc_compare(40);
         
-        client.test_ot(15);
+//        client.test_ot(15);
         
         client.disconnect();
         
