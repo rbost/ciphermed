@@ -8,6 +8,8 @@
 #include <boost/asio.hpp>
 #include <net/message_io.hh>
 
+#include <net/oblivious_transfer.hh>
+
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
 #include <mpc/garbled_comparison.hh>
@@ -29,12 +31,12 @@ using boost::asio::ip::tcp;
 void exec_comparison_protocol_A(tcp::socket &socket, Comparison_protocol_A *comparator, unsigned int n_threads = 2);
 void exec_lsic_A(tcp::socket &socket, LSIC_A *lsic);
 void exec_priv_compare_A(tcp::socket &socket, Compare_A *comparator, unsigned int n_threads);
-void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator);
+void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator, ObliviousTransfer *ot);
 
 void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comparator, unsigned int n_threads = 2);
 void exec_lsic_B(tcp::socket &socket, LSIC_B *lsic);
 void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator, unsigned int n_threads = 2);
-void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator);
+void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator, ObliviousTransfer *ot);
 
 void exec_enc_comparison_owner(tcp::socket &socket, EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result, unsigned int n_threads = 2);
 void exec_enc_comparison_helper(tcp::socket &socket, EncCompare_Helper &helper, bool decrypt_result, unsigned int n_threads = 2);

@@ -15,7 +15,7 @@ void exec_comparison_protocol_A(tcp::socket &socket, Comparison_protocol_A *comp
     }else if(typeid(*comparator) == typeid(Compare_A)){
         exec_priv_compare_A(socket, reinterpret_cast<Compare_A*>(comparator),n_threads);
     }else if(typeid(*comparator) == typeid(GC_Compare_A)) {
-        exec_garbled_compare_A(socket, reinterpret_cast<GC_Compare_A*>(comparator));
+        exec_garbled_compare_A(socket, reinterpret_cast<GC_Compare_A*>(comparator), NULL);
     }
 }
 
@@ -69,21 +69,45 @@ void exec_priv_compare_A(tcp::socket &socket, Compare_A *comparator, unsigned in
     comparator->unblind(c_t_prime);
 }
 
-void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator)
+void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator, ObliviousTransfer *ot)
 {
     int l = comparator->bit_length();
+    GarbledCircuit* gc = comparator->get_garbled_circuit();
     
     block a_labels[l], b_labels[l+1];
+    block global_key;
+    int a_inputs[l];
     
     // first get the global key ...
+    global_key = read_block_from_socket(socket);
+    comparator->set_global_key(global_key);
     
     // ... and then the garbled table ...
+    read_byte_string_from_socket(socket, (unsigned char*)(gc->garbledTable), sizeof(GarbledTable)*(gc->q));
     
-    // to finish with b's labels
+    // ... b's labels
+    read_byte_string_from_socket(socket, (unsigned char*)b_labels, (l+1)*sizeof(block));
     
     // initiate OT to get our labels
     
+    vector<bool> a_bits = comparator->get_a_bits();
+    for (size_t i = 0; i < l; i++) {
+        a_inputs[i] = a_bits[i];
+    }
+
+    ot->receiver(l, a_inputs, (char *)a_labels, socket);
+    
     // evaluate GC
+    
+    comparator->evaluateGC(a_labels, b_labels);
+    
+    
+    // get the outputmap
+    OutputMap om = new block[2*sizeof(block)]; // m = 1
+    read_byte_string_from_socket(socket, (unsigned char*)om, 2*sizeof(block));
+
+    // apply the outputmap
+    comparator->map_output(om);
     
     // unblind
     Protobuf::BigInt mask_m = readMessageFromSocket<Protobuf::BigInt>(socket);
@@ -98,7 +122,7 @@ void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comp
     }else if(typeid(*comparator) == typeid(Compare_B)){
         exec_priv_compare_B(socket, reinterpret_cast<Compare_B*>(comparator), n_threads);
     }else if(typeid(*comparator) == typeid(GC_Compare_B)) {
-        exec_garbled_compare_B(socket, reinterpret_cast<GC_Compare_B*>(comparator));
+        exec_garbled_compare_B(socket, reinterpret_cast<GC_Compare_B*>(comparator), NULL);
     }
 }
 
@@ -155,9 +179,40 @@ void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator, unsigned in
     
 }
 
-void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator)
+void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator, ObliviousTransfer *ot)
 {
+    int l = comparator->bit_length();
+    GarbledCircuit* gc = comparator->get_garbled_circuit();
     
+    block global_key;
+    
+    // first send the global key ...
+    global_key = comparator->get_global_key();
+    write_block_to_socket(global_key, socket);
+    
+    // ... and then the garbled table ...
+    write_byte_string_to_socket(socket, (unsigned char*)(gc->garbledTable), sizeof(GarbledTable)*(gc->q));
+    
+    // ... b's labels
+    block *b_labels = comparator->get_b_input_labels();
+    write_byte_string_to_socket(socket, (unsigned char*)b_labels, (l+1)*sizeof(block));
+    
+    // initiate OT send get a's labels
+    
+    block *all_a_labels;
+    all_a_labels = comparator->get_all_a_input_labels();
+    
+    ot->sender(l,(char *)all_a_labels, socket);
+    
+    
+    // send the outputmap
+    OutputMap om = comparator->get_output_map(); // m = 1
+    write_byte_string_to_socket(socket, (unsigned char*)om, 2*sizeof(block));
+    
+    // send the mask
+    mpz_class mask = comparator->get_enc_mask();
+    Protobuf::BigInt mask_m = convert_to_message(mask);
+    sendMessageToSocket(socket, mask_m);
 }
 
 void exec_rev_enc_comparison_owner(tcp::socket &socket, Rev_EncCompare_Owner &owner, unsigned int lambda, bool decrypt_result, unsigned int n_threads)
