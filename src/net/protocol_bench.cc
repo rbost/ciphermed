@@ -1,5 +1,6 @@
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
+#include <mpc/garbled_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
@@ -12,10 +13,13 @@
 
 #include <net/defs.hh>
 #include <net/net_utils.hh>
+#include <net/oblivious_transfer.hh>
 #include <util/util.hh>
 
 #include <FHE.h>
 #include <EncryptedArray.h>
+
+#define OT_BLOCK_SIZE 16
 
 void Bench_Client::send_test_query(enum Test_Request_Request_Type type, unsigned int bit_size, unsigned int iterations, bool use_lsic, unsigned int argmax_elements)
 {
@@ -81,23 +85,60 @@ void Bench_Client::bench_compare(size_t bit_size, unsigned int iterations)
     
     double cpu_time = 0., total_time = 0.;
     Timer t;
-
+    
     RESET_BYTE_COUNT
-
+    
     for (unsigned int i = 0; i < iterations; i++) {
         mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
         
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
-
+        
         Compare_A comparator(b,bit_size,*server_paillier_,*server_gm_,rand_state_);
         run_priv_compare_A(&comparator);
-    
+        
         cpu_time += GET_BENCHMARK_TIME;
         total_time += t.lap_ms();
     }
     
     cout << "Party A DGK bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << "CPU time: " << cpu_time/iterations << endl;
+    cout << "Total time: " << total_time/iterations << endl;
+#ifdef BENCHMARK
+    cout << (IOBenchmark::byte_count()/((double)iterations)) << " exchanged bytes per iteration" << endl;
+    cout << (IOBenchmark::interaction_count()/((double)iterations)) << " interactions per iteration\n\n" << endl;
+#endif
+}
+
+void Bench_Client::bench_garbled_compare(size_t bit_size, unsigned int iterations)
+{
+    if (!has_gm_pk()) {
+        get_server_pk_gm();
+    }
+    // send the start message
+    send_test_query(Test_Request_Request_Type_TEST_GARBLED_COMPARE, bit_size, iterations);
+    
+    mpz_class b;
+    
+    double cpu_time = 0., total_time = 0.;
+    Timer t;
+    
+    RESET_BYTE_COUNT
+    
+    for (unsigned int i = 0; i < iterations; i++) {
+        mpz_urandom_len(b.get_mpz_t(), rand_state_, bit_size);
+        
+        RESET_BENCHMARK_TIMER
+        t.lap(); // reset timer
+        
+        GC_Compare_A comparator(b,bit_size,*server_gm_,rand_state_);
+        run_garbled_compare_A(&comparator);
+        
+        cpu_time += GET_BENCHMARK_TIME;
+        total_time += t.lap_ms();
+    }
+    
+    cout << "Party A Garbled Comparison bench for " << iterations << " rounds, bit size=" << bit_size << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
@@ -325,13 +366,13 @@ void Bench_Client::bench_ot(size_t n_elements ,unsigned int iterations)
             choices[i] = gmp_urandomb_ui(rand_state_,1);
         }
         
-        char *messages = new char[nOTs*SHA1_BYTES];
+        char *messages = new char[nOTs*OT_BLOCK_SIZE];
         
         
         RESET_BENCHMARK_TIMER
         t.lap(); // reset timer
         
-        ot_->receiver(nOTs, choices, messages, socket_);
+        ObliviousTransfer::receiver(nOTs, choices, messages, socket_);
         
         cpu_time += GET_BENCHMARK_TIME;
         total_time += t.lap_ms();
@@ -428,7 +469,14 @@ void Bench_Server_session::run_session()
                     bench_compare(bit_size, iterations);
                 }
                     break;
-
+                    
+                case Test_Request_Request_Type_TEST_GARBLED_COMPARE:
+                {
+                    cout << id_ << ": Bench Garbled Compare" << endl;
+                    bench_garbled_compare(bit_size, iterations);
+                }
+                    break;
+                    
                 case Test_Request_Request_Type_TEST_ENC_COMPARE:
                 {
                     cout << id_ << ": Bench Enc Compare" << endl;
@@ -546,6 +594,28 @@ void Bench_Server_session::bench_compare(size_t bit_size, unsigned int iteration
 
 }
 
+void Bench_Server_session::bench_garbled_compare(size_t bit_size, unsigned int iterations)
+{
+    mpz_class a;
+    
+    double cpu_time = 0.;
+    
+    for (unsigned int i = 0; i < iterations; i++) {
+        mpz_urandom_len(a.get_mpz_t(), rand_state_, bit_size);
+        
+        RESET_BENCHMARK_TIMER
+        
+        GC_Compare_B comparator(a,bit_size,server_->gm(), rand_state_);
+        run_garbled_compare_B(&comparator);
+        
+        cpu_time += GET_BENCHMARK_TIME;
+    }
+    
+    cout << id_  << ": Party B Garbled Compare bench for " << iterations << " rounds, bit size=" << bit_size << endl;
+    cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
+    
+}
+
 void Bench_Server_session::bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic)
 {
     double cpu_time = 0.;
@@ -620,7 +690,7 @@ void Bench_Server_session::bench_change_es(unsigned int iterations)
 void Bench_Server_session::bench_ot(size_t n_elements, unsigned int iterations)
 {
     const int nOTs = n_elements;
-    char *messages = new char [2*nOTs*SHA1_BYTES];
+    char *messages = new char [2*nOTs*OT_BLOCK_SIZE];
     double cpu_time = 0.;
 
     for (unsigned int k = 0; k < iterations; k++) {
@@ -632,7 +702,7 @@ void Bench_Server_session::bench_ot(size_t n_elements, unsigned int iterations)
         }
 
         RESET_BENCHMARK_TIMER
-        ot_->sender(nOTs, messages, socket_);
+        ObliviousTransfer::sender(nOTs, messages, socket_);
         cpu_time += GET_BENCHMARK_TIME;
     }
     cout << id_  << ": Sender OT bench for " << iterations << " iterations" << endl;

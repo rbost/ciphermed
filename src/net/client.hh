@@ -4,6 +4,8 @@
 #include <vector>
 #include <boost/asio.hpp>
 
+#include <mpc/garbled_comparison.hh>
+
 #include <FHE.h>
 
 #include <crypto/paillier.hh>

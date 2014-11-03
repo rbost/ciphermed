@@ -1,5 +1,6 @@
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
+#include <mpc/garbled_comparison.hh>
 #include <mpc/rev_enc_comparison.hh>
 #include <mpc/enc_comparison.hh>
 #include <mpc/linear_enc_argmax.hh>
@@ -38,6 +39,7 @@ static void bench_client(const string &hostname, unsigned int key_size, unsigned
         
         client.bench_lsic(bit_size, iterations);
         client.bench_compare(bit_size, iterations);
+        client.bench_garbled_compare(bit_size, iterations);
         
         client.bench_enc_compare(bit_size, iterations, true);
         client.bench_enc_compare(bit_size, iterations, false);

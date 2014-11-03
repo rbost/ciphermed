@@ -42,6 +42,7 @@ class Bench_Client : public Client{
 
     void bench_lsic(size_t bit_size, unsigned int iterations);
     void bench_compare(size_t bit_size, unsigned int iterations);
+    void bench_garbled_compare(size_t bit_size, unsigned int iterations);
     void bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
     void bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
     void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
@@ -69,6 +70,7 @@ class  Bench_Server_session : public Server_session{
     /* Test functions */
     void bench_lsic(size_t bit_size, unsigned int iterations);
     void bench_compare(size_t bit_size, unsigned int iterations);
+    void bench_garbled_compare(size_t bit_size, unsigned int iterations);
     void bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
     void bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
     void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
