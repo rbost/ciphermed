@@ -176,17 +176,7 @@ void Bench_Client::bench_enc_compare(size_t bit_size, unsigned int iterations, C
         total_time += t.lap_ms();
     }
     
-    cout << "Owner Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " ;
-    switch (comparison_prot) {
-        case LSIC_PROTOCOL:
-            cout << "LSIC";
-            break;
-            
-        default:
-            break;
-    }
-    
-    << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << "Owner Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
