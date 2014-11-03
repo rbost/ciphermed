@@ -11,6 +11,8 @@
 #include <math/math_util.hh>
 #include <net/net_utils.hh>
 
+#include <cassert>
+
 const char* ifcp1024 = "B10B8F96A080E01DDE92DE5EAE5D54EC52C99FBCFB06A3C69A6A9DCA52D23B616073E28675A23D189838EF1E2EE652C013ECB4AEA906112324975C3CD49B83BFACCBDD7D90C4BD7098488E9C219A73724EFFD6FAE5644738FAA31A4FF55BCCC0A151AF5F0DC8B4BD45BF37DF365C1A65E68CFDA76D4DA708DF1FB2BC2E4A4371";//"124325339146889384540494091085456630009856882741872806181731279018491820800119460022367403769795008250021191767583423221479185609066059226301250167164084041279837566626881119772675984258163062926954046545485368458404445166682380071370274810671501916789361956272226105723317679562001235501455748016154805420913";
 const char* ifcg1024 = "A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5";//"115740200527109164239523414760926155534485715860090261532154107313946218459149402375178179458041461723723231563839316251515439564315555249353831328479173170684416728715378198172203100328308536292821245983596065287318698169565702979765910089654821728828592422299160041156491980943427556153020487552135890973413";
 const char* ifcq1024 = "F518AA8781A8DF278ABA4E7D64B7CB9D49462353";
@@ -82,8 +84,9 @@ bool ObliviousTransfer::GMP_Cleanup()
 
 
 
-bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket &socket)
+bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket &socket, uint8_t block_size)
 {
+    assert(block_size <= SHA1_BYTES);
     int nSndVals = 2;
     char* pBuf = new char[nOTs*m_NPState.field_size];
     int nBufSize = nSndVals * m_NPState.field_size;
@@ -156,6 +159,7 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
     delete pBuf;
     pBuf = new char[m_NPState.field_size];
     char* retPtr = ret;
+    char *hashVar = new char [SHA1_BYTES];
     // compute masking hashes
 
     FixedPointExp pbr (pC[0], m_NPState.p, m_NPState.field_size*8);
@@ -163,14 +167,20 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
     {
         pbr.powerMod(pDec[k], pK[k]);
         mpz_export_padded(pBuf, m_NPState.field_size, pDec[k]);
-        hashReturn(retPtr, pBuf, m_NPState.field_size, k);
-        retPtr += SHA1_BYTES;
+        hashReturn(hashVar, pBuf, m_NPState.field_size, k);
+        
+        for (int i = 0; i < block_size; i++) {
+            retPtr[i] = hashVar[i];
+        }
+
+        retPtr += block_size;
     }
     
     delete [] pBuf;
-
-    char *hashBuf = new char[nOTs * SHA1_BYTES * nSndVals];
-    read_byte_string_from_socket(socket, hashBuf, nOTs * SHA1_BYTES * nSndVals);
+    delete [] hashVar;
+    
+    char *hashBuf = new char[nOTs * block_size * nSndVals];
+    read_byte_string_from_socket(socket, hashBuf, nOTs * block_size * nSndVals);
 
     
     char *hashBufPtr = hashBuf;
@@ -184,17 +194,17 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
         chosenHash = hashBufPtr;
         
 //        for (size_t u = 0; i < choice; u++) {
-            chosenHash += choice*SHA1_BYTES;
+            chosenHash += choice*block_size;
 //        }
         
         // unmask the message with the hash
-        for (int i = 0; i < SHA1_BYTES; i++) {
+        for (int i = 0; i < block_size; i++) {
             retPtr[i] ^= chosenHash[i];
         }
         
         
-        hashBufPtr += nSndVals*SHA1_BYTES;
-        retPtr += SHA1_BYTES;
+        hashBufPtr += nSndVals*block_size;
+        retPtr += block_size;
     }
 
     
@@ -204,8 +214,9 @@ bool ObliviousTransfer::receiver(int nOTs, int *choices, char *ret, tcp::socket 
 
 
 
-bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket)
+bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket, uint8_t block_size)
 {
+    assert(block_size <= SHA1_BYTES);
     char* pBuf = new char[m_NPState.field_size * nOTs];
     int nSndVals = 2;
 
@@ -272,9 +283,10 @@ bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket)
     
     delete pBuf;
     pBuf = new char[m_NPState.field_size*nSndVals];
-    char *hashBuf = new char[nOTs * SHA1_BYTES * nSndVals];
+    char *hashBuf = new char[nOTs * block_size * nSndVals];
     char* hashBufPtr = hashBuf;
     char* messagePtr = messages;
+    char* hashVar = new char[SHA1_BYTES];
     //====================================================
     // Write all nOTs * nSndVals possible values and save hash value to ret
 //    char* retPtr= ret;
@@ -299,21 +311,22 @@ bool ObliviousTransfer::sender(int nOTs, char *messages, tcp::socket &socket)
             }
             
             // compute the hash of PK_u^r
-            hashReturn(hashBufPtr, pBufIdx, m_NPState.field_size, k);
+            hashReturn(hashVar, pBufIdx, m_NPState.field_size, k);
 
-            for (int i = 0; i < SHA1_BYTES; i++) {
-                hashBufPtr[i] ^= messagePtr[i];
+            for (int i = 0; i < block_size; i++) {
+                hashBufPtr[i] = hashVar[i] ^ messagePtr[i];
             }
-            messagePtr += SHA1_BYTES;
-            hashBufPtr += SHA1_BYTES;
+            messagePtr += block_size;
+            hashBufPtr += block_size;
             pBufIdx += m_NPState.field_size;
         }
     }
     
-    write_byte_string_to_socket(socket, hashBuf, nOTs * SHA1_BYTES * nSndVals);
+    write_byte_string_to_socket(socket, hashBuf, nOTs * block_size * nSndVals);
 
     delete [] hashBuf;
     delete [] pBuf;
+    delete [] hashVar;
 
     return true;
 }

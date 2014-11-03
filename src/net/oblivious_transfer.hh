@@ -53,8 +53,8 @@ class ObliviousTransfer {
 public:
     ObliviousTransfer(int secparam){ GMP_Init(secparam); };
     
-    bool sender(int nOTs, char *messages, tcp::socket &socket);
-    bool receiver(int nOTs, int *choices, char *ret, tcp::socket &socket);
+    bool sender(int nOTs, char *messages, tcp::socket &socket, uint8_t block_size = SHA1_BYTES);
+    bool receiver(int nOTs, int *choices, char *ret, tcp::socket &socket, uint8_t block_size = SHA1_BYTES);
 };
 
 #endif /* defined(__ciphermed_proj__oblivious_transfer__) */

@@ -20,6 +20,8 @@
 
 #include <iomanip>
 
+#define OT_BLOCK_SIZE 16
+
 const bool use_lsic__ = true;
 
 void Tester_Client::send_test_query(enum Test_Request_Request_Type type)
@@ -439,7 +441,7 @@ void Tester_Client::test_ot(unsigned int nOTs)
 //    unsigned int nOTs = 2;
     int *choices = new int[nOTs];
     
-    unsigned char *messages = new unsigned char[nOTs*SHA1_BYTES];
+    unsigned char *messages = new unsigned char[nOTs*OT_BLOCK_SIZE];
     
     
     for (size_t i = 0; i < nOTs; i++) {
@@ -451,12 +453,12 @@ void Tester_Client::test_ot(unsigned int nOTs)
     
     send_test_query(Test_Request_Request_Type_TEST_OT);
 
-    ot_->receiver(nOTs, choices, (char *)messages, socket_);
+    ot_->receiver(nOTs, choices, (char *)messages, socket_, OT_BLOCK_SIZE);
     
     
     for (size_t i = 0; i < nOTs; i++) {
-        for (size_t j = 0; j < SHA1_BYTES; j++) {
-            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[i*SHA1_BYTES + j];
+        for (size_t j = 0; j < OT_BLOCK_SIZE; j++) {
+            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[i*OT_BLOCK_SIZE + j];
 //            cout << (dec) << "|";
         }
         cout << ";";
@@ -467,34 +469,34 @@ void Tester_Client::test_ot(unsigned int nOTs)
 
 void Tester_Server_session::test_ot(unsigned int nOTs)
 {
-    unsigned char *messages = new unsigned char [2*nOTs*SHA1_BYTES];
+    unsigned char *messages = new unsigned char [2*nOTs*OT_BLOCK_SIZE];
     
     for (size_t i = 0; i < 2*nOTs; i++) {
-        for (size_t j = 0; j < SHA1_BYTES; j++) {
+        for (size_t j = 0; j < OT_BLOCK_SIZE; j++) {
             unsigned long v =gmp_urandomb_ui(rand_state_,8);
             cout << v << ";";
-            messages[i*SHA1_BYTES + j] = (unsigned char)v;
+            messages[i*OT_BLOCK_SIZE + j] = (unsigned char)v;
         }
     }
     cout << endl;
     
  
     for (size_t i = 0; i < nOTs; i++) {
-        for (size_t j = 0; j < SHA1_BYTES; j++) {
-            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[2*i*SHA1_BYTES + j];
+        for (size_t j = 0; j < OT_BLOCK_SIZE; j++) {
+            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[2*i*OT_BLOCK_SIZE + j];
 //            cout << (dec) << "|";
         }
         cout << ";";
     }
     cout << endl;
     for (size_t i = 0; i < nOTs; i++) {
-        for (size_t j = 0; j < SHA1_BYTES; j++) {
-            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[(2*i+1)*SHA1_BYTES + j];
+        for (size_t j = 0; j < OT_BLOCK_SIZE; j++) {
+            cout << setw(2) << setfill('0') << (hex) << (unsigned int) messages[(2*i+1)*OT_BLOCK_SIZE + j];
 //            cout << "|";
         }
         cout << ";";
     }
     cout << (dec) << endl;
 
-    ot_->sender(nOTs, (char *)messages, socket_);
+    ot_->sender(nOTs, (char *)messages, socket_, OT_BLOCK_SIZE);
 }
