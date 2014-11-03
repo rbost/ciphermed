@@ -151,7 +151,7 @@ void GC_Compare_A::prepare_circuit()
     gc_ = create_comparison_circuit(&garblingContext, bit_length_, NULL);
 }
 
-int GC_Compare_A::evaluateGC(InputLabels a_inputLabels, InputLabels b_inputLabels, OutputMap outputMap)
+void GC_Compare_A::evaluateGC(InputLabels a_inputLabels, InputLabels b_inputLabels)
 {
     int n = gc_->n;
     int m = gc_->m;
@@ -167,10 +167,14 @@ int GC_Compare_A::evaluateGC(InputLabels a_inputLabels, InputLabels b_inputLabel
     extractedLabels[n-1] = b_inputLabels[bit_length_];
 
     
-    evaluate(gc_, extractedLabels, computedOutputMap);
-    mapOutputs(outputMap, computedOutputMap, outputVals, m);
-    
-    blinded_res_ = outputVals[0];
+    evaluate(gc_, extractedLabels, &computedOutput_);
+}
+
+int GC_Compare_A::map_output(OutputMap outputMap)
+{
+
+    mapOutputs(outputMap, &computedOutput_, &blinded_res_, 1);
+
     return blinded_res_;
 }
 
@@ -298,7 +302,8 @@ void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t s
     int outputVals[m];
 
 
-    outputVals[0] = party_a.evaluateGC(a_labels, b_labels, party_b.get_output_map());
+    party_a.evaluateGC(a_labels, b_labels);
+    outputVals[0] = party_a.map_output(party_b.get_output_map());
     
     party_a.unblind(party_b.get_enc_mask());
 }

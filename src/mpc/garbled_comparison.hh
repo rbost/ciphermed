@@ -30,8 +30,9 @@ public:
     
     void set_garbled_table(GarbledTable* gt){ gc_->garbledTable = gt; };
     void set_global_key(block key){ gc_->globalKey = key; };
-    int evaluateGC(InputLabels a_inputLabels, InputLabels b_inputLabels, OutputMap outputMap);
-
+    void evaluateGC(InputLabels a_inputLabels, InputLabels b_inputLabels);
+    int map_output(OutputMap outputMap);
+    
     void unblind(const mpz_class &enc_mask);
 
     GarbledCircuit* get_garbled_circuit(){ return gc_; };
@@ -51,6 +52,7 @@ protected:
     size_t bit_length_; // bit length of the numbers to compare
     
     GarbledCircuit *gc_;
+    block computedOutput_;
     
     GM gm_;
     gmp_randstate_t randstate_;
