@@ -7,6 +7,7 @@
 #include <thread>
 #include <net/defs.hh>
 
+#include <net/oblivious_transfer.hh>
 
 void exec_comparison_protocol_A(tcp::socket &socket, Comparison_protocol_A *comparator, unsigned int n_threads)
 {
@@ -15,7 +16,7 @@ void exec_comparison_protocol_A(tcp::socket &socket, Comparison_protocol_A *comp
     }else if(typeid(*comparator) == typeid(Compare_A)){
         exec_priv_compare_A(socket, reinterpret_cast<Compare_A*>(comparator),n_threads);
     }else if(typeid(*comparator) == typeid(GC_Compare_A)) {
-        exec_garbled_compare_A(socket, reinterpret_cast<GC_Compare_A*>(comparator), NULL);
+        exec_garbled_compare_A(socket, reinterpret_cast<GC_Compare_A*>(comparator));
     }
 }
 
@@ -69,7 +70,7 @@ void exec_priv_compare_A(tcp::socket &socket, Compare_A *comparator, unsigned in
     comparator->unblind(c_t_prime);
 }
 
-void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator, ObliviousTransfer *ot)
+void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator)
 {
     int l = comparator->bit_length();
     GarbledCircuit* gc = comparator->get_garbled_circuit();
@@ -95,7 +96,7 @@ void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator, Obliv
         a_inputs[i] = a_bits[i];
     }
 
-    ot->receiver(l, a_inputs, (char *)a_labels, socket);
+    ObliviousTransfer::receiver(l, a_inputs, (char *)a_labels, socket, sizeof(block));
     
     // evaluate GC
     
@@ -122,7 +123,7 @@ void exec_comparison_protocol_B(tcp::socket &socket, Comparison_protocol_B *comp
     }else if(typeid(*comparator) == typeid(Compare_B)){
         exec_priv_compare_B(socket, reinterpret_cast<Compare_B*>(comparator), n_threads);
     }else if(typeid(*comparator) == typeid(GC_Compare_B)) {
-        exec_garbled_compare_B(socket, reinterpret_cast<GC_Compare_B*>(comparator), NULL);
+        exec_garbled_compare_B(socket, reinterpret_cast<GC_Compare_B*>(comparator));
     }
 }
 
@@ -179,7 +180,7 @@ void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator, unsigned in
     
 }
 
-void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator, ObliviousTransfer *ot)
+void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator)
 {
     int l = comparator->bit_length();
     GarbledCircuit* gc = comparator->get_garbled_circuit();
@@ -202,7 +203,7 @@ void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator, Obliv
     block *all_a_labels;
     all_a_labels = comparator->get_all_a_input_labels();
     
-    ot->sender(l,(char *)all_a_labels, socket);
+    ObliviousTransfer::sender(l,(char *)all_a_labels, socket, sizeof(block));
     
     
     // send the outputmap

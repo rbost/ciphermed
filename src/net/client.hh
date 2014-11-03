@@ -11,8 +11,6 @@
 
 #include <net/key_deps_descriptor.hh>
 
-#include <net/oblivious_transfer.hh>
-
 using boost::asio::ip::tcp;
 
 using namespace std;
@@ -50,8 +48,6 @@ public:
     void send_fhe_pk();
 
     void exchange_keys();
-
-    ObliviousTransfer* get_ot(){ return ot_; }
     
     mpz_class run_comparison_protocol_A(Comparison_protocol_A *comparator);
     mpz_class run_lsic_A(LSIC_A *lsic);
@@ -127,7 +123,6 @@ protected:
     FHESecKey *fhe_sk_;
     ZZX fhe_G_;
 
-    ObliviousTransfer *ot_;
     gmp_randstate_t rand_state_;
     
     boost::asio::streambuf input_buf_;

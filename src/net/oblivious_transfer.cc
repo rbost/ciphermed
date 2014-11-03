@@ -37,6 +37,8 @@ static void hashReturn(char* ret, char* val, int val_len, int ctr) {
     
 }
 
+NPState ObliviousTransfer::m_NPState;
+int ObliviousTransfer::m_SecParam = 0;
 
 bool ObliviousTransfer::GMP_Init(int secparam) {
     m_SecParam = secparam;

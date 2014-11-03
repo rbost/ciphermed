@@ -10,6 +10,8 @@
 #include <protobuf/protobuf_conversion.hh>
 #include <net/message_io.hh>
 
+#include <net/oblivious_transfer.hh>
+
 #include <net/defs.hh>
 #include <net/net_utils.hh>
 #include <util/util.hh>
@@ -453,7 +455,7 @@ void Tester_Client::test_ot(unsigned int nOTs)
     
     send_test_query(Test_Request_Request_Type_TEST_OT);
 
-    ot_->receiver(nOTs, choices, (char *)messages, socket_, OT_BLOCK_SIZE);
+    ObliviousTransfer::receiver(nOTs, choices, (char *)messages, socket_, OT_BLOCK_SIZE);
     
     
     for (size_t i = 0; i < nOTs; i++) {
@@ -498,5 +500,5 @@ void Tester_Server_session::test_ot(unsigned int nOTs)
     }
     cout << (dec) << endl;
 
-    ot_->sender(nOTs, (char *)messages, socket_, OT_BLOCK_SIZE);
+    ObliviousTransfer::sender(nOTs, (char *)messages, socket_, OT_BLOCK_SIZE);
 }

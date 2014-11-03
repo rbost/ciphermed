@@ -42,19 +42,18 @@ struct security_parameters {
 typedef struct security_parameters NPState;
 
 class ObliviousTransfer {
-    NPState m_NPState;
-    int m_SecParam;
-
-    bool GMP_Init(int secparam);
-    bool GMP_Cleanup();   
-    
-    void mpz_export_padded(char* pBufIdx, int field_size, mpz_t to_export);
-
 public:
-    ObliviousTransfer(int secparam){ GMP_Init(secparam); };
+    static NPState m_NPState;
+    static int m_SecParam;
+
+    static bool GMP_Init(int secparam);
+    static bool GMP_Cleanup();
     
-    bool sender(int nOTs, char *messages, tcp::socket &socket, uint8_t block_size = SHA1_BYTES);
-    bool receiver(int nOTs, int *choices, char *ret, tcp::socket &socket, uint8_t block_size = SHA1_BYTES);
+    static void mpz_export_padded(char* pBufIdx, int field_size, mpz_t to_export);
+
+    static void init(int secparam){ GMP_Init(secparam); };
+    static bool sender(int nOTs, char *messages, tcp::socket &socket, uint8_t block_size = SHA1_BYTES);
+    static bool receiver(int nOTs, int *choices, char *ret, tcp::socket &socket, uint8_t block_size = SHA1_BYTES);
 };
 
 #endif /* defined(__ciphermed_proj__oblivious_transfer__) */

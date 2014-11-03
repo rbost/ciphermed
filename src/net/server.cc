@@ -22,6 +22,7 @@
 #include <net/server.hh>
 #include <net/net_utils.hh>
 #include <net/message_io.hh>
+#include <net/oblivious_transfer.hh>
 
 #include <net/exec_protocol.hh>
 
@@ -39,6 +40,7 @@ Server::Server(gmp_randstate_t state, Key_dependencies_descriptor key_deps_desc,
     gmp_randinit_set(rand_state_, state);
 
     init_needed_keys(keysize);
+    ObliviousTransfer::init(OT_SECPARAM);
 }
 
 Server::~Server()
@@ -139,8 +141,6 @@ Server_session::Server_session(Server *server, gmp_randstate_t state, unsigned i
 : server_(server), socket_(std::move(socket)), client_gm_(NULL), client_paillier_(NULL), client_fhe_pk_(NULL), id_(id)
 {
     gmp_randinit_set(rand_state_, state);
-    
-    ot_ = new ObliviousTransfer(OT_SECPARAM);
 }
 
 Server_session::~Server_session()

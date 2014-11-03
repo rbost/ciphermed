@@ -28,6 +28,7 @@
 #include <protobuf/protobuf_conversion.hh>
 
 #include <net/exec_protocol.hh>
+#include <net/oblivious_transfer.hh>
 
 using boost::asio::ip::tcp;
 
@@ -40,7 +41,7 @@ Client::Client(boost::asio::io_service& io_service, gmp_randstate_t state,Key_de
     
     init_needed_keys(keysize);
     
-    ot_ = new ObliviousTransfer(OT_SECPARAM);
+    ObliviousTransfer::init(OT_SECPARAM);
 }
 
 Client::~Client()
