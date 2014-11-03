@@ -24,7 +24,7 @@
 
 #define OT_BLOCK_SIZE 16
 
-const bool use_lsic__ = true;
+const COMPARISON_PROTOCOL comparison_prot__ = LSIC_PROTOCOL;
 
 void Tester_Client::send_test_query(enum Test_Request_Request_Type type)
 {
@@ -84,7 +84,7 @@ void Tester_Client::test_enc_compare(size_t l)
 
     send_test_query(Test_Request_Request_Type_TEST_ENC_COMPARE);
 
-    bool res = enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
+    bool res = enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, comparison_prot__);
     cout<< "\nResult is " << res << endl;
     cout << "Result should be " << (a < b) << endl;
 }
@@ -107,7 +107,7 @@ void Tester_Client::test_multiple_enc_compare(size_t l)
     
     send_test_query(Test_Request_Request_Type_TEST_MULTIPLE_COMPARE);
 
-    vector<bool> results = multiple_enc_comparison(c_a, c_b, l, use_lsic__);
+    vector<bool> results = multiple_enc_comparison(c_a, c_b, l, comparison_prot__);
     
     for (size_t i = 0; i < n; i++) {
         if ((a[i] < b[i]) != results[i]) {
@@ -129,7 +129,7 @@ void Tester_Client::test_rev_enc_compare(size_t l)
 
     send_test_query(Test_Request_Request_Type_TEST_REV_ENC_COMPARE);
 
-    rev_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, use_lsic__);
+    rev_enc_comparison(server_paillier_->encrypt(a),server_paillier_->encrypt(b),l, comparison_prot__);
     
     cout << "\nResult should be " << (a < b) << endl;
 }
@@ -159,7 +159,7 @@ void Tester_Client::test_linear_enc_argmax()
     
     ScopedTimer *t = new ScopedTimer("Linear enc argmax");
     
-    run_linear_enc_argmax(owner,use_lsic__);
+    run_linear_enc_argmax(owner,comparison_prot__);
     delete t;
     
     size_t mpc_argmax = owner.output();
@@ -193,7 +193,7 @@ void Tester_Client::test_tree_enc_argmax()
     
     ScopedTimer *t = new ScopedTimer("Tree enc argmax");
     
-    run_tree_enc_argmax(owner,use_lsic__);
+    run_tree_enc_argmax(owner,comparison_prot__);
     delete t;
     
     size_t mpc_argmax = owner.output();
@@ -321,14 +321,14 @@ void Tester_Server_session::run_session()
                 case Test_Request_Request_Type_TEST_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Enc Compare" << endl;
-                    help_enc_comparison(0,use_lsic__);
+                    help_enc_comparison(0,comparison_prot__);
                 }
                     break;
                     
                 case Test_Request_Request_Type_TEST_REV_ENC_COMPARE:
                 {
                     cout << id_ << ": Test Rev Enc Compare" << endl;
-                    bool b = help_rev_enc_comparison(0,use_lsic__);
+                    bool b = help_rev_enc_comparison(0,comparison_prot__);
                     cout << id_ << ": Rev Enc Compare result: " << b << endl;
                 }
                     break;
@@ -337,7 +337,7 @@ void Tester_Server_session::run_session()
                 {
                     cout << id_ << ": Test Linear Enc Argmax" << endl;
                     Linear_EncArgmax_Helper helper(100,5,server_->paillier());
-                    run_linear_enc_argmax(helper,use_lsic__);
+                    run_linear_enc_argmax(helper,comparison_prot__);
                 }
                     break;
                     
@@ -365,7 +365,7 @@ void Tester_Server_session::run_session()
                 case Test_Request_Request_Type_TEST_MULTIPLE_COMPARE:
                 {
                     cout << id_ << ": Test Multiple Enc Compare" << endl;
-                    multiple_help_enc_comparison(5, 0,use_lsic__);
+                    multiple_help_enc_comparison(5, 0,comparison_prot__);
                 }
                     break;
                  
@@ -373,7 +373,7 @@ void Tester_Server_session::run_session()
                 {
                     cout << id_ << ": Test Tree Enc Argmax" << endl;
                     Tree_EncArgmax_Helper helper(100,5,server_->paillier());
-                    run_tree_enc_argmax(helper,use_lsic__);
+                    run_tree_enc_argmax(helper,comparison_prot__);
                 }
                     break;
                 case Test_Request_Request_Type_TEST_OT:

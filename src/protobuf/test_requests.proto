@@ -19,6 +19,6 @@ message Test_Request
     required Request_Type type = 1;
     optional uint32 bit_size = 2;
     optional uint32 iterations = 3;
-    optional bool use_lsic = 4;
+    optional uint32 comparison_protocol = 4;
     optional uint32 argmax_elements = 5;
 }

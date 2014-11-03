@@ -10,7 +10,7 @@
 #include <net/message_io.hh>
 #include <util/util.hh>
 
-static const bool use_lsic__ = true;
+static const COMPARISON_PROTOCOL comparison_prot__ = LSIC_PROTOCOL;
 
 Naive_Bayes_Classifier_Server::Naive_Bayes_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<vector<vector<double>>> &conditionals_vec, const vector<double> &prior_vec)
 : Server(state, Naive_Bayes_Classifier_Server::key_deps_descriptor(), keysize, lambda)
@@ -119,10 +119,10 @@ void Naive_Bayes_Classifier_Server_session::run_session()
         unsigned int features_count = nb_server_->features_count();
         
         Tree_EncArgmax_Helper helper(54+cat_count,cat_count,server_->paillier());
-        run_tree_enc_argmax(helper,use_lsic__);
+        run_tree_enc_argmax(helper,comparison_prot__);
         
 //        Linear_EncArgmax_Helper helper(54+features_count,cat_count,server_->paillier());
-//        run_linear_enc_argmax(helper,use_lsic__);
+//        run_linear_enc_argmax(helper,comparison_prot__);
         
 #ifdef BENCHMARK
         cout << "Benchmark: " << GET_BENCHMARK_TIME << " ms" << endl;
@@ -181,10 +181,10 @@ bool Naive_Bayes_Classifier_Client::run()
     t = new ScopedTimer("Argmax");
     
     Tree_EncArgmax_Owner owner(cat_prob,54+cat_count,*server_paillier_,rand_state_, lambda_);
-    run_tree_enc_argmax(owner,use_lsic__);
+    run_tree_enc_argmax(owner,comparison_prot__);
 
 //    Linear_EncArgmax_Owner owner(cat_prob,54+features_count,*server_paillier_,rand_state_, lambda_);
-//    run_linear_enc_argmax(owner,use_lsic__);
+//    run_linear_enc_argmax(owner,comparison_prot__);
 
     delete t;
     

@@ -305,9 +305,9 @@ void Server_session::run_garbled_compare_B(GC_Compare_B *comparator)
 }
 
 // we suppose that the client already has the server's public key for Paillier
-void Server_session::rev_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+void Server_session::rev_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot)
 {
-    Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, use_lsic);
+    Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, comparison_prot);
     owner.set_input(a,b);
     run_rev_enc_comparison_owner(owner);
 }
@@ -317,9 +317,9 @@ void Server_session::run_rev_enc_comparison_owner(Rev_EncCompare_Owner &owner)
     exec_rev_enc_comparison_owner(socket_, owner, server_->lambda(), true, server_->threads_per_session());
 }
 
-bool Server_session::help_rev_enc_comparison(const size_t &l, bool use_lsic)
+bool Server_session::help_rev_enc_comparison(const size_t &l, COMPARISON_PROTOCOL comparison_prot)
 {
-    Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, use_lsic);
+    Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, comparison_prot);
     return run_rev_enc_comparison_helper(helper);
 }
 
@@ -329,9 +329,9 @@ bool Server_session::run_rev_enc_comparison_helper(Rev_EncCompare_Helper &helper
     return helper.output();
 }
 
-bool Server_session::enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+bool Server_session::enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot)
 {
-    EncCompare_Owner owner = create_enc_comparator_owner(l, use_lsic);
+    EncCompare_Owner owner = create_enc_comparator_owner(l, comparison_prot);
     owner.set_input(a,b);
     
     return run_enc_comparison_owner(owner);
@@ -343,9 +343,9 @@ bool Server_session::run_enc_comparison_owner(EncCompare_Owner &owner)
     return owner.output();
 }
 
-void Server_session::help_enc_comparison(const size_t &l, bool use_lsic)
+void Server_session::help_enc_comparison(const size_t &l, COMPARISON_PROTOCOL comparison_prot)
 {
-    EncCompare_Helper helper = create_enc_comparator_helper(l, use_lsic);
+    EncCompare_Helper helper = create_enc_comparator_helper(l, comparison_prot);
     run_enc_comparison_helper(helper);
 }
 
@@ -382,44 +382,44 @@ mpz_class Server_session::run_enc_comparison_helper_enc_result(EncCompare_Helper
 
 // here we keep the old convention as these are the function meant to be called
 
-void Server_session::rev_enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+void Server_session::rev_enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot)
 {
-    EncCompare_Owner owner = create_enc_comparator_owner(l, use_lsic);
+    EncCompare_Owner owner = create_enc_comparator_owner(l, comparison_prot);
     owner.set_input(a,b);
     run_enc_comparison_owner_enc_result(owner);
 }
 
 
-mpz_class Server_session::help_rev_enc_comparison_enc_result(const size_t &l, bool use_lsic)
+mpz_class Server_session::help_rev_enc_comparison_enc_result(const size_t &l, COMPARISON_PROTOCOL comparison_prot)
 {
-    EncCompare_Helper helper = create_enc_comparator_helper(l, use_lsic);
+    EncCompare_Helper helper = create_enc_comparator_helper(l, comparison_prot);
     return run_enc_comparison_helper_enc_result(helper);
 }
 
 
-mpz_class Server_session::enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic)
+mpz_class Server_session::enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot)
 {
-    Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, use_lsic);
+    Rev_EncCompare_Owner owner = create_rev_enc_comparator_owner(l, comparison_prot);
     owner.set_input(a,b);
     
     return run_rev_enc_comparison_owner_enc_result(owner);
 }
 
 
-void Server_session::help_enc_comparison_enc_result(const size_t &l, bool use_lsic)
+void Server_session::help_enc_comparison_enc_result(const size_t &l, COMPARISON_PROTOCOL comparison_prot)
 {
-    Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, use_lsic);
+    Rev_EncCompare_Helper helper = create_rev_enc_comparator_helper(l, comparison_prot);
     run_rev_enc_comparison_helper_enc_result(helper);
 }
 
-vector<bool> Server_session::multiple_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic)
+vector<bool> Server_session::multiple_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, COMPARISON_PROTOCOL comparison_prot)
 {
     assert(a.size() == b.size());
     size_t n = a.size();
     vector<EncCompare_Owner*> owners(n);
     
     for (size_t i = 0; i < n; i++) {
-        owners[i] = new EncCompare_Owner(create_enc_comparator_owner(l, use_lsic));
+        owners[i] = new EncCompare_Owner(create_enc_comparator_owner(l, comparison_prot));
         owners[i]->set_input(a[i],b[i]);
     }
     
@@ -437,12 +437,12 @@ vector<bool> Server_session::multiple_enc_comparison(const vector<mpz_class> &a,
 }
 
 
-void Server_session::multiple_help_enc_comparison(const size_t n, const size_t &l, bool use_lsic)
+void Server_session::multiple_help_enc_comparison(const size_t n, const size_t &l, COMPARISON_PROTOCOL comparison_prot)
 {
     vector<EncCompare_Helper*> helpers(n);
     
     for (size_t i = 0; i < n; i++) {
-        helpers[i] = new EncCompare_Helper(create_enc_comparator_helper(l, use_lsic));
+        helpers[i] = new EncCompare_Helper(create_enc_comparator_helper(l, comparison_prot));
         
     }
     
@@ -455,14 +455,14 @@ void Server_session::multiple_help_enc_comparison(const size_t n, const size_t &
 }
 
 
-void Server_session::multiple_rev_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic)
+void Server_session::multiple_rev_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, COMPARISON_PROTOCOL comparison_prot)
 {
     assert(a.size() == b.size());
     size_t n = a.size();
     vector<Rev_EncCompare_Owner*> owners(n);
     
     for (size_t i = 0; i < n; i++) {
-        owners[i] = new Rev_EncCompare_Owner(create_rev_enc_comparator_owner(l, use_lsic));
+        owners[i] = new Rev_EncCompare_Owner(create_rev_enc_comparator_owner(l, comparison_prot));
         owners[i]->set_input(a[i],b[i]);
     }
     
@@ -477,12 +477,12 @@ void Server_session::multiple_rev_enc_comparison(const vector<mpz_class> &a, con
 }
 
 
-vector<bool> Server_session::multiple_help_rev_enc_comparison(const size_t n, const size_t &l, bool use_lsic)
+vector<bool> Server_session::multiple_help_rev_enc_comparison(const size_t n, const size_t &l, COMPARISON_PROTOCOL comparison_prot)
 {
     vector<Rev_EncCompare_Helper*> helpers(n);
     
     for (size_t i = 0; i < n; i++) {
-        helpers[i] = new Rev_EncCompare_Helper(create_rev_enc_comparator_helper(l, use_lsic));
+        helpers[i] = new Rev_EncCompare_Helper(create_rev_enc_comparator_helper(l, comparison_prot));
         
     }
     
@@ -498,12 +498,12 @@ vector<bool> Server_session::multiple_help_rev_enc_comparison(const size_t n, co
     return results;
 }
 
-void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, bool use_lsic)
+void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, COMPARISON_PROTOCOL comparison_prot)
 {
     size_t nbits = helper.bit_length();
     function<Comparison_protocol_B*()> comparator_creator;
     
-    if (use_lsic) {
+    if (comparison_prot) {
         comparator_creator = [this,nbits](){ return new LSIC_B(0,nbits,server_->gm()); };
         
     }else{
@@ -512,12 +512,12 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, bool
     exec_linear_enc_argmax(socket_, helper, comparator_creator, server_->threads_per_session());
 }
 
-void Server_session::run_tree_enc_argmax(Tree_EncArgmax_Helper &helper, bool use_lsic)
+void Server_session::run_tree_enc_argmax(Tree_EncArgmax_Helper &helper, COMPARISON_PROTOCOL comparison_prot)
 {
     size_t nbits = helper.bit_length();
     function<Comparison_protocol_B*()> comparator_creator;
     
-    if (use_lsic) {
+    if (comparison_prot) {
         comparator_creator = [this,nbits](){ return new LSIC_B(0,nbits,server_->gm()); };
         
     }else{
@@ -551,55 +551,63 @@ void Server_session::help_compute_dot_product(const vector<mpz_class> &y, bool e
     exec_help_compute_dot_product(socket_, y, server_->paillier(), encrypted_input);
 }
 
-EncCompare_Owner Server_session::create_enc_comparator_owner(size_t bit_size, bool use_lsic)
+EncCompare_Owner Server_session::create_enc_comparator_owner(size_t bit_size, COMPARISON_PROTOCOL comparison_prot)
 {
     Comparison_protocol_B *comparator;
     
-    if (use_lsic) {
+    if (comparison_prot == LSIC_PROTOCOL) {
         comparator = new LSIC_B(0,bit_size,server_->gm());
-    }else{
+    }else if (comparison_prot == DGK_PROTOCOL){
         comparator = new Compare_B(0,bit_size,server_->paillier(),server_->gm());
+    }else if (comparison_prot == GC_PROTOCOL) {
+        comparator = new GC_Compare_B(0,bit_size,server_->gm(), rand_state_);
     }
-    
+
     return EncCompare_Owner(0,0,bit_size,*client_paillier_,comparator,rand_state_);
 }
 
-EncCompare_Helper Server_session::create_enc_comparator_helper(size_t bit_size, bool use_lsic)
+EncCompare_Helper Server_session::create_enc_comparator_helper(size_t bit_size, COMPARISON_PROTOCOL comparison_prot)
 {
 
     Comparison_protocol_A *comparator;
     
-    if (use_lsic) {
+    if (comparison_prot == LSIC_PROTOCOL) {
         comparator = new LSIC_A(0,bit_size,*client_gm_);
-    }else{
+    }else if (comparison_prot == DGK_PROTOCOL){
         comparator = new Compare_A(0,bit_size,*client_paillier_,*client_gm_,rand_state_);
+    }else if (comparison_prot == GC_PROTOCOL) {
+        comparator = new GC_Compare_A(0,bit_size,*client_gm_, rand_state_);
     }
-    
+
     return EncCompare_Helper(bit_size,server_->paillier(),comparator);
 }
 
-Rev_EncCompare_Owner Server_session::create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic)
+Rev_EncCompare_Owner Server_session::create_rev_enc_comparator_owner(size_t bit_size, COMPARISON_PROTOCOL comparison_prot)
 {
     Comparison_protocol_A *comparator;
     
-    if (use_lsic) {
+    if (comparison_prot == LSIC_PROTOCOL) {
         comparator = new LSIC_A(0,bit_size,*client_gm_);
-    }else{
+    }else if (comparison_prot == DGK_PROTOCOL){
         comparator = new Compare_A(0,bit_size,*client_paillier_,*client_gm_,rand_state_);
+    }else if (comparison_prot == GC_PROTOCOL) {
+        comparator = new GC_Compare_A(0,bit_size,*client_gm_, rand_state_);
     }
     
     return Rev_EncCompare_Owner(0,0,bit_size,*client_paillier_,comparator,rand_state_);
 }
 
 
-Rev_EncCompare_Helper Server_session::create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic)
+Rev_EncCompare_Helper Server_session::create_rev_enc_comparator_helper(size_t bit_size, COMPARISON_PROTOCOL comparison_prot)
 {
     Comparison_protocol_B *comparator;
     
-    if (use_lsic) {
+    if (comparison_prot == LSIC_PROTOCOL) {
         comparator = new LSIC_B(0,bit_size,server_->gm());
-    }else{
+    }else if (comparison_prot == DGK_PROTOCOL){
         comparator = new Compare_B(0,bit_size,server_->paillier(),server_->gm());
+    }else if (comparison_prot == GC_PROTOCOL) {
+        comparator = new GC_Compare_B(0,bit_size,server_->gm(), rand_state_);
     }
 
     return Rev_EncCompare_Helper(bit_size,server_->paillier(),comparator);

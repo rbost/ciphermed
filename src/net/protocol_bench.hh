@@ -38,15 +38,15 @@ class Bench_Client : public Client{
     Bench_Client(boost::asio::io_service& io_service, gmp_randstate_t state, unsigned int keysize, unsigned int lambda)
     : Client(io_service,state,Bench_Server::key_deps_descriptor(),keysize,lambda) {};
     
-    void send_test_query(enum Test_Request_Request_Type type, unsigned int bit_size = BIT_SIZE_DEFAULT, unsigned int iterations = ITERATIONS_DEFAULT, bool use_lsic = false, unsigned int argmax_elements = 0);
+    void send_test_query(enum Test_Request_Request_Type type, unsigned int bit_size = BIT_SIZE_DEFAULT, unsigned int iterations = ITERATIONS_DEFAULT, COMPARISON_PROTOCOL comparison_prot = GC_PROTOCOL, unsigned int argmax_elements = 0);
 
     void bench_lsic(size_t bit_size, unsigned int iterations);
     void bench_compare(size_t bit_size, unsigned int iterations);
     void bench_garbled_compare(size_t bit_size, unsigned int iterations);
-    void bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
-    void bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
-    void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
-    void bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
+    void bench_enc_compare(size_t bit_size, unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
+    void bench_rev_enc_compare(size_t bit_size, unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
+    void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
+    void bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
     void bench_change_es(unsigned int iterations);
     void bench_ot(size_t n_elements ,unsigned int iterations);
     
@@ -65,16 +65,16 @@ class  Bench_Server_session : public Server_session{
     : Server_session(server,state,id,socket){};
     
     void run_session();
-    enum Test_Request_Request_Type get_test_query(unsigned int &bit_size, unsigned int &iterations, bool &use_lsic, unsigned int &argmax_elements);
+    enum Test_Request_Request_Type get_test_query(unsigned int &bit_size, unsigned int &iterations, COMPARISON_PROTOCOL &comparison_prot, unsigned int &argmax_elements);
 
     /* Test functions */
     void bench_lsic(size_t bit_size, unsigned int iterations);
     void bench_compare(size_t bit_size, unsigned int iterations);
     void bench_garbled_compare(size_t bit_size, unsigned int iterations);
-    void bench_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
-    void bench_rev_enc_compare(size_t bit_size, unsigned int iterations, bool use_lsic);
-    void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
-    void bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, bool use_lsic);
+    void bench_enc_compare(size_t bit_size, unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
+    void bench_rev_enc_compare(size_t bit_size, unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
+    void bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
+    void bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, COMPARISON_PROTOCOL comparison_prot);
     void bench_change_es(unsigned int iterations);
     void bench_ot(size_t n_elements ,unsigned int iterations);
 

@@ -62,24 +62,24 @@ public:
     void run_garbled_compare_B(GC_Compare_B *comparator);
 
     /* calls for (reversed) comparison over encrypted data */
-    bool enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    void help_enc_comparison(const size_t &l, bool use_lsic);
+    bool enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot);
+    void help_enc_comparison(const size_t &l, COMPARISON_PROTOCOL comparison_prot);
 
-    void rev_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    bool help_rev_enc_comparison(const size_t &l, bool use_lsic);
+    void rev_enc_comparison(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot);
+    bool help_rev_enc_comparison(const size_t &l, COMPARISON_PROTOCOL comparison_prot);
 
-    void rev_enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
+    void rev_enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot);
     
-    mpz_class help_rev_enc_comparison_enc_result(const size_t &l, bool use_lsic);
+    mpz_class help_rev_enc_comparison_enc_result(const size_t &l, COMPARISON_PROTOCOL comparison_prot);
     
-    mpz_class enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, bool use_lsic);
-    void help_enc_comparison_enc_result(const size_t &l, bool use_lsic);
+    mpz_class enc_comparison_enc_result(const mpz_class &a, const mpz_class &b, size_t l, COMPARISON_PROTOCOL comparison_prot);
+    void help_enc_comparison_enc_result(const size_t &l, COMPARISON_PROTOCOL comparison_prot);
     
-    vector<bool> multiple_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic);
-    void multiple_help_enc_comparison(const size_t n, const size_t &l, bool use_lsic);
+    vector<bool> multiple_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, COMPARISON_PROTOCOL comparison_prot);
+    void multiple_help_enc_comparison(const size_t n, const size_t &l, COMPARISON_PROTOCOL comparison_prot);
 
-    void multiple_rev_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, bool use_lsic);
-    vector<bool> multiple_help_rev_enc_comparison(const size_t n, const size_t &l, bool use_lsic);
+    void multiple_rev_enc_comparison(const vector<mpz_class> &a, const vector<mpz_class> &b, size_t l, COMPARISON_PROTOCOL comparison_prot);
+    vector<bool> multiple_help_rev_enc_comparison(const size_t n, const size_t &l, COMPARISON_PROTOCOL comparison_prot);
 
     /* other protocols */
 
@@ -101,14 +101,14 @@ public:
     void run_enc_comparison_owner_enc_result(EncCompare_Owner &owner);
     mpz_class run_enc_comparison_helper_enc_result(EncCompare_Helper &helper);
 
-    size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, bool use_lsic);
-    size_t run_tree_enc_argmax(Tree_EncArgmax_Owner &owner, bool use_lsic);
+    size_t run_linear_enc_argmax(Linear_EncArgmax_Owner &owner, COMPARISON_PROTOCOL comparison_prot);
+    size_t run_tree_enc_argmax(Tree_EncArgmax_Owner &owner, COMPARISON_PROTOCOL comparison_prot);
 
     /* to build comparators */
-    EncCompare_Owner create_enc_comparator_owner(size_t bit_size, bool use_lsic);
-    EncCompare_Helper create_enc_comparator_helper(size_t bit_size, bool use_lsic);
-    Rev_EncCompare_Owner create_rev_enc_comparator_owner(size_t bit_size, bool use_lsic);
-    Rev_EncCompare_Helper create_rev_enc_comparator_helper(size_t bit_size, bool use_lsic);
+    EncCompare_Owner create_enc_comparator_owner(size_t bit_size, COMPARISON_PROTOCOL comparison_prot);
+    EncCompare_Helper create_enc_comparator_helper(size_t bit_size, COMPARISON_PROTOCOL comparison_prot);
+    Rev_EncCompare_Owner create_rev_enc_comparator_owner(size_t bit_size, COMPARISON_PROTOCOL comparison_prot);
+    Rev_EncCompare_Helper create_rev_enc_comparator_helper(size_t bit_size, COMPARISON_PROTOCOL comparison_prot);
 
     unsigned int n_threads() const { return n_threads_; }
     void set_n_threads(unsigned int n) { assert(n > 0); n_threads_ = n; }

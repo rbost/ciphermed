@@ -85,7 +85,7 @@ void Decision_tree_Classifier_Server_session::run_session()
         t = new ScopedTimer("Server: Compare");
         for (size_t i = 0; i < node_values.size(); i++) {
             mpz_class c_treshold = client_paillier_->encrypt(get<1>(criteria[i]));
-            c_b_gm[i] = enc_comparison_enc_result(node_values[i],c_treshold,64,false);
+            c_b_gm[i] = enc_comparison_enc_result(node_values[i],c_treshold,64,GC_PROTOCOL);
         }
         delete t;
 
@@ -193,7 +193,7 @@ void Decision_tree_Classifier_Client::run()
 
     for (unsigned int i = 0; i < n_nodes_; i++) {
         // for now, do it over 64 bits
-        help_enc_comparison_enc_result(64, false);
+        help_enc_comparison_enc_result(64, GC_PROTOCOL);
     }
     delete t;
 

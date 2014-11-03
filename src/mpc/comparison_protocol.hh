@@ -26,3 +26,11 @@ public:
 
 // dynamicaly call the right test function
 void runProtocol(Comparison_protocol_A *party_a, Comparison_protocol_B *party_b, gmp_randstate_t state);
+
+
+typedef enum
+{
+    LSIC_PROTOCOL = 0,
+    DGK_PROTOCOL = 1,
+    GC_PROTOCOL = 2
+}COMPARISON_PROTOCOL;

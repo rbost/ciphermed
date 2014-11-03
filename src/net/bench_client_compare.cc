@@ -41,12 +41,14 @@ static void bench_client(const string &hostname, unsigned int key_size, unsigned
         client.bench_compare(bit_size, iterations);
         client.bench_garbled_compare(bit_size, iterations);
         
-        client.bench_enc_compare(bit_size, iterations, true);
-        client.bench_enc_compare(bit_size, iterations, false);
+        client.bench_enc_compare(bit_size, iterations, LSIC_PROTOCOL);
+        client.bench_enc_compare(bit_size, iterations, DGK_PROTOCOL);
+        client.bench_enc_compare(bit_size, iterations, GC_PROTOCOL);
         
-        client.bench_rev_enc_compare(bit_size, iterations, true);
-        client.bench_rev_enc_compare(bit_size, iterations, false);
-                
+        client.bench_rev_enc_compare(bit_size, iterations, LSIC_PROTOCOL);
+        client.bench_rev_enc_compare(bit_size, iterations, DGK_PROTOCOL);
+        client.bench_rev_enc_compare(bit_size, iterations, GC_PROTOCOL);
+
         client.disconnect();
         
     }

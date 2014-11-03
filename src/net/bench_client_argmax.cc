@@ -22,7 +22,7 @@ static void bench_linear_lsic(Bench_Client &client, unsigned int bit_size, unsig
     for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
         cout << "\n\n\n";
         
-        client.bench_linear_enc_argmax(n_elts, bit_size, iterations, true);
+        client.bench_linear_enc_argmax(n_elts, bit_size, iterations, LSIC_PROTOCOL);
     }
 }
 
@@ -35,7 +35,7 @@ static void bench_linear_dgk(Bench_Client &client, unsigned int bit_size, unsign
     for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
         cout << "\n\n\n";
         
-        client.bench_linear_enc_argmax(n_elts, bit_size, iterations, false);
+        client.bench_linear_enc_argmax(n_elts, bit_size, iterations, DGK_PROTOCOL);
     }
 }
 
@@ -48,7 +48,7 @@ static void bench_tree_lsic(Bench_Client &client, unsigned int bit_size, unsigne
     for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
         cout << "\n\n\n";
         
-        client.bench_tree_enc_argmax(n_elts, bit_size, iterations, true);
+        client.bench_tree_enc_argmax(n_elts, bit_size, iterations, LSIC_PROTOCOL);
     }
 }
 
@@ -61,7 +61,7 @@ static void bench_tree_dgk(Bench_Client &client, unsigned int bit_size, unsigned
     for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
         cout << "\n\n\n";
         
-        client.bench_tree_enc_argmax(n_elts, bit_size, iterations, false);
+        client.bench_tree_enc_argmax(n_elts, bit_size, iterations, DGK_PROTOCOL);
     }
 }
 
