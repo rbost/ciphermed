@@ -140,8 +140,6 @@ GC_Compare_A::GC_Compare_A(const mpz_class &x, const size_t &l, GM &gm, gmp_rand
 {
     s_ = 1 - 2*gmp_urandomb_ui(state,1);
     gmp_randinit_set(randstate_, state);
-    
-    prepare_circuit();
 }
 
 void GC_Compare_A::prepare_circuit()
@@ -203,8 +201,6 @@ GC_Compare_B::GC_Compare_B(const mpz_class &y, const size_t &l, GM_priv &gm, gmp
 : b_(y), bit_length_(l), gm_(gm), mask_(0)
 {
     mask_ = gmp_urandomb_ui(state,1);
-    
-    prepare_circuit();
 }
 
 
@@ -264,6 +260,9 @@ mpz_class GC_Compare_B::get_enc_mask()
 
 void runProtocol(GC_Compare_A &party_a, GC_Compare_B &party_b, gmp_randstate_t state)
 {
+    party_a.prepare_circuit();
+    party_b.prepare_circuit();
+    
     GarbledCircuit *gc_a = party_a.get_garbled_circuit();
     GarbledCircuit *gc_b = party_b.get_garbled_circuit();
     

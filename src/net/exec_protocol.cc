@@ -72,6 +72,7 @@ void exec_priv_compare_A(tcp::socket &socket, Compare_A *comparator, unsigned in
 
 void exec_garbled_compare_A(tcp::socket &socket, GC_Compare_A *comparator)
 {
+    comparator->prepare_circuit();
     int l = comparator->bit_length();
     GarbledCircuit* gc = comparator->get_garbled_circuit();
     
@@ -182,6 +183,7 @@ void exec_priv_compare_B(tcp::socket &socket, Compare_B *comparator, unsigned in
 
 void exec_garbled_compare_B(tcp::socket &socket, GC_Compare_B *comparator)
 {
+    comparator->prepare_circuit();
     int l = comparator->bit_length();
     GarbledCircuit* gc = comparator->get_garbled_circuit();
     
