@@ -248,7 +248,7 @@ mpz_class Client::run_priv_compare_A(Compare_A *comparator)
 
 void Client::run_comparison_protocol_B(Comparison_protocol_B *comparator)
 {
-    exec_comparison_protocol_B(socket_,comparator);
+    exec_comparison_protocol_B(socket_,comparator,n_threads_);
 }
 
 void Client::run_lsic_B(LSIC_B *lsic)
