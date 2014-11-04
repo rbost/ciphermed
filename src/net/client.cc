@@ -547,7 +547,7 @@ EncCompare_Owner Client::create_enc_comparator_owner(size_t bit_size, COMPARISON
         assert(paillier_ != NULL);
         comparator = new Compare_B(0,bit_size,*paillier_,*gm_);
     }else if (comparison_prot == GC_PROTOCOL) {
-        new GC_Compare_B(0,bit_size,*gm_, rand_state_);
+        comparator = new GC_Compare_B(0,bit_size,*gm_, rand_state_);
     }
 
     return EncCompare_Owner(0,0,bit_size,*server_paillier_,comparator,rand_state_);
