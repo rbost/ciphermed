@@ -5,7 +5,7 @@ MPCOBJS := $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC))
 
 all:    $(OBJDIR)/libmpc.so
 $(OBJDIR)/libmpc.so: $(MPCOBJS) $(OBJDIR)/libcipher.so $(OBJDIR)/libjustGarble.so
-	$(CXX) -shared -o $@ $(MPCOBJS) -Wl,--no-as-needed $(LDFLAGS) -lgmp -lgmpxx -lcipher -ljustGarble
+	$(CXX) -shared -o $@ $(MPCOBJS) $(SHAIFHEPATH)/fhe.a -Wl,--no-as-needed $(LDFLAGS) -lgmp -lgmpxx -lcipher -ljustGarble
 
 all:	$(OBJDIR)/mpc/test_mpc 
 $(OBJDIR)/mpc/test_mpc: $(OBJDIR)/mpc/test_mpc.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so
