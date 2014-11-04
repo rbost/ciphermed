@@ -420,17 +420,16 @@ static void usage(char *prog)
 }
 
 int
-main(int ac, char **av)
+main(int argc, char **argv)
 {
-    argmap_t argmap;
-    argmap["n"] = "5";
-    argmap["shallow"] = "1";
+    if (argc != 3)
+    {
+        std::cerr << "Usage: test_tree <lambda> <shallow>" << std::endl;
+        return 1;
+    }
+    unsigned int n = atoi(argv[1]);
+    unsigned int shallow = atoi(argv[2]);
 
-    if (!parseArgs(ac, av, argmap)) usage(av[0]);
-
-    long n = atoi(argmap["n"]);
-    bool shallow = atoi(argmap["shallow"]);
-   
     srand(time(NULL));
     
 //    test_tree();

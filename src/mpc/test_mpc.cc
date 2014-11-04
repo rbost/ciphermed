@@ -614,20 +614,17 @@ static void usage(char *prog)
 }
 
 
-int main(int ac, char **av)
+int main(int argc, char **argv)
 {            
-    argmap_t argmap;
-    argmap["lambda"] = "100";
-    argmap["l"] = "256";
-    argmap["n"] = "10";
-    argmap["t"] = "1";
-    
-    if (!parseArgs(ac, av, argmap)) usage(av[0]);
-    
-    unsigned int lambda = atoi(argmap["lambda"]);
-    unsigned int l = atoi(argmap["l"]);
-    unsigned int n = atoi(argmap["n"]);
-    unsigned int t = atoi(argmap["t"]);
+    if (argc != 5)
+    {
+        std::cerr << "Usage: test_mpc <lambda> <l> <n> <t>" << std::endl;
+        return 1;
+    }
+    unsigned int lambda = atoi(argv[1]);
+    unsigned int l = atoi(argv[2]);
+    unsigned int n = atoi(argv[3]);
+    unsigned int t = atoi(argv[4]);
 
     SetSeed(to_ZZ(time(NULL)));
     srand(time(NULL));
