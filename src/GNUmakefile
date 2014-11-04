@@ -12,9 +12,9 @@ DEBUG ?= 0
 BENCHMARK ?= 0
 
 ifeq ($(strip $(DEBUG)),1)
-	CXXOPT :=
+	CXXOPT := -g
 else
-	CXXOPT := -O3
+	CXXOPT := -O3 -march=native
 endif
 
 ifeq ($(strip $(BENCHMARK)),1)
@@ -27,14 +27,14 @@ SHARED_OBJDIR = $(TOP)/$(OBJDIR)
 
 
 CXX	 ?= g++
-CXXFLAGS := -g $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
+CXXWARNINGS := -Wall -Wpointer-arith -Wendif-labels -Wformat=2 -Wextra -Wwrite-strings -Wno-unused-parameter -Wno-ignored-qualifiers -Wmissing-declarations -Woverloaded-virtual -Wunreachable-code
+
+CXXFLAGS := $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
         -maes -msse4 \
-        -Wall -Wpointer-arith -Wendif-labels -Wformat=2  \
-	    -Wextra -Wwrite-strings -Wno-unused-parameter \
-	    -Wno-ignored-qualifiers \
-	    -Wmissing-declarations -Woverloaded-virtual  \
-	    -Wunreachable-code -D_GNU_SOURCE -std=c++0x  \
+        $(CXXWARNINGS) -D_GNU_SOURCE -std=c++0x  \
 	    -fno-omit-frame-pointer -I$(TOP) -I$(SHAIFHEPATH) -I$(NTLINCPATH) -I$(JSONCPP)
+
+
 LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
 LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR)
 
@@ -79,7 +79,12 @@ include classifiers/Makefrag
 $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d)) $(PROTO_H)
 	@mkdir -p $(@D)
 	perl mergedep.pl $@ $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
--include $(OBJDIR)/.deps
+
+NODEPS := clean
+
+ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
+    -include $(OBJDIR)/.deps
+endif
 
 # .PHONY: indent
 # indent:
