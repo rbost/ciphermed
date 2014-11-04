@@ -21,6 +21,28 @@
 
 #define OT_BLOCK_SIZE 16
 
+static inline std::string protocol_string(COMPARISON_PROTOCOL comparison_prot)
+{
+    switch (comparison_prot) {
+        case LSIC_PROTOCOL:
+            return "LSIC";
+            break;
+            
+        case DGK_PROTOCOL:
+            return "DGK";
+            break;
+            
+        case GC_PROTOCOL:
+            return "Garbled Comparison";
+            break;
+            
+        default:
+            return "??";
+            break;
+    }
+    return "??";
+}
+
 void Bench_Client::send_test_query(enum Test_Request_Request_Type type, unsigned int bit_size, unsigned int iterations, COMPARISON_PROTOCOL comparison_prot, unsigned int argmax_elements)
 {
     Test_Request request;
@@ -176,7 +198,7 @@ void Bench_Client::bench_enc_compare(size_t bit_size, unsigned int iterations, C
         total_time += t.lap_ms();
     }
     
-    cout << "Owner Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << "Owner Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << protocol_string(comparison_prot) << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
@@ -211,7 +233,7 @@ void Bench_Client::bench_rev_enc_compare(size_t bit_size, unsigned int iteration
         cpu_time += GET_BENCHMARK_TIME;
         total_time += t.lap_ms();
     }
-    cout << "Owner Rev Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << "Owner Rev Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << protocol_string(comparison_prot) << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
@@ -254,7 +276,7 @@ void Bench_Client::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,un
         total_time += t.lap_ms();
     }
     
-    cout << "Owner Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << "Owner Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " <<  protocol_string(comparison_prot) << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
@@ -296,7 +318,7 @@ void Bench_Client::bench_tree_enc_argmax(size_t n_elements, size_t bit_size,unsi
         total_time += t.lap_ms();
     }
     
-    cout << "Owner Tree Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << "Owner Tree Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " <<  protocol_string(comparison_prot) << endl;
     cout << "CPU time: " << cpu_time/iterations << endl;
     cout << "Total time: " << total_time/iterations << endl;
 #ifdef BENCHMARK
@@ -627,7 +649,7 @@ void Bench_Server_session::bench_enc_compare(size_t bit_size, unsigned int itera
         
         cpu_time += GET_BENCHMARK_TIME;
     }
-    cout << id_  << ": Helper Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << id_  << ": Helper Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " <<  protocol_string(comparison_prot) << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
@@ -640,7 +662,7 @@ void Bench_Server_session::bench_rev_enc_compare(size_t bit_size, unsigned int i
         help_rev_enc_comparison(bit_size,comparison_prot);
         cpu_time += GET_BENCHMARK_TIME;
     }
-    cout << id_  << ": Helper Rev Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << id_  << ": Helper Rev Enc Compare bench for " << iterations << " rounds, bit size=" << bit_size << " using " <<  protocol_string(comparison_prot) << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
@@ -655,7 +677,7 @@ void Bench_Server_session::bench_linear_enc_argmax(size_t n_elements, size_t bit
         run_linear_enc_argmax(helper,comparison_prot);
         cpu_time += GET_BENCHMARK_TIME;
     }
-    cout << id_  << ": Helper Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << id_  << ": Helper Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " <<  protocol_string(comparison_prot) << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
@@ -670,7 +692,7 @@ void Bench_Server_session::bench_tree_enc_argmax(size_t n_elements, size_t bit_s
         run_tree_enc_argmax(helper,comparison_prot);
         cpu_time += GET_BENCHMARK_TIME;
     }
-    cout << id_  << ": Helper Tree Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " << (comparison_prot?"LSIC":"DGK") << endl;
+    cout << id_  << ": Helper Tree Enc Argmax bench for " << n_elements << " elements, " << iterations << " rounds, bit size=" << bit_size << " using " <<  protocol_string(comparison_prot) << endl;
     cout << id_  << ": CPU time: " << cpu_time/iterations << endl;
 }
 
