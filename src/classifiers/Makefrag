@@ -6,16 +6,16 @@ LINEAR_OBJ := $(patsubst %.cc,$(OBJDIR)/classifiers/%.o,$(LINEAR_SRC))
 all:	$(OBJDIR)/classifiers/client_linear
 
 $(OBJDIR)/classifiers/client_linear: $(OBJDIR)/classifiers/test_client_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -L$(NTLLIBPATH) -lntl -lgmp   $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lutil
 
 
 all:	$(OBJDIR)/classifiers/server_linear
 
 $(OBJDIR)/classifiers/server_linear: $(OBJDIR)/classifiers/test_server_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -lmath -lfheutil\
-	   -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -lmath -lutil\
+	   -L$(NTLLIBPATH) -lntl -lgmp   $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lutil
 
 
 
@@ -26,16 +26,16 @@ all:	$(OBJDIR)/classifiers/client_tree
 
 $(OBJDIR)/classifiers/client_tree: $(OBJDIR)/classifiers/test_client_tree.o $(TREE_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree\
-	   -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+	   -L$(NTLLIBPATH) -lntl -lgmp   $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lutil
 
 
 all:	$(OBJDIR)/classifiers/server_tree
 
 $(OBJDIR)/classifiers/server_tree: $(OBJDIR)/classifiers/test_server_tree.o $(TREE_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libtree.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree -lmath -lfheutil\
-	   -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree -lmath -lutil\
+	   -L$(NTLLIBPATH) -lntl -lgmp   $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lutil
 
 NB_SRC := nb_classifier.cc
 NB_OBJ := $(patsubst %.cc,$(OBJDIR)/classifiers/%.o,$(NB_SRC))
@@ -44,16 +44,16 @@ all:	$(OBJDIR)/classifiers/client_nb
 
 $(OBJDIR)/classifiers/client_nb: $(OBJDIR)/classifiers/test_client_nb.o $(NB_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
 	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree\
-	   -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM)\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+	   -L$(NTLLIBPATH) -lntl -lgmp   $(L_BOOST_SYSTEM)\
+       -lprotobuf -lprotobuf_defs -lnet -lutil
 
 
 all:	$(OBJDIR)/classifiers/server_nb
 
 $(OBJDIR)/classifiers/server_nb: $(OBJDIR)/classifiers/test_server_nb.o $(NB_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree -lmath -lfheutil\
-	   -L$(NTLLIBPATH) -lntl -lgmp -lgf2x $(L_BOOST_SYSTEM) -ljsoncpp\
-       -lprotobuf -lprotobuf_defs -lnet -lfheutil
+	$(CXX) $^ -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree -lmath -lutil\
+	   -L$(NTLLIBPATH) -lntl -lgmp   $(L_BOOST_SYSTEM) -ljsoncpp\
+       -lprotobuf -lprotobuf_defs -lnet -lutil
 
 
 # vim: set noexpandtab:

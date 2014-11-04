@@ -10,5 +10,5 @@ $(OBJDIR)/libmpc.so: $(MPCOBJS) $(OBJDIR)/libcipher.so $(OBJDIR)/libjustGarble.s
 all:	$(OBJDIR)/mpc/test_mpc 
 $(OBJDIR)/mpc/test_mpc: $(OBJDIR)/mpc/test_mpc.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so
 	$(CXX) $< -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher\
-	   -L$(NTLLIBPATH) -lntl -lgmp -lgf2x 
+	   -L$(NTLLIBPATH) -lntl -lgmp   
 # vim: set noexpandtab:

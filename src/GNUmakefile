@@ -76,9 +76,9 @@ include protobuf/Makefrag
 include net/Makefrag
 include classifiers/Makefrag
 
-$(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
+$(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d)) $(PROTO_H)
 	@mkdir -p $(@D)
-	perl mergedep.pl $@ $^
+	perl mergedep.pl $@ $(foreach dir, $(OBJDIRS), $(wildcard $(OBJDIR)/$(dir)/*.d))
 -include $(OBJDIR)/.deps
 
 # .PHONY: indent

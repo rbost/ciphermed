@@ -1,39 +1,39 @@
+OBJDIRS     += protobuf
+
 PROTO_SRC_DIR = proto_src
-PROTO_OBJ_DIR = proto_obj
 
 $(PROTO_SRC_DIR)/%.pb.h $(PROTO_SRC_DIR)/%.pb.cc: protobuf/%.proto
 	@mkdir -p $(@D)
 	cd protobuf;\
 	$(PROTOC) -I. --cpp_out=../$(PROTO_SRC_DIR) $(*F).proto;
 
-$(PROTO_OBJ_DIR)/%.pb.o: $(PROTO_SRC_DIR)/%.pb.cc
+$(OBJDIR)/protobuf/%.pb.o: $(PROTO_SRC_DIR)/%.pb.cc
 	@mkdir -p $(@D)
 	$(CXX) -MD $(CXXFLAGS) -c $< -o $@
 
 
-OBJDIRS     += protobuf
-SRC  := protobuf_conversion.cc 
-OBJ  := $(patsubst %.cc,$(OBJDIR)/protobuf/%.o,$(SRC))
+
+PROTOBUFDEF_SRC  := protobuf_conversion.cc
+PROTOBUFDEF_OBJ  := $(patsubst %.cc,$(OBJDIR)/protobuf/%.o,$(PROTOBUFDEF_SRC))
 
 PROTO_FILE = bigint.proto keys.proto lsic_messages.proto fhe.proto test_requests.proto garbled.proto
-PROTO_H = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.h,$(PROTO_FILE)) $(PROTO_SRC_DIR)/proto_headers.hh
+
+
+
+
+PROTO_H = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.h,$(PROTO_FILE))
 PROTO_CC = $(patsubst %.proto, $(PROTO_SRC_DIR)/%.pb.cc,$(PROTO_FILE))
-PROTO_OBJ = $(patsubst %.proto, $(PROTO_OBJ_DIR)/%.pb.o,$(PROTO_FILE))
-
-$(OBJ) : $(PROTO_H)
-
-.PRECIOUS: $(PROTO_H)
-.PRECIOUS: $(PROTO_CC)
+PROTO_OBJ = $(patsubst %.proto, $(OBJDIR)/protobuf/%.pb.o,$(PROTO_FILE))
 
 protobufs : $(PROTO_OBJ)
 
 all:    $(OBJDIR)/libprotobuf_defs.so
-$(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(OBJ)  $(OBJDIR)/libcipher.so
-	$(CXX) -shared -o $@ $(PROTO_OBJ) $(OBJ) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf -lgmp -lgmpxx -lcipher
+$(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(PROTOBUFDEF_OBJ)  $(OBJDIR)/libcipher.so
+	$(CXX) -shared -o $@ $(PROTO_OBJ) $(PROTOBUFDEF_OBJ) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf -lcipher
 
 all:	$(OBJDIR)/protobuf/test_protobuf
-$(OBJDIR)/protobuf/test_protobuf: $(OBJDIR)/protobuf/test_protobuf.o $(OBJ) $(PROTO_OBJ) $(OBJDIR)/libcipher.so
-	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lgmp -lprotobuf -lcipher -L$(NTLLIBPATH) -lntl -lgf2x
+$(OBJDIR)/protobuf/test_protobuf: $(OBJDIR)/protobuf/test_protobuf.o $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libcipher.so
+	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf_defs -lcipher -L$(NTLLIBPATH) -lntl  
 
 
 # vim: set noexpandtab:

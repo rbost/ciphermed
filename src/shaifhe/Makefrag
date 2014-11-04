@@ -11,11 +11,11 @@ all:    $(OBJDIR)/shaifhe/test $(OBJDIR)/shaifhe/shiftfun
 $(OBJDIR)/shaifhe/test: $(OBJDIR)/shaifhe/test.o 
 	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) \
 	  -L$(NTLLIBPATH) -lntl \
-	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH) -lgf2x -lgmp
+	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH)   -lgmp
 
 $(OBJDIR)/shaifhe/shiftfun: $(OBJDIR)/shaifhe/shiftfun.o 
 	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) \
 	  -L$(NTLLIBPATH) -lntl \
-	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH) -lgf2x -lgmp
+	  -Wl,-rpath=$(GF2XLIBPATH) -L$(GF2XLIBPATH)   -lgmp
 
 # vim: set noexpandtab:

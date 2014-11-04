@@ -2,14 +2,14 @@ OBJDIRS     += util
 UTILSRC   := util.cc benchmarks.cc
 UTILOBJ   := $(patsubst %.cc,$(OBJDIR)/util/%.o,$(UTILSRC))
 
-all:    $(OBJDIR)/libfheutil.so
-$(OBJDIR)/libfheutil.so: $(UTILOBJ) 
+all:    $(OBJDIR)/libutil.so
+$(OBJDIR)/libutil.so: $(UTILOBJ) 
 	$(CXX) -shared -o $@ $(UTILOBJ) $(LDFLAGS)
 
 install: install_util
 
 .PHONY: install_util
-install_util: $(OBJDIR)/libfheutil.so
-	install -m 644 $(OBJDIR)/libfheutil.so /usr/lib
+install_util: $(OBJDIR)/libutil.so
+	install -m 644 $(OBJDIR)/libutil.so /usr/lib
 
 # vim: set noexpandtab:
