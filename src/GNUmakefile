@@ -9,7 +9,7 @@ L_BOOST_SYSTEM ?= -lboost_system
 L_BOOST_THREAD ?= -lboost_thread
 
 DEBUG ?= 0
-BENCHMARK ?= 0
+BENCHMARK ?= 1
 
 ifeq ($(strip $(DEBUG)),1)
 	CXXOPT := -g

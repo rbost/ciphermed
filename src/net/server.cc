@@ -503,11 +503,12 @@ void Server_session::run_linear_enc_argmax(Linear_EncArgmax_Helper &helper, COMP
     size_t nbits = helper.bit_length();
     function<Comparison_protocol_B*()> comparator_creator;
     
-    if (comparison_prot) {
+    if (comparison_prot == LSIC_PROTOCOL) {
         comparator_creator = [this,nbits](){ return new LSIC_B(0,nbits,server_->gm()); };
-        
-    }else{
+    }else if (comparison_prot == DGK_PROTOCOL){
         comparator_creator = [this,nbits](){ return new Compare_B(0,nbits,server_->paillier(),server_->gm()); };
+    }else if (comparison_prot == GC_PROTOCOL) {
+        comparator_creator = [this,nbits](){ return new GC_Compare_B(0,nbits,server_->gm(), rand_state_); };
     }
     exec_linear_enc_argmax(socket_, helper, comparator_creator, server_->threads_per_session());
 }
@@ -517,11 +518,12 @@ void Server_session::run_tree_enc_argmax(Tree_EncArgmax_Helper &helper, COMPARIS
     size_t nbits = helper.bit_length();
     function<Comparison_protocol_B*()> comparator_creator;
     
-    if (comparison_prot) {
+    if (comparison_prot == LSIC_PROTOCOL) {
         comparator_creator = [this,nbits](){ return new LSIC_B(0,nbits,server_->gm()); };
-        
-    }else{
+    }else if (comparison_prot == DGK_PROTOCOL){
         comparator_creator = [this,nbits](){ return new Compare_B(0,nbits,server_->paillier(),server_->gm()); };
+    }else if (comparison_prot == GC_PROTOCOL) {
+        comparator_creator = [this,nbits](){ return new GC_Compare_B(0,nbits,server_->gm(), rand_state_); };
     }
     exec_tree_enc_argmax(socket_, helper, comparator_creator, server_->threads_per_session());
 }
