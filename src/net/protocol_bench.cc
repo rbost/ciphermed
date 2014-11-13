@@ -522,7 +522,7 @@ void Bench_Server_session::run_session()
 
                 case Test_Request_Request_Type_TEST_TREE_ENC_ARGMAX:
                 {
-                    cout << id_ << ": Bench Linear Enc Argmax" << endl;
+                    cout << id_ << ": Bench Tree Enc Argmax" << endl;
                     bench_tree_enc_argmax(argmax_elements, bit_size, iterations, comparison_prot);
                 }
                     break;
@@ -668,6 +668,7 @@ void Bench_Server_session::bench_rev_enc_compare(size_t bit_size, unsigned int i
 
 void Bench_Server_session::bench_linear_enc_argmax(size_t n_elements, size_t bit_size,unsigned int iterations, COMPARISON_PROTOCOL comparison_prot)
 {
+    cout << id_  << ": Protocol:" <<  protocol_string(comparison_prot) << endl;
     
     double cpu_time = 0.;
     
