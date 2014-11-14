@@ -39,6 +39,19 @@ static void bench_linear_dgk(Bench_Client &client, unsigned int bit_size, unsign
     }
 }
 
+static void bench_linear_garble(Bench_Client &client, unsigned int bit_size, unsigned int iterations, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
+{
+    unsigned int n_elts;
+    cout << "===================================\n";
+    cout << "LINEAR USING GARBLED COMPARE\n\n";
+    
+    for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
+        cout << "\n\n\n";
+        
+        client.bench_linear_enc_argmax(n_elts, bit_size, iterations, GC_PROTOCOL);
+    }
+}
+
 static void bench_tree_lsic(Bench_Client &client, unsigned int bit_size, unsigned int iterations, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
 {
     unsigned int n_elts;
@@ -62,6 +75,19 @@ static void bench_tree_dgk(Bench_Client &client, unsigned int bit_size, unsigned
         cout << "\n\n\n";
         
         client.bench_tree_enc_argmax(n_elts, bit_size, iterations, DGK_PROTOCOL);
+    }
+}
+
+static void bench_tree_garble(Bench_Client &client, unsigned int bit_size, unsigned int iterations, unsigned int n_elts_min, unsigned int n_elts_max, unsigned int step)
+{
+    unsigned int n_elts;
+    cout << "===================================\n";
+    cout << "TREE USING GARBLED COMPARE\n\n";
+    
+    for (n_elts = n_elts_min; n_elts <= n_elts_max; n_elts += step) {
+        cout << "\n\n\n";
+        
+        client.bench_tree_enc_argmax(n_elts, bit_size, iterations, GC_PROTOCOL);
     }
 }
 
@@ -89,10 +115,15 @@ static void bench_client_argmax(const string &hostname, unsigned int key_size, u
         
         client.exchange_keys();
         
-        bench_linear_lsic(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+        // bench_linear_garble(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+        bench_tree_garble(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+
         bench_linear_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
-        bench_tree_lsic(client, bit_size, iterations, n_elts_min, n_elts_max, step);
         bench_tree_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+        
+        
+//        bench_linear_lsic(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+//        bench_tree_lsic(client, bit_size, iterations, n_elts_min, n_elts_max, step);
         
         client.disconnect();
         
