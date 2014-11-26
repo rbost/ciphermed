@@ -24,7 +24,7 @@ message PK_Status {
     enum Key_Status {
         NEED_PK = 0;
         NO_NEED_PK = 1;
-        HAS_PK = 1;
+        HAS_PK = 2;
     }
     
     required Key_Status state = 2;

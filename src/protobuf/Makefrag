@@ -33,7 +33,7 @@ $(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(PROTOBUFDEF_OBJ)  $(OBJDIR)/libcip
 
 all:	$(OBJDIR)/protobuf/test_protobuf
 $(OBJDIR)/protobuf/test_protobuf: $(OBJDIR)/protobuf/test_protobuf.o $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libcipher.so
-	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf_defs -lcipher -L$(NTLLIBPATH) -lntl  
+	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf_defs -lcipher -L$(NTLLIBPATH) -lntl -lgf2x 
 
 
 # vim: set noexpandtab:

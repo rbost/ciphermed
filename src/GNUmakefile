@@ -35,7 +35,7 @@ CXXFLAGS := $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
 	    -fno-omit-frame-pointer -I$(TOP) -I$(SHAIFHEPATH) -I$(NTLINCPATH) -I$(JSONCPP)
 
 
-LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
+LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx -lgf2x
 LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR)
 
 PROTOC ?= protoc
