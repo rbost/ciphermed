@@ -1,7 +1,7 @@
 
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
-
+#include <typeinfo>
 
 void runProtocol(Comparison_protocol_A *party_a, Comparison_protocol_B *party_b, gmp_randstate_t state)
 {
