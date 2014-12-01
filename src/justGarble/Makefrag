@@ -5,7 +5,7 @@ SOURCES  := $(wildcard $(SRCDIR)/*.c)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
 OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/justGarble/%.o)
 
-JG_CFLAGS= -g -lm -lrt -lpthread -maes -msse4 -lmsgpack -fPIC
+JG_CFLAGS= -g -lm -lrt -lpthread -maes -msse4 -lmsgpack -fPIC -I/usr/local/include
 
 all:    $(OBJDIR)/libjustGarble.so
 $(OBJDIR)/libjustGarble.so: $(OBJECTS)
