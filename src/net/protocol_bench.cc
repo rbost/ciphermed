@@ -476,7 +476,7 @@ void Bench_Server_session::run_session()
             unsigned int bit_size, iterations, argmax_elements;
             COMPARISON_PROTOCOL comparison_prot;
             Test_Request_Request_Type request_type = get_test_query(bit_size, iterations, comparison_prot, argmax_elements);
-            
+
             switch (request_type) {
                 case Test_Request_Request_Type_TEST_LSIC:
                 {
@@ -545,7 +545,8 @@ void Bench_Server_session::run_session()
                     cout << id_ << ": Bench Change ES" << endl;
                     bench_change_es(iterations);
                 }
-                case Test_Request_Request_Type_TEST_OT:
+                break;
+		case Test_Request_Request_Type_TEST_OT:
                 {
                     cout << id_ << ": Bench OT" << endl;
                     bench_ot(argmax_elements,iterations);

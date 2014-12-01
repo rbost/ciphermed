@@ -6,7 +6,7 @@ all:    $(OBJDIR)/libtree.so
 $(OBJDIR)/libtree.so: $(TREEOBJ)
 	$(CXX) -shared -o $@ $(TREEOBJ) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lntl
 
-all:	$(OBJDIR)/tree/test_tree 
+#all:	$(OBJDIR)/tree/test_tree 
 $(OBJDIR)/tree/test_tree: $(OBJDIR)/tree/test_tree.o $(OBJDIR)/libtree.so
-	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -ltree -L$(NTLLIBPATH) -lntl
+	$(CXX) $< -o $@ $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -ltree -L$(NTLLIBPATH) -lntl -lgf2x
 # vim: set noexpandtab:
