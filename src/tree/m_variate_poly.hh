@@ -9,6 +9,7 @@
 
 using namespace std;
 
+#include <tree/util.hh>
 // An instance of the Multivariate_poly class represents
 // a multivariate polynomial as a sum of terms of type Term.
 // A term is a leading coefficient and a list of variables

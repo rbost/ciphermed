@@ -25,7 +25,15 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <msgpack.h>
+
+#if !defined(__APPLE__)
 #include <malloc.h>
+#else
+#define memalign(a,b) malloc(b)
+#endif
+
+
+
 #include <sys/stat.h>
 
 long fsize(const char *filename) {

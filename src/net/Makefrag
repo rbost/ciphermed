@@ -11,7 +11,7 @@ BENCH_OBJ := $(patsubst %.cc,$(OBJDIR)/net/%.o,$(BENCH_SRC))
 
 net:    $(OBJDIR)/libnet.so
 $(OBJDIR)/libnet.so: $(NETOBJ) $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libcipher.so  $(OBJDIR)/libmpc.so
-	$(CXX) -shared -o $@ $(NETOBJ) $(LDFLAGS) -lcipher -lmpc -lcrypto -lprotobuf -lprotobuf_defs
+	$(CXX) -shared -o $@ $(NETOBJ) $(LDFLAGS) $(L_BOOST_SYSTEM) -lmath -lcipher -lmpc -lcrypto -lprotobuf -lprotobuf_defs -lutil
 
 net:	$(OBJDIR)/net/client
 

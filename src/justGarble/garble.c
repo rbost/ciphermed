@@ -24,7 +24,13 @@
 #include  "dkcipher.h"
 #include  "aes.h"
 #include  "justGarble.h"
+
+#if !defined(__APPLE__)
 #include <malloc.h>
+#else
+#define memalign(a,b) malloc(b)
+#endif
+
 #include <wmmintrin.h>
 #include <time.h>
 

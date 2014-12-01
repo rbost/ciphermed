@@ -1,5 +1,5 @@
 OBJDIRS     += crypto
-CRYPTO2SRC  := elgamal.cc paillier.cc gm.cc 
+CRYPTO2SRC  := paillier.cc gm.cc 
 
 CIPHEROBS := $(patsubst %.cc,$(OBJDIR)/crypto/%.o,$(CRYPTO2SRC))
 
@@ -7,7 +7,7 @@ all:    $(OBJDIR)/libcipher.so
 $(OBJDIR)/libcipher.so: $(CIPHEROBS) $(OBJDIR)/libmath.so $(OBJDIR)/libutil.so
 	$(CXX) -shared -o $@ $(CIPHEROBS) $(LDFLAGS) -lmath -lutil
 
-all:	$(OBJDIR)/crypto/test_crypto 
+#all:	$(OBJDIR)/crypto/test_crypto 
 $(OBJDIR)/crypto/test_crypto: $(OBJDIR)/crypto/test_crypto.o $(OBJDIR)/libcipher.so $(OBJDIR)/libmath.so
 	$(CXX) $< -o $@ $(LDFLAGS) -lmath -lutil -lcipher \
 	   -L$(NTLLIBPATH) -L$(NTLLIBPATH) -lntl

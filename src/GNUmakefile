@@ -26,7 +26,7 @@ TOP	 := $(shell echo $${PWD-`pwd`})
 SHARED_OBJDIR = $(TOP)/$(OBJDIR)
 
 
-CXX	 ?= g++
+CXX	 := clang++
 CXXWARNINGS := -Wall -Wpointer-arith -Wendif-labels -Wformat=2 -Wextra -Wwrite-strings -Wno-unused-parameter -Wno-ignored-qualifiers -Wmissing-declarations -Woverloaded-virtual -Wunreachable-code
 
 CXXFLAGS := $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
@@ -35,8 +35,8 @@ CXXFLAGS := $(CXXOPT) -fno-strict-aliasing -fwrapv -fPIC \
 	    -fno-omit-frame-pointer -I$(TOP) -I$(SHAIFHEPATH) -I$(NTLINCPATH) -I$(JSONCPP)
 
 
-LDFLAGS	 := -lpthread -lrt -lgmp -lgmpxx
-LDFLAGS +=  -L$(TOP)/$(OBJDIR) -Wl,-rpath=$(TOP)/$(OBJDIR)
+LDFLAGS	 := -lpthread -lgmp -lgmpxx
+LDFLAGS +=  -L$(TOP)/$(OBJDIR) -rpath $(TOP)/$(OBJDIR)
 
 PROTOC ?= protoc
 

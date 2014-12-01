@@ -6,7 +6,7 @@ LINEAR_OBJ := $(patsubst %.cc,$(OBJDIR)/classifiers/%.o,$(LINEAR_SRC))
 all:	$(OBJDIR)/classifiers/client_linear
 
 $(OBJDIR)/classifiers/client_linear: $(OBJDIR)/classifiers/test_client_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $< $(LINEAR_OBJ)  -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -Wl,--no-as-needed -lmpc -lcipher -ltree\
+	$(CXX) $< $(LINEAR_OBJ)  -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -ltree\
 		-L$(NTLLIBPATH) -lntl   $(L_BOOST_SYSTEM)\
 		-lprotobuf -lprotobuf_defs -lnet -lutil
 
@@ -17,7 +17,7 @@ $(OBJDIR)/classifiers/client_linear: $(OBJDIR)/classifiers/test_client_linear.o 
 all:	$(OBJDIR)/classifiers/server_linear
 
 $(OBJDIR)/classifiers/server_linear: $(OBJDIR)/classifiers/test_server_linear.o $(LINEAR_OBJ) $(PROTO_OBJ) $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so $(OBJDIR)/libmath.so $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libnet.so
-	$(CXX) $< $(LINEAR_OBJ) -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -Wl,--no-as-needed -lmpc -lcipher -lmath -lutil\
+	$(CXX) $< $(LINEAR_OBJ) -o $@  $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lmpc -lcipher -lmath -lutil\
 	   -L$(NTLLIBPATH) -lntl -lgmp   $(L_BOOST_SYSTEM)\
        -lprotobuf -lprotobuf_defs -lnet -lutil
 

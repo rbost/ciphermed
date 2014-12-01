@@ -172,7 +172,7 @@ void runProtocol(EncArgmax_Owner &owner, EncArgmax_Helper &helper, gmp_randstate
     size_t m = (k-1)*(k-2)/2;
     m = ceilf( ((float)m)/num_threads);
     
-    thread threads[num_threads];
+    vector<thread> threads(num_threads);
     size_t t = 0, c_count = 0, i_begin = 0;
     for (size_t i = 0; i < k; i++) {
         c_count += i;

@@ -90,15 +90,15 @@ typedef struct { __m128i rd_key[15]; int rounds; } AES_KEY;
     kp[idx+2] = x0; tmp = x3
 
 
-inline int AES_set_encrypt_key(const unsigned char *userKey, const int bits, AES_KEY *key);
-inline void AES_set_decrypt_key_fast(AES_KEY *dkey, const AES_KEY *ekey);
-inline int AES_set_decrypt_key(const unsigned char *userKey, const int bits, AES_KEY *key);
+ int AES_set_encrypt_key(const unsigned char *userKey, const int bits, AES_KEY *key);
+ void AES_set_decrypt_key_fast(AES_KEY *dkey, const AES_KEY *ekey);
+ int AES_set_decrypt_key(const unsigned char *userKey, const int bits, AES_KEY *key);
 
-inline void AES_encrypt(const unsigned char *in, unsigned char *out, const AES_KEY *key);
-inline void AES_decrypt(const unsigned char *in, unsigned char *out, const AES_KEY *key);
-inline void AES_ecb_encrypt_blks(block *blks, unsigned nblks, AES_KEY *key);
-inline void AES_ecb_decrypt_blks(block *blks, unsigned nblks, AES_KEY *key);
-inline void AES_ecb_encrypt_blks_4(block *blks, AES_KEY *key);
+ void AES_encrypt(const unsigned char *in, unsigned char *out, const AES_KEY *key);
+ void AES_decrypt(const unsigned char *in, unsigned char *out, const AES_KEY *key);
+ void AES_ecb_encrypt_blks(block *blks, unsigned nblks, AES_KEY *key);
+ void AES_ecb_decrypt_blks(block *blks, unsigned nblks, AES_KEY *key);
+ void AES_ecb_encrypt_blks_4(block *blks, AES_KEY *key);
 #endif
     
 #ifdef __cplusplus

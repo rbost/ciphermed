@@ -1,11 +1,11 @@
 OBJDIRS     += mpc
-MPCSRC  := millionaire.cc comparison_protocol.cc  lsic.cc svm_classifier.cc private_comparison.cc garbled_comparison.cc enc_comparison.cc rev_enc_comparison.cc enc_argmax.cc linear_enc_argmax.cc tree_enc_argmax.cc change_encryption_scheme.cc
+MPCSRC  := comparison_protocol.cc  lsic.cc svm_classifier.cc private_comparison.cc garbled_comparison.cc enc_comparison.cc rev_enc_comparison.cc enc_argmax.cc linear_enc_argmax.cc tree_enc_argmax.cc change_encryption_scheme.cc
 
 MPCOBJS := $(patsubst %.cc,$(OBJDIR)/mpc/%.o,$(MPCSRC))
 
 all:    $(OBJDIR)/libmpc.so
 $(OBJDIR)/libmpc.so: $(MPCOBJS) $(OBJDIR)/libcipher.so $(OBJDIR)/libjustGarble.so
-	$(CXX) -shared -o $@ $(MPCOBJS) $(SHAIFHEPATH)/fhe.a -Wl,--no-as-needed $(LDFLAGS) -lgmp -lgmpxx -lcipher -ljustGarble
+	$(CXX) -shared -o $@ $(MPCOBJS) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lgmp -lgmpxx -lcipher -ljustGarble -lntl
 
 all:	$(OBJDIR)/mpc/test_mpc 
 $(OBJDIR)/mpc/test_mpc: $(OBJDIR)/mpc/test_mpc.o $(OBJDIR)/libmpc.so $(OBJDIR)/libcipher.so

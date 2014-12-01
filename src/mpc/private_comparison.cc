@@ -35,7 +35,7 @@ vector<mpz_class> Compare_B::encrypt_bits_parallel(unsigned int n_threads)
     
     size_t n = bit_length_;
     size_t m = ceilf( ((float)n)/n_threads);
-    thread threads[n_threads];
+    vector<thread> threads(n_threads);
 
     auto job =[this,&c_b](size_t i_start,size_t i_end)
     {
@@ -202,7 +202,7 @@ vector<mpz_class> Compare_A::rerandomize_parallel(const vector<mpz_class> &c, co
     
     size_t n = rerand_indexes.size();
     size_t m = ceilf( ((float)n)/n_threads);
-    thread threads[n_threads];
+    vector<thread> threads(n_threads);
     
     auto job =[this,&c_rand,&rerand_indexes](size_t i_start,size_t i_end)
     {
