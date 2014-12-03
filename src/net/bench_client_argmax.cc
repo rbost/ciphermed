@@ -115,11 +115,11 @@ static void bench_client_argmax(const string &hostname, unsigned int key_size, u
         
         client.exchange_keys();
         
-        // bench_linear_garble(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+        bench_linear_garble(client, bit_size, iterations, n_elts_min, n_elts_max, step);
         bench_tree_garble(client, bit_size, iterations, n_elts_min, n_elts_max, step);
 
-        bench_linear_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
-        bench_tree_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+//        bench_linear_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
+//        bench_tree_dgk(client, bit_size, iterations, n_elts_min, n_elts_max, step);
         
         
 //        bench_linear_lsic(client, bit_size, iterations, n_elts_min, n_elts_max, step);
