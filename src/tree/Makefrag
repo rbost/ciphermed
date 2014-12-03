@@ -4,7 +4,7 @@ TREEOBJ := $(patsubst %.cc,$(OBJDIR)/tree/%.o,$(TREESRC))
 
 all:    $(OBJDIR)/libtree.so
 $(OBJDIR)/libtree.so: $(TREEOBJ)
-	$(CXX) -shared -o $@ $(TREEOBJ) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lntl
+	$(CXX) -shared -o $@ $(TREEOBJ) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lntl -lgf2x
 
 #all:	$(OBJDIR)/tree/test_tree 
 $(OBJDIR)/tree/test_tree: $(OBJDIR)/tree/test_tree.o $(OBJDIR)/libtree.so

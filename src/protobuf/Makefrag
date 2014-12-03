@@ -29,7 +29,7 @@ protobufs : $(PROTO_OBJ)
 
 all:    $(OBJDIR)/libprotobuf_defs.so
 $(OBJDIR)/libprotobuf_defs.so: $(PROTO_OBJ) $(PROTOBUFDEF_OBJ)  $(OBJDIR)/libcipher.so
-	$(CXX) -shared -o $@ $(PROTO_OBJ) $(PROTOBUFDEF_OBJ) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf -lcipher -lntl
+	$(CXX) -shared -o $@ $(PROTO_OBJ) $(PROTOBUFDEF_OBJ) $(SHAIFHEPATH)/fhe.a $(LDFLAGS) -lprotobuf -lcipher -lntl -lgf2x
 
 all:	$(OBJDIR)/protobuf/test_protobuf
 $(OBJDIR)/protobuf/test_protobuf: $(OBJDIR)/protobuf/test_protobuf.o $(OBJDIR)/libprotobuf_defs.so $(OBJDIR)/libcipher.so
