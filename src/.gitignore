@@ -9,3 +9,5 @@ config.mk
 proto_obj
 *.pb.h
 *.pb.cc
+
+*.out
