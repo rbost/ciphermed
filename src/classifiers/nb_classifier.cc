@@ -1,3 +1,23 @@
+/*
+ * Copyright 2013-2015 Raphael Bost
+ *
+ * This file is part of ciphermed.
+
+ *  ciphermed is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  ciphermed is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with ciphermed.  If not, see <http://www.gnu.org/licenses/>. 2
+ *
+ */
+
 #include <mpc/lsic.hh>
 #include <mpc/private_comparison.hh>
 #include <mpc/enc_comparison.hh>
@@ -10,7 +30,7 @@
 #include <net/message_io.hh>
 #include <util/util.hh>
 
-static const COMPARISON_PROTOCOL comparison_prot__ = LSIC_PROTOCOL;
+static const COMPARISON_PROTOCOL comparison_prot__ = GC_PROTOCOL;
 
 Naive_Bayes_Classifier_Server::Naive_Bayes_Classifier_Server(gmp_randstate_t state, unsigned int keysize, unsigned int lambda, const vector<vector<vector<double>>> &conditionals_vec, const vector<double> &prior_vec)
 : Server(state, Naive_Bayes_Classifier_Server::key_deps_descriptor(), keysize, lambda)

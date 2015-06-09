@@ -1,3 +1,23 @@
+/*
+ * Copyright 2013-2015 Raphael Bost
+ *
+ * This file is part of ciphermed.
+
+ *  ciphermed is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  ciphermed is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with ciphermed.  If not, see <http://www.gnu.org/licenses/>. 2
+ *
+ */
+
 #include <classifiers/decision_tree_classifier.hh>
 
 #include <util/util.hh>
@@ -55,11 +75,11 @@ static void test_tree_classifier_client(const string &hostname)
         vector<long> query;
         unsigned int n_nodes;
         
-//        query = gen_nursery_query();
-//        n_nodes = 4;
+       query = gen_nursery_query();
+       n_nodes = 4;
         
-        query = gen_ecg_query();
-        n_nodes = 6;
+        // query = gen_ecg_query();
+        // n_nodes = 6;
         
         
 //        vector<long> query_bits = bitDecomp(query, N_LEVELS);
