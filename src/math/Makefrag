@@ -1,6 +1,4 @@
 OBJDIRS     += math
-MATHSRC_OTHER   :=  field.cc matrix.cc poly.cc
-MATHOBJ_OTHER   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC_ALL))
 
 MATHSRC   :=  math_util.cc num_th_alg.cc prime_seq.cc
 MATHOBJ   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC))
@@ -8,10 +6,6 @@ MATHOBJ   := $(patsubst %.cc,$(OBJDIR)/math/%.o,$(MATHSRC))
 all:    $(OBJDIR)/libmath.so
 $(OBJDIR)/libmath.so: $(MATHOBJ)
 	$(CXX) -shared -o $@ $(MATHOBJ) $(LDFLAGS) -lgmpxx -lgmp
-
-test_math:    $(OBJDIR)/math/r
-$(OBJDIR)/math/r: $(OBJDIR)/math/r.o $(MATHOBJ_OTHER) $(OBJDIR)/libmath.so
-	$(CXX) $< -o $@ $(LDFLAGS) -lmath
 
 all:    $(OBJDIR)/math/test_algo
 $(OBJDIR)/math/test_algo: $(OBJDIR)/math/test_algo.o $(OBJDIR)/libmath.so
