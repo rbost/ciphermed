@@ -25,7 +25,6 @@
 #include <iostream>
 #include <string>
 
-#include <util/errstream.hh>
 #include <util/compiler.hh>
 #include <sys/time.h>
 
@@ -130,12 +129,3 @@ private:
 
     Timer t_;
 };
-
-inline void
-assert_s(bool value, const std::string &msg) throw (FHEError)
-{
-    if (unlikely(!value)) {
-        std::cerr << "ERROR: " << msg << std::endl;
-        throw FHEError(msg);
-    }
-}
