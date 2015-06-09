@@ -74,7 +74,7 @@ T readMessageFromSocket(boost::asio::ip::tcp::socket &socket) {
 
 template <class T>
 void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
-//    PAUSE_BENCHMARK
+   // PAUSE_BENCHMARK
     
     std::vector<byte> writebuf;
     unsigned msg_size = msg.ByteSize();
@@ -91,7 +91,7 @@ void sendMessageToSocket(boost::asio::ip::tcp::socket &socket, const T& msg) {
         return;
     }
     boost::asio::write(socket, boost::asio::buffer(writebuf));
-//    RESUME_BENCHMARK
+   // RESUME_BENCHMARK
 }
 
 #endif
