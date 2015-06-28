@@ -1,5 +1,5 @@
 OBJDIRS     += crypto
-CRYPTO2SRC  := elgamal.cc paillier.cc gm.cc 
+CRYPTO2SRC  := paillier.cc gm.cc 
 
 CIPHEROBS := $(patsubst %.cc,$(OBJDIR)/crypto/%.o,$(CRYPTO2SRC))
 
