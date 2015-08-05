@@ -253,9 +253,10 @@ FHEcontext* create_from_message(const Protobuf::FHE_Context &message)
     std::istringstream stream(message.content());
     
     unsigned long m, p, r;
-    readContextBase(stream, m, p, r);
+    vector<long> gens, ords;
+    readContextBase(stream, m, p, r, gens, ords);
     
-    FHEcontext *context = new FHEcontext(m, p, r);
+    FHEcontext *context = new FHEcontext(m, p, r, gens, ords);
     
     stream >> (*context);
 
