@@ -131,8 +131,8 @@ public:
 static Ctxt ctxt_neg(Ctxt &c, const EncryptedArray &ea)
 {
     Ctxt c_neg(c);
-    PlaintextArray pa(ea);
-    pa.encode(1);
+    NewPlaintextArray pa(ea);
+    encode(ea,pa,1);
     ZZX one;
     ea.encode(one, pa);
     

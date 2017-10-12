@@ -214,8 +214,8 @@ void Tester_Client::test_fhe()
         bits[i] = gmp_urandomb_ui(rand_state_,1);
     }
     
-    PlaintextArray p0(ea);
-    p0.encode(bits);
+    NewPlaintextArray p0(ea);
+    encode(ea,p0,bits);
     p0.print(cout);
     
     Ctxt c0(*server_fhe_pk_);
@@ -434,7 +434,7 @@ void Tester_Server_session::test_change_es()
     Ctxt c = read_fhe_ctxt_from_socket(socket_, server_->fhe_sk());
     
     EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
-    PlaintextArray pp0(ea);
+    NewPlaintextArray pp0(ea);
     ea.decrypt(c, server_->fhe_sk(), pp0);
     cout << id_ << ": Decryption result = " << endl;
     pp0.print(cout);
@@ -453,7 +453,7 @@ void Tester_Server_session::decrypt_fhe()
     Ctxt c = convert_from_message(m, server_->fhe_sk());
     
     EncryptedArray ea(server_->fhe_sk().getContext(), server_->fhe_G());
-    PlaintextArray pp0(ea);
+    NewPlaintextArray pp0(ea);
     ea.decrypt(c, server_->fhe_sk(), pp0);
     cout << id_ << ": Decryption result = " << endl;
     pp0.print(cout);
