@@ -105,8 +105,8 @@ Ctxt evalPoly_FHE_timing(const Multivariate_poly< vector<long> > &poly, const ve
     
     if (s == 0) {
         Ctxt c = Ctxt(pk);
-        PlaintextArray pa(ea);
-        pa.encode(0);
+        NewPlaintextArray pa(ea);
+        encode(ea,pa,0);
         ea.encrypt(c,pk,pa);
         return c;
     }
@@ -143,8 +143,8 @@ Ctxt evalPoly_FHE(const Multivariate_poly< vector<long> > &poly, const vector<Ct
 
     if (s == 0) {
         Ctxt c = Ctxt(pk);
-        PlaintextArray pa(ea);
-        pa.encode(0);
+        NewPlaintextArray pa(ea);
+        encode(ea,pa,0);
         ea.encrypt(c,pk,pa);
         return c;
     }

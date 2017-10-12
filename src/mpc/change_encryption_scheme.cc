@@ -41,8 +41,8 @@ Ctxt Change_ES_FHE_to_GM_A::unblind(const Ctxt &c, const FHEPubKey& publicKey, c
     if (coin_) {
         Ctxt d(c);
         
-        PlaintextArray array(ea);
-        array.encode(1);
+        NewPlaintextArray array(ea);
+        encode(ea,array,1);
         ZZX poly;
         ea.encode(poly,array);
         
@@ -58,8 +58,8 @@ Ctxt Change_ES_FHE_to_GM_A::unblind(const Ctxt &c, const FHEPubKey& publicKey, c
 Ctxt Change_ES_FHE_to_GM_B::decrypt_encrypt(const mpz_class &c, GM_priv &gm, const FHEPubKey &publicKey, const EncryptedArray &ea)
 {
     bool b = gm.decrypt(c);
-    PlaintextArray array(ea);
-    array.encode(b);
+    NewPlaintextArray array(ea);
+    encode(ea,array,b);
     
     Ctxt c0(publicKey);
     ea.encrypt(c0, publicKey, array);
@@ -92,8 +92,8 @@ Ctxt Change_ES_FHE_to_GM_slots_A::unblind(const Ctxt &c, const FHEPubKey& public
 {
     Ctxt d(c);
     
-    PlaintextArray array(ea);
-    array.encode(coins_);
+    NewPlaintextArray array(ea);
+    encode(ea,array,coins_);
     ZZX poly;
     ea.encode(poly,array);
     
@@ -110,8 +110,8 @@ Ctxt Change_ES_FHE_to_GM_slots_B::decrypt_encrypt(const vector<mpz_class> &c, GM
         v[i] = gm.decrypt(c[i]);
     }
     
-    PlaintextArray array(ea);
-    array.encode(v);
+    NewPlaintextArray array(ea);
+    encode(ea,array,v);
     
     Ctxt c0(publicKey);
     ea.encrypt(c0, publicKey, array);
